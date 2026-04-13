@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { analyzePose, PoseAnalysisResponse } from '../../services/api'
-import './WebcamStream.css'
+import '../../styles/webcam.css'
 
 interface WebcamStreamProps {
   isActive: boolean
@@ -199,7 +199,7 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
             <p>척추 정렬도: {(result.spine_alignment * 100).toFixed(0)}%</p>
             <p>신뢰도: {(result.confidence * 100).toFixed(0)}%</p>
           </div>
-          <p className="recommendation">{result.recommendation}</p>
+          <p className="recommendation">{result.recommendations?.[0] || '자세를 개선하세요'}</p>
         </div>
       )}
     </div>

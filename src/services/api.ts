@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { getToken, clearAuth } from './authService'
 
 const API_BASE = 'http://localhost:8000/api'
 
@@ -8,6 +9,33 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
 })
+
+// ==================== 요청 인터셉터 ====================
+// 모든 요청에 Authorization 헤더 자동 추가
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = getToken()
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => Promise.reject(error)
+)
+
+// ==================== 응답 인터셉터 ====================
+// 401 응답 시 자동으로 로그아웃
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // 토큰 만료 또는 유효하지 않음
+      clearAuth()
+      window.location.href = '/login'
+    }
+    return Promise.reject(error)
+  }
+)
 
 export interface PoseAnalysisRequest {
   image: string // Base64 이미지
