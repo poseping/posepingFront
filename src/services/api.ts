@@ -1,7 +1,8 @@
 import axios from 'axios'
 import { getToken, clearAuth } from './authService'
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
+const envApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim()
+const API_BASE = envApiBaseUrl || '/api'
 
 const apiClient = axios.create({
   baseURL: API_BASE,
@@ -28,6 +29,16 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (!error.response) {
+      console.error('API network error', {
+        message: error.message,
+        code: error.code,
+        url: error.config?.url,
+        baseURL: error.config?.baseURL,
+        method: error.config?.method,
+      })
+    }
+
     if (error.response?.status === 401) {
       // 토큰 만료 또는 유효하지 않음
       clearAuth()

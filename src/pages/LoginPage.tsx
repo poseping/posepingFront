@@ -24,6 +24,18 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const logRequestError = (label: string, err: any) => {
+    console.error(label, {
+      message: err?.message,
+      code: err?.code,
+      status: err?.response?.status,
+      data: err?.response?.data,
+      url: err?.config?.url,
+      baseURL: err?.config?.baseURL,
+      method: err?.config?.method,
+    })
+  }
+
   // ==================== 카카오 로그인 ====================
   const handleKakaoLogin = async () => {
     try {
@@ -64,11 +76,14 @@ export default function LoginPage() {
             const errorMsg = err.response?.data?.detail || err.message || '로그인 실패'
             setError(errorMsg)
             dispatch(loginFailure(errorMsg))
+          } finally {
+            setLoading(false)
           }
         },
         fail: (error: any) => {
           console.error('❌ 카카오 로그인 실패:', error)
           setError(`카카오 로그인 실패: ${error?.error_description || '알 수 없는 오류'}`)
+          setLoading(false)
         },
       })
     } catch (err) {
@@ -106,7 +121,7 @@ export default function LoginPage() {
       // 메인 페이지로 이동
       navigate('/main')
     } catch (err: any) {
-      console.error('❌ 백엔드 에러:', err.response?.data || err.message)
+      logRequestError('❌ 백엔드 에러:', err)
       const errorMsg = err.response?.data?.detail || err.message || '로그인 실패'
       setError(errorMsg)
       dispatch(loginFailure(errorMsg))
@@ -116,7 +131,9 @@ export default function LoginPage() {
   }
 
   const handleGoogleError = () => {
+    console.error('Google OAuth provider returned onError')
     setError('구글 로그인 실패')
+    setLoading(false)
   }
 
   return (

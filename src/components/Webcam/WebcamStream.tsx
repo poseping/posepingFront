@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
+import type { AxiosError } from 'axios'
 import { analyzePose, PoseAnalysisResponse } from '../../services/api'
 import '../../styles/webcam.css'
 
@@ -14,15 +15,18 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
   const displayCanvasRef = useRef<HTMLCanvasElement>(null) // 표시 Canvas: 랜드마크 그리기
   const [result, setResult] = useState<PoseAnalysisResponse | null>(null)
   const animationFrameRef = useRef<number>()
+  const requestInFlightRef = useRef(false)
+  const lastAnalyzeAtRef = useRef(0)
 
   // TanStack Query - 자세 분석 mutation
-  const { mutate: analyzePoseImage, isPending } = useMutation({
+  const { mutateAsync: analyzePoseImage, isPending } = useMutation({
     mutationFn: analyzePose,
     onSuccess: (data) => {
       setResult(data)
     },
     onError: (error) => {
-      console.error('자세 분석 실패:', error)
+      const axiosError = error as AxiosError
+      console.error('자세 분석 실패:', axiosError.response?.data ?? error)
     },
   })
 
@@ -57,29 +61,44 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
   useEffect(() => {
     if (!isActive || !videoRef.current || !captureCanvasRef.current) return
 
-    const captureAndAnalyze = () => {
+    const captureAndAnalyze = async (timestamp: number) => {
       const captureCanvas = captureCanvasRef.current!
       const ctx = captureCanvas.getContext('2d')
       const video = videoRef.current!
 
+      animationFrameRef.current = requestAnimationFrame(captureAndAnalyze)
+
+      if (!ctx) return
+      if (video.readyState < 2) return
+      if (!video.videoWidth || !video.videoHeight) return
+      if (requestInFlightRef.current) return
+      if (timestamp - lastAnalyzeAtRef.current < 300) return
+
       captureCanvas.width = video.videoWidth
       captureCanvas.height = video.videoHeight
 
-      if (ctx) {
-        // 비디오 프레임을 captureCanvas에 그린다
-        ctx.drawImage(video, 0, 0)
+      // 비디오 프레임을 captureCanvas에 그린다
+      ctx.drawImage(video, 0, 0)
 
-        // 그 이미지를 Base64로 변환해서 API로 보낸다
-        const imageBase64 = captureCanvas.toDataURL('image/jpeg', 0.8).split(',')[1]
-        analyzePoseImage(imageBase64)
+      // 그 이미지를 Base64로 변환해서 API로 보낸다
+      const dataUrl = captureCanvas.toDataURL('image/jpeg', 0.8)
+      const imageBase64 = dataUrl.split(',')[1]
+      if (!imageBase64 || dataUrl === 'data:,') return
+
+      requestInFlightRef.current = true
+      try {
+        await analyzePoseImage(imageBase64)
+        lastAnalyzeAtRef.current = timestamp
+      } finally {
+        requestInFlightRef.current = false
       }
-
-      animationFrameRef.current = requestAnimationFrame(captureAndAnalyze)
     }
 
     animationFrameRef.current = requestAnimationFrame(captureAndAnalyze)
 
     return () => {
+      requestInFlightRef.current = false
+      lastAnalyzeAtRef.current = 0
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current)
       }
