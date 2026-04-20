@@ -94,6 +94,26 @@ export default function LoginPage() {
     }
   }
 
+  // ==================== 개발용 로그인 ====================
+  const handleDevLogin = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const response = await apiClient.post('/auth/dev-login')
+      const { access_token, user } = response.data
+
+      saveToken(access_token)
+      saveUserInfo(user)
+      dispatch(loginSuccess({ user, token: access_token }))
+      navigate('/main')
+    } catch (err: any) {
+      setError('개발용 로그인 실패')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   // ==================== 구글 로그인 ====================
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
@@ -165,6 +185,16 @@ export default function LoginPage() {
             </div>
           </GoogleOAuthProvider>
         </div>
+
+        {import.meta.env.DEV && (
+          <button
+            onClick={handleDevLogin}
+            disabled={loading}
+            style={{ marginTop: '16px', padding: '8px 16px', cursor: 'pointer' }}
+          >
+            [개발자] 바로 로그인
+          </button>
+        )}
 
         <p className="privacy-notice">
           로그인하면 서비스 약관에 동의합니다
