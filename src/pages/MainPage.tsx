@@ -7,12 +7,15 @@ import { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import WebcamStream from '../components/Webcam/WebcamStream'
+import PhotoAnalysisStudio from '../components/PhotoAnalysis/PhotoAnalysisStudio'
 import { logout } from '../store/authSlice'
 import { clearAuth } from '../services/authService'
 import '../styles/global.css'
+import '../styles/main-page.css'
 
 function MainPage() {
   const [isActive, setIsActive] = useState(false)
+  const [activeView, setActiveView] = useState<'realtime' | 'photo'>('realtime')
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
@@ -34,7 +37,31 @@ function MainPage() {
         </button>
       </header>
       <main>
-        <WebcamStream isActive={isActive} onToggle={() => setIsActive(!isActive)} />
+        <div className="main-page-content">
+          <div className="analysis-tabs">
+            <button
+              className={`analysis-tab ${activeView === 'realtime' ? 'active' : ''}`}
+              onClick={() => setActiveView('realtime')}
+            >
+              실시간 분석
+            </button>
+            <button
+              className={`analysis-tab ${activeView === 'photo' ? 'active' : ''}`}
+              onClick={() => {
+                setIsActive(false)
+                setActiveView('photo')
+              }}
+            >
+              사진 분석
+            </button>
+          </div>
+
+          {activeView === 'realtime' ? (
+            <WebcamStream isActive={isActive} onToggle={() => setIsActive(!isActive)} />
+          ) : (
+            <PhotoAnalysisStudio />
+          )}
+        </div>
       </main>
     </div>
   )
