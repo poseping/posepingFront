@@ -42,7 +42,7 @@ main {
   padding: 2rem;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
 }
 
 @media (max-width: 768px) {
