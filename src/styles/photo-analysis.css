@@ -6,6 +6,7 @@
 }
 
 .photo-hero-card,
+.photo-stats-card,
 .photo-upload-card,
 .photo-summary-card,
 .photo-action-panel,
@@ -47,6 +48,7 @@
 }
 
 .photo-upload-card,
+.photo-stats-card,
 .photo-summary-card,
 .photo-action-panel,
 .photo-save-panel,
@@ -58,6 +60,59 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
+}
+
+.photo-stats-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.photo-stats-header h3 {
+  color: #13223f;
+  font-size: 1.1rem;
+}
+
+.photo-stats-metrics {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.photo-stats-metrics div {
+  min-width: 116px;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+.photo-stats-metrics span {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.photo-stats-metrics strong {
+  color: #0f172a;
+  font-size: 1.05rem;
+}
+
+.photo-stats-chart {
+  width: 100%;
+  height: 240px;
+}
+
+.photo-stats-empty {
+  display: grid;
+  min-height: 180px;
+  place-items: center;
+  border-radius: 16px;
+  background: #f8fafc;
+  color: #64748b;
+  font-weight: 700;
 }
 
 .photo-upload-field {
@@ -105,6 +160,7 @@
   font-weight: 800;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  flex: 1;
 }
 
 .photo-primary-button {
@@ -345,6 +401,7 @@
 
 @media (max-width: 768px) {
   .photo-hero-card,
+  .photo-stats-card,
   .photo-upload-card,
   .photo-summary-card,
   .photo-action-panel,
@@ -358,6 +415,7 @@
   .photo-save-panel,
   .photo-action-row,
   .photo-save-actions,
+  .photo-stats-header,
   .photo-editor-header,
   .photo-summary-header {
     flex-direction: column;
@@ -367,6 +425,15 @@
   .photo-primary-button,
   .photo-secondary-button {
     width: 100%;
+  }
+
+  .photo-stats-metrics {
+    width: 100%;
+  }
+
+  .photo-stats-metrics div {
+    flex: 1;
+    min-width: 0;
   }
 
   .photo-editor-stage,

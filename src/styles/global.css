@@ -48,7 +48,7 @@ header h1 {
   border-color: rgba(255, 255, 255, 0.8);
 }
 
-main {
+main, .sub {
   flex: 1;
   padding: 2rem;
   display: flex;
@@ -61,7 +61,7 @@ main {
     font-size: 1.5rem;
   }
 
-  main {
+  main, .sub {
     padding: 1rem;
   }
 }
