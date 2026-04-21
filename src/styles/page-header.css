@@ -1,0 +1,96 @@
+/* ── 공통 (모바일 포함 전체) ── */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.25rem;
+  height: 56px;
+  background: var(--primary);
+  border-bottom: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.page-header__left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.page-header__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
+}
+
+.page-header__desc {
+  display: none;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.4;
+}
+
+@media (min-width: 768px) {
+  .page-header__desc {
+    display: block;
+  }
+}
+
+/* nav: 모바일에서 숨김 */
+.page-header__nav {
+  display: none;
+}
+
+/* ── 데스크톱 (768px+): nav만 추가 표시 ── */
+@media (min-width: 768px) {
+  .page-header {
+    padding: 0 1.5rem;
+    height: 60px;
+  }
+
+  .page-header__title {
+    font-size: 1.1rem;
+  }
+
+  .page-header__nav {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .page-header__nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.85rem;
+    border-radius: 999px;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .page-header__nav-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+  }
+
+  .page-header__nav-item--active {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+  }
+
+  .page-header__nav-icon {
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  .page-header__nav-label {
+    line-height: 1;
+  }
+}

@@ -1,3 +1,11 @@
+/* 앱 프레임: 기본은 꽉 차게, 큰 화면에서는 중앙 정렬 */
+.app-frame {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--background);
+  position: relative;
+}
+
 .app {
   display: flex;
   flex-direction: column;
@@ -5,13 +13,16 @@
 }
 
 header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 2rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  padding: 1rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 40;
 }
 
 header h1 {

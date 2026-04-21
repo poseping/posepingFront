@@ -4,38 +4,18 @@
  */
 
 import { useState } from 'react'
-import { useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
 import WebcamStream from '../components/Webcam/WebcamStream'
 import PhotoAnalysisStudio from '../components/PhotoAnalysis/PhotoAnalysisStudio'
-import { logout } from '../store/authSlice'
-import { clearAuth } from '../services/authService'
-import '../styles/global.css'
+import PageHeader from '../components/PageHeader'
 import '../styles/main-page.css'
 
 function MainPage() {
   const [isActive, setIsActive] = useState(false)
   const [activeView, setActiveView] = useState<'realtime' | 'photo'>('realtime')
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
-
-  const handleLogout = () => {
-    // Redux 상태 초기화
-    dispatch(logout())
-    // 로컬스토리지 초기화
-    clearAuth()
-    // 로그인 페이지로 이동
-    navigate('/login')
-  }
 
   return (
     <div className="app">
-      <header>
-        <h1>바른자세 감시 시스템</h1>
-        <button className="logout-btn" onClick={handleLogout}>
-          로그아웃
-        </button>
-      </header>
+      <PageHeader title="바른자세 감시 시스템" />
       <main>
         <div className="main-page-content">
           <div className="analysis-tabs">

@@ -8,7 +8,12 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useDispatch, useSelector } from 'react-redux'
 import LoginPage from './pages/LoginPage'
 import MainPage from './pages/MainPage'
+import HomePage from './pages/HomePage'
+import HistoryPage from './pages/HistoryPage'
+import MyPage from './pages/MyPage'
+import SettingsPage from './pages/SettingsPage'
 import ProtectedRoute from './components/ProtectedRoute'
+import AppLayout from './components/AppLayout'
 import { setToken } from './store/authSlice'
 import { getToken, getUserInfo } from './services/authService'
 import { RootState } from './store/store'
@@ -18,11 +23,9 @@ function App() {
   const dispatch = useDispatch()
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated)
 
-  // 앱 시작 시 저장된 토큰 복원
   useEffect(() => {
     const token = getToken()
     const user = getUserInfo()
-
     if (token && user && !isAuthenticated) {
       dispatch(setToken({ user, token }))
     }
@@ -30,26 +33,29 @@ function App() {
 
   return (
     <Router>
+      <div className="app-frame">
       <Routes>
-        {/* 공개 라우트 */}
         <Route path="/login" element={<LoginPage />} />
 
-        {/* 보호된 라우트 */}
+        {/* 로그인 후 공통 레이아웃 (하단 메뉴바 포함) */}
         <Route
-          path="/main"
           element={
             <ProtectedRoute>
-              <MainPage />
+              <AppLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route path="/home"     element={<HomePage />} />
+          <Route path="/main"     element={<MainPage />} />
+          <Route path="/history"  element={<HistoryPage />} />
+          <Route path="/mypage"   element={<MyPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+        </Route>
 
-        {/* 기본 경로 */}
         <Route path="/" element={<Navigate to="/main" replace />} />
-
-        {/* 404 */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
+      </div>
     </Router>
   )
 }

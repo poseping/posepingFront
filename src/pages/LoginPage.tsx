@@ -94,6 +94,26 @@ export default function LoginPage() {
     }
   }
 
+  // ==================== 개발용 로그인 ====================
+  const handleDevLogin = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const response = await apiClient.post('/auth/dev-login')
+      const { access_token, user } = response.data
+
+      saveToken(access_token)
+      saveUserInfo(user)
+      dispatch(loginSuccess({ user, token: access_token }))
+      navigate('/main')
+    } catch (err: any) {
+      setError('개발용 로그인 실패')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   // ==================== 구글 로그인 ====================
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
@@ -118,7 +138,6 @@ export default function LoginPage() {
       // Redux 상태 업데이트
       dispatch(loginSuccess({ user, token: access_token }))
 
-      // 메인 페이지로 이동
       navigate('/main')
     } catch (err: any) {
       logRequestError('❌ 백엔드 에러:', err)
@@ -138,23 +157,29 @@ export default function LoginPage() {
 
   return (
     <div className="login-page">
-      <div className="login-container">
-        <h1>바른자세 감시 시스템</h1>
-        <p className="subtitle">소셜 로그인으로 시작하세요</p>
+      {/* 로고 영역 */}
+      <div className="login-hero">
+        <div className="login-logo">척</div>
+        <h1 className="login-title">척추Ping</h1>
+        <p className="login-desc">바른 자세 습관을 만들어드려요</p>
+      </div>
+
+      {/* 로그인 카드 */}
+      <div className="login-card">
+        <p className="login-card-label">소셜 계정으로 시작하기</p>
 
         {error && <div className="error-message">{error}</div>}
 
         <div className="login-buttons">
-          {/* 카카오 로그인 */}
           <button
             className="kakao-login-btn"
             onClick={handleKakaoLogin}
             disabled={loading}
           >
-            {loading ? '로그인 중...' : '카카오로 로그인'}
+            <span className="btn-icon">💬</span>
+            {loading ? '로그인 중...' : '카카오로 계속하기'}
           </button>
 
-          {/* 구글 로그인 */}
           <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
             <div className="google-login-wrapper">
               <GoogleLogin
@@ -166,10 +191,14 @@ export default function LoginPage() {
           </GoogleOAuthProvider>
         </div>
 
-        <p className="privacy-notice">
-          로그인하면 서비스 약관에 동의합니다
-        </p>
+        {import.meta.env.DEV && (
+          <button className="dev-login-btn" onClick={handleDevLogin} disabled={loading}>
+            개발용 로그인
+          </button>
+        )}
       </div>
+
+      <p className="login-footer">로그인 시 서비스 이용약관 및 개인정보 처리방침에 동의한 것으로 간주됩니다</p>
     </div>
   )
 }
