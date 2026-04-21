@@ -53,6 +53,18 @@ export interface SavePhotoAnalysisResponse {
   images_stored: boolean
 }
 
+export interface PhotoAnalysisHistoryItem {
+  id?: number
+  analysis_id?: number
+  analyzed_at?: string
+  saved_at?: string
+  created_at?: string
+  front?: Partial<PhotoMetrics>
+  side?: Partial<PhotoSideMetrics>
+  spine_alignment?: number | null
+  neck_forward_angle?: number | null
+}
+
 export const analyzePhotoFiles = async (
   frontImage: File,
   sideImage: File,
@@ -92,4 +104,20 @@ export const savePhotoAnalysis = async (saveToken: string): Promise<SavePhotoAna
   })
 
   return response.data
+}
+
+export const getPhotoAnalysisHistory = async (): Promise<PhotoAnalysisHistoryItem[]> => {
+  const response = await apiClient.get<
+    PhotoAnalysisHistoryItem[] | {
+      items?: PhotoAnalysisHistoryItem[]
+      analyses?: PhotoAnalysisHistoryItem[]
+      results?: PhotoAnalysisHistoryItem[]
+    }
+  >('/photo/analyses')
+
+  if (Array.isArray(response.data)) {
+    return response.data
+  }
+
+  return response.data.items ?? response.data.analyses ?? response.data.results ?? []
 }
