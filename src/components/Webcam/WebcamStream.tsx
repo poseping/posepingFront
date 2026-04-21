@@ -1,13 +1,17 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
+import { analyzePose } from '../../services/api'
 import {
-  analyzePose,
   analyzeWebcam,
   registerPostureProfile,
   getPostureProfiles,
+  updatePostureProfile,
+  deletePostureProfile,
   type Landmark,
-} from '../../services/api'
+  type PostureProfile,
+} from '../../services/webcamApi'
+import PostureProfileModal from './PostureProfileModal'
 import '../../styles/webcam.css'
 
 interface WebcamStreamProps {
@@ -89,6 +93,7 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
   } | null>(null)
   const [isRegistering, setIsRegistering] = useState(false)
   const [registerMsg, setRegisterMsg] = useState<string | null>(null)
+  const [selectedProfile, setSelectedProfile] = useState<PostureProfile | null>(null)
   const animationFrameRef = useRef<number>()
   const requestInFlightRef = useRef(false)
   const notificationSentRef = useRef(false)
@@ -178,6 +183,20 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
     }
   }, [captureFrame, queryClient])
 
+  const { mutateAsync: runUpdate } = useMutation({
+    mutationFn: ({ profileId, data }: { profileId: number; data: Parameters<typeof updatePostureProfile>[1] }) =>
+      updatePostureProfile(profileId, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['postureProfiles'] }),
+  })
+
+  const { mutateAsync: runDelete } = useMutation({
+    mutationFn: (profileId: number) => deletePostureProfile(profileId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['postureProfiles'] })
+      setSelectedProfile(null)
+    },
+  })
+
   const { mutateAsync: runAnalyze } = useMutation({
     mutationFn: (imageBase64: string) => analyzeWebcam(imageBase64),
     onSuccess: (data) => {
@@ -230,6 +249,7 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
   }, [isActive, hasProfile, captureFrame, runAnalyze])
 
   return (
+    <>
     <div className="webcam-page">
       {/* hidden elements */}
       <video ref={videoRef} autoPlay playsInline style={{ display: 'none' }} />
@@ -297,6 +317,8 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
                   <div
                     key={profile.profile_id}
                     className={`wcam-profile-item${profile.is_active ? ' active' : ''}`}
+                    onClick={() => setSelectedProfile(profile)}
+                    style={{ cursor: 'pointer' }}
                   >
                     <span className="wcam-profile-name">{profile.profile_name}</span>
                     <span className="wcam-profile-date">{formatDate(profile.created_at)}</span>
@@ -332,5 +354,20 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
         )}
       </div>
     </div>
+
+    {selectedProfile && (
+      <PostureProfileModal
+        profile={selectedProfile}
+        onClose={() => setSelectedProfile(null)}
+        onUpdate={async (data) => {
+          const updated = await runUpdate({ profileId: selectedProfile.profile_id, data })
+          setSelectedProfile(updated)
+        }}
+        onDelete={async () => {
+          await runDelete(selectedProfile.profile_id)
+        }}
+      />
+    )}
+    </>
   )
 }

@@ -357,6 +357,249 @@
 }
 
 /* ============================
+   Profile Modal
+   ============================ */
+.wcam-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 1rem;
+  backdrop-filter: blur(2px);
+}
+
+.wcam-modal-card {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(19, 42, 76, 0.08);
+  box-shadow: 0 24px 60px rgba(20, 38, 70, 0.18);
+  padding: 1.5rem;
+  width: min(480px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.wcam-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.35rem;
+}
+
+.wcam-modal-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.wcam-modal-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #10213d;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wcam-modal-icon-btn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.88rem;
+  padding: 0.25rem;
+  border-radius: 8px;
+  transition: background 0.15s;
+  line-height: 1;
+}
+
+.wcam-modal-icon-btn:hover { background: #f1f5f9; }
+
+.wcam-modal-close-btn {
+  flex-shrink: 0;
+  background: #f1f5f9;
+  border: none;
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: #64748b;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  transition: background 0.15s, color 0.15s;
+}
+
+.wcam-modal-close-btn:hover { background: #e2e8f0; color: #1e293b; }
+
+.wcam-modal-name-edit {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.wcam-modal-name-input {
+  flex: 1;
+  min-width: 0;
+  border: 2px solid #155eef;
+  border-radius: 10px;
+  padding: 0.38rem 0.65rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #10213d;
+  outline: none;
+}
+
+.wcam-modal-meta-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.wcam-modal-meta {
+  font-size: 0.82rem;
+  color: #94a3b8;
+}
+
+.wcam-modal-skeleton-wrap {
+  border-radius: 16px;
+  overflow: hidden;
+  background: #0f172a;
+  position: relative;
+}
+
+.wcam-modal-canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  aspect-ratio: 4 / 3;
+}
+
+.wcam-modal-skeleton-label {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.75rem;
+  margin: 0;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 600;
+}
+
+.wcam-modal-divider {
+  height: 1px;
+  background: rgba(19, 42, 76, 0.08);
+  margin: 1rem 0;
+}
+
+.wcam-modal-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.wcam-modal-toggle-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.wcam-modal-toggle-label {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #10213d;
+}
+
+.wcam-modal-toggle-desc {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.wcam-toggle-switch {
+  flex-shrink: 0;
+  position: relative;
+  width: 48px;
+  height: 26px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.wcam-toggle-switch.on  { background: #155eef; }
+.wcam-toggle-switch.off { background: #cbd5e1; }
+
+.wcam-toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: left 0.2s;
+}
+
+.wcam-toggle-switch.on::after  { left: calc(100% - 23px); }
+.wcam-toggle-switch.off::after { left: 3px; }
+
+.wcam-modal-action-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+
+.wcam-modal-action-btn.save           { background: #155eef; color: #fff; }
+.wcam-modal-action-btn.cancel         { background: #f1f5f9; color: #475569; }
+.wcam-modal-action-btn.delete-confirm { background: #ef4444; color: #fff; }
+.wcam-modal-action-btn:disabled       { opacity: 0.55; cursor: not-allowed; }
+
+.wcam-modal-delete-btn {
+  width: 100%;
+  border: 1.5px solid #fecaca;
+  background: #fff5f5;
+  color: #dc2626;
+  border-radius: 12px;
+  padding: 0.7rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.wcam-modal-delete-btn:hover { background: #fee2e2; border-color: #fca5a5; }
+
+.wcam-modal-confirm-text {
+  margin: 0 0 0.75rem;
+  font-size: 0.88rem;
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.wcam-modal-confirm-row {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+/* ============================
    Mobile overrides
    ============================ */
 @media (max-width: 768px) {
