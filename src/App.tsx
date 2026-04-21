@@ -7,9 +7,8 @@ import { useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import LoginPage from './pages/LoginPage'
+import MainPage from './pages/MainPage'
 import HomePage from './pages/HomePage'
-import WebcamPage from './pages/WebcamPage'
-import PhotoPage from './pages/PhotoPage'
 import HistoryPage from './pages/HistoryPage'
 import MyPage from './pages/MyPage'
 import SettingsPage from './pages/SettingsPage'
@@ -47,15 +46,13 @@ function App() {
           }
         >
           <Route path="/home"     element={<HomePage />} />
-          <Route path="/webcam"   element={<WebcamPage />} />
-          <Route path="/photo"    element={<PhotoPage />} />
+          <Route path="/main"     element={<MainPage />} />
           <Route path="/history"  element={<HistoryPage />} />
           <Route path="/mypage"   element={<MyPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
 
-        <Route path="/" element={<Navigate to="/home" replace />} />
-        <Route path="/main" element={<Navigate to="/home" replace />} />
+        <Route path="/" element={<Navigate to="/main" replace />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
       </div>

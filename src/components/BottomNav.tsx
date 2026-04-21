@@ -3,8 +3,7 @@ import '../styles/bottom-nav.css'
 
 const navItems = [
   { to: '/home',     label: '홈',      icon: '🏠' },
-  { to: '/webcam',   label: '웹캠',    icon: '📷' },
-  { to: '/photo',    label: '사진',    icon: '🖼️' },
+  { to: '/main',     label: '분석',    icon: '📷' },
   { to: '/history',  label: '기록',    icon: '📊' },
   { to: '/mypage',   label: '마이',    icon: '👤' },
   { to: '/settings', label: '설정',    icon: '⚙️' },

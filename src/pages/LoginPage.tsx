@@ -70,7 +70,7 @@ export default function LoginPage() {
             dispatch(loginSuccess({ user, token: access_token }))
 
             // 메인 페이지로 이동
-            navigate('/home')
+            navigate('/main')
           } catch (err: any) {
             console.error('❌ 백엔드 에러:', err.response?.data || err.message)
             const errorMsg = err.response?.data?.detail || err.message || '로그인 실패'
@@ -106,7 +106,7 @@ export default function LoginPage() {
       saveToken(access_token)
       saveUserInfo(user)
       dispatch(loginSuccess({ user, token: access_token }))
-      navigate('/home')
+      navigate('/main')
     } catch (err: any) {
       setError('개발용 로그인 실패')
     } finally {
@@ -138,7 +138,7 @@ export default function LoginPage() {
       // Redux 상태 업데이트
       dispatch(loginSuccess({ user, token: access_token }))
 
-      navigate('/home')
+      navigate('/main')
     } catch (err: any) {
       logRequestError('❌ 백엔드 에러:', err)
       const errorMsg = err.response?.data?.detail || err.message || '로그인 실패'
