@@ -103,6 +103,14 @@ function clamp(value: number, min = 0, max = 1) {
   return Math.min(max, Math.max(min, value))
 }
 
+function toImageX(value: number, imageWidth: number) {
+  return value * imageWidth
+}
+
+function toImageY(value: number, imageHeight: number) {
+  return value * imageHeight
+}
+
 function formatMetric(value: number | null, suffix = '') {
   if (value === null || Number.isNaN(value)) {
     return '-'
@@ -124,6 +132,7 @@ function EditableLandmarkCanvas({
   const frameRef = useRef<HTMLDivElement>(null)
   const dragStateRef = useRef<DragState | null>(null)
   const [imageSize, setImageSize] = useState({ width: 4, height: 5 })
+  const [frameSize, setFrameSize] = useState({ width: 4, height: 5 })
 
   const editableIds = useMemo(() => {
     if (panel === 'front') {
@@ -184,7 +193,38 @@ function EditableLandmarkCanvas({
     }
   }, [landmarks, onChange])
 
+  useEffect(() => {
+    const frame = frameRef.current
+    if (!frame) {
+      return
+    }
+
+    const updateFrameSize = () => {
+      const rect = frame.getBoundingClientRect()
+      if (rect.width > 0 && rect.height > 0) {
+        setFrameSize({ width: rect.width, height: rect.height })
+      }
+    }
+
+    updateFrameSize()
+
+    const resizeObserver = new ResizeObserver(updateFrameSize)
+    resizeObserver.observe(frame)
+
+    return () => {
+      resizeObserver.disconnect()
+    }
+  }, [imageUrl])
+
   const selectedLandmark = landmarks.find((landmark) => landmark.id === selectedLandmarkId) ?? null
+  const overlayUnit = Math.min(imageSize.width, imageSize.height) / 100
+  const svgUnitsPerScreenPixel = frameSize.width > 0 ? imageSize.width / frameSize.width : 1
+  const lineWidth = 0.35 * overlayUnit
+  const pointStrokeWidth = 0.35 * overlayUnit
+  const pointRadius = 1.15 * overlayUnit
+  const selectedPointRadius = 1.55 * overlayUnit
+  const labelOffset = 1.5 * overlayUnit
+  const labelFontSize = 14 * svgUnitsPerScreenPixel
 
   return (
     <section className="photo-editor-card">
@@ -203,18 +243,11 @@ function EditableLandmarkCanvas({
             className="photo-editor-frame"
             style={{ aspectRatio: `${imageSize.width} / ${imageSize.height}` }}
           >
-            <img
-              src={imageUrl}
-              alt={title}
-              className="photo-editor-image"
-              onLoad={(event) => {
-                const image = event.currentTarget
-                if (image.naturalWidth > 0 && image.naturalHeight > 0) {
-                  setImageSize({ width: image.naturalWidth, height: image.naturalHeight })
-                }
-              }}
-            />
-            <svg className="photo-editor-overlay" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <svg
+              className="photo-editor-overlay"
+              viewBox={`0 0 ${imageSize.width} ${imageSize.height}`}
+              preserveAspectRatio="xMidYMid meet"
+            >
               {visibleConnections.map(([startId, endId]) => {
                 const start = landmarks.find((landmark) => landmark.id === startId)
                 const end = landmarks.find((landmark) => landmark.id === endId)
@@ -226,11 +259,12 @@ function EditableLandmarkCanvas({
                 return (
                   <line
                     key={`${startId}-${endId}`}
-                    x1={start.x * 100}
-                    y1={start.y * 100}
-                    x2={end.x * 100}
-                    y2={end.y * 100}
+                    x1={toImageX(start.x, imageSize.width)}
+                    y1={toImageY(start.y, imageSize.height)}
+                    x2={toImageX(end.x, imageSize.width)}
+                    y2={toImageY(end.y, imageSize.height)}
                     className="photo-editor-line"
+                    style={{ strokeWidth: lineWidth }}
                   />
                 )
               })}
@@ -239,10 +273,11 @@ function EditableLandmarkCanvas({
                 return (
                   <g key={landmark.id}>
                     <circle
-                      cx={landmark.x * 100}
-                      cy={landmark.y * 100}
-                      r={isSelected ? 1.55 : 1.15}
+                      cx={toImageX(landmark.x, imageSize.width)}
+                      cy={toImageY(landmark.y, imageSize.height)}
+                      r={isSelected ? selectedPointRadius : pointRadius}
                       className={`photo-editor-point ${isSelected ? 'selected' : ''}`}
+                      style={{ strokeWidth: pointStrokeWidth }}
                       onPointerDown={(event) => {
                         event.preventDefault()
                         dragStateRef.current = { landmarkId: landmark.id, panel }
@@ -251,9 +286,10 @@ function EditableLandmarkCanvas({
                       onClick={() => onSelect(landmark.id)}
                     />
                     <text
-                      x={landmark.x * 100 + 1.5}
-                      y={landmark.y * 100 - 1.5}
+                      x={toImageX(landmark.x, imageSize.width) + labelOffset}
+                      y={toImageY(landmark.y, imageSize.height) - labelOffset}
                       className="photo-editor-label"
+                      style={{ fontSize: labelFontSize }}
                     >
                       {LANDMARK_LABELS[landmark.id] || landmark.name}
                     </text>
@@ -261,6 +297,19 @@ function EditableLandmarkCanvas({
                 )
               })}
             </svg>
+            <div className={"photo-editor-overlay-back"}></div>
+            <img
+                src={imageUrl}
+                alt={title}
+                className="photo-editor-image"
+                onLoad={(event) => {
+                  const image = event.currentTarget
+                  if (image.naturalWidth > 0 && image.naturalHeight > 0) {
+                    setImageSize({ width: image.naturalWidth, height: image.naturalHeight })
+                    setFrameSize({ width: image.clientWidth, height: image.clientHeight })
+                  }
+                }}
+            />
           </div>
         ) : (
           <div className="photo-editor-empty">이미지를 업로드하면 랜드마크 편집 화면이 표시됩니다.</div>
