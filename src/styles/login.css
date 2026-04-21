@@ -81,9 +81,8 @@
 
 .kakao-login-btn {
   width: 100%;
-  padding: 13px 16px;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   background: #fee500;
   color: #191919;
   font-size: 15px;
@@ -93,11 +92,6 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: background 0.15s, opacity 0.15s;
-}
-
-.kakao-login-btn:hover:not(:disabled) {
-  background: #fdd400;
 }
 
 .kakao-login-btn:disabled {
@@ -119,12 +113,12 @@
 
 .google-login-wrapper > div {
   width: 100% !important;
+  height: 45px !important;
 }
 
-.google-login-wrapper button {
-  width: 100% !important;
-  height: 44px !important;
-  border-radius: 10px !important;
+.google-login-wrapper div[role=button] {
+  height: 45px !important;
+  border-radius: 8px !important;
 }
 
 .google-login-wrapper svg {
