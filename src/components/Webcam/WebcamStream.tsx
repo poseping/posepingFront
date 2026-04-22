@@ -61,24 +61,32 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
   const activeCount = profiles.filter((p) => p.is_active).length
   const canAddMore = activeCount < 3
 
+  const webcamNeeded = isActive || isGuideOpen
+
   useEffect(() => {
+    if (!webcamNeeded) return
+
+    let stopped = false
     const startWebcam = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { width: { ideal: 1280 }, height: { ideal: 720 } },
         })
-        if (videoRef.current) videoRef.current.srcObject = stream
+        if (!stopped && videoRef.current) videoRef.current.srcObject = stream
+        else stream.getTracks().forEach((t) => t.stop())
       } catch (error) {
         console.error('웹캠 접근 실패:', error)
       }
     }
     startWebcam()
     return () => {
+      stopped = true
       if (videoRef.current?.srcObject) {
         (videoRef.current.srcObject as MediaStream).getTracks().forEach((t) => t.stop())
+        videoRef.current.srcObject = null
       }
     }
-  }, [])
+  }, [webcamNeeded])
 
   const captureFrame = useCallback((captureWidth = 480, captureHeight = 360): string | null => {
     const canvas = captureCanvasRef.current
