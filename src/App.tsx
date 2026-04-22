@@ -3,9 +3,7 @@
  * 라우터 설정 및 상태 관리
  */
 
-import { useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { useDispatch, useSelector } from 'react-redux'
 import LoginPage from './pages/LoginPage'
 import MainPage from './pages/MainPage'
 import HomePage from './pages/HomePage'
@@ -14,22 +12,9 @@ import MyPage from './pages/MyPage'
 import SettingsPage from './pages/SettingsPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import AppLayout from './components/AppLayout'
-import { setToken } from './store/authSlice'
-import { getToken, getUserInfo } from './services/authService'
-import { RootState } from './store/store'
 import './styles/global.css'
 
 function App() {
-  const dispatch = useDispatch()
-  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated)
-
-  useEffect(() => {
-    const token = getToken()
-    const user = getUserInfo()
-    if (token && user && !isAuthenticated) {
-      dispatch(setToken({ user, token }))
-    }
-  }, [dispatch, isAuthenticated])
 
   return (
     <Router>

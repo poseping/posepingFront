@@ -1,124 +1,931 @@
-.webcam-container {
+/* ============================
+   Webcam Page — 2-col desktop / 1-col mobile
+   ============================ */
+.webcam-page {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 1.5rem;
+  width: 100%;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .webcam-page {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+/* ============================
+   Shared Card Base
+   ============================ */
+.wcam-card {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(19, 42, 76, 0.08);
+  box-shadow: 0 18px 45px rgba(20, 38, 70, 0.08);
+  padding: 1.5rem;
+}
+
+/* ============================
+   Left Column (Canvas + Result)
+   ============================ */
+.webcam-left {
   display: flex;
   flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.wcam-stage-card {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(19, 42, 76, 0.08);
+  box-shadow: 0 18px 45px rgba(20, 38, 70, 0.08);
+  overflow: hidden;
+}
+
+.wcam-stage-inner {
+  display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 2rem;
-  width: 100%;
-  max-width: 800px;
+  min-height: 300px;
+  background:
+    linear-gradient(135deg, rgba(17, 94, 239, 0.06), rgba(11, 122, 117, 0.08)),
+    #0f172a;
 }
 
 .webcam-canvas {
   width: 100%;
-  max-width: 640px;
   height: auto;
+  display: block;
+  max-height: 72vh;
+  object-fit: contain;
+}
+
+/* ============================
+   Result Card
+   ============================ */
+.wcam-result-card {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(19, 42, 76, 0.08);
+  box-shadow: 0 18px 45px rgba(20, 38, 70, 0.08);
+  padding: 1.5rem;
+}
+
+.wcam-result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+
+.wcam-result-header h3 {
+  margin: 0;
+  color: #10213d;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.wcam-status-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.wcam-status-chip.good    { background: #dcfce7; color: #166534; }
+.wcam-status-chip.warning { background: #fef3c7; color: #92400e; }
+.wcam-status-chip.bad     { background: #fee2e2; color: #b91c1c; }
+
+.wcam-result-score {
+  color: #64748b;
+  font-size: 0.88rem;
+  margin: 0 0 0.75rem;
+}
+
+.wcam-result-score strong {
+  color: #0f172a;
+}
+
+.wcam-issue-block {
+  padding: 0.85rem 1rem;
+  border-radius: 16px;
+  background: #fff7ed;
+}
+
+.wcam-issue-block h4 {
+  margin: 0 0 0.4rem;
+  color: #1e293b;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.wcam-issue-block ul {
+  margin: 0;
+  padding-left: 1rem;
+  color: #475569;
+  font-size: 0.85rem;
+  line-height: 1.65;
+}
+
+/* ============================
+   Right Column (Profile + Controls)
+   ============================ */
+.webcam-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.wcam-kicker {
+  margin-bottom: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #0b7a75;
+}
+
+/* ============================
+   Empty State (no profiles)
+   ============================ */
+.wcam-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.5rem 0.5rem;
+  gap: 0.65rem;
+}
+
+.wcam-empty-icon {
+  font-size: 2.4rem;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+
+.wcam-empty-state h4 {
+  margin: 0;
+  color: #10213d;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.wcam-empty-state p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  max-width: 26ch;
+}
+
+/* ============================
+   Profile List (has profiles)
+   ============================ */
+.wcam-profile-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+
+.wcam-profile-list-header h4 {
+  margin: 0;
+  color: #10213d;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.wcam-info-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #64748b;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: default;
+  flex-shrink: 0;
+}
+
+.wcam-info-badge:hover .wcam-info-tooltip {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.wcam-info-tooltip {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 220px;
+  background: #1e293b;
+  color: #f1f5f9;
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.5;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: opacity 0.15s ease;
+  z-index: 10;
+}
+
+.wcam-profile-scroll {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+}
+
+.wcam-profile-item {
+  /* 3개가 정확히 보이도록: (100% - gap×2) / 3 */
+  flex: 0 0 calc((100% - 1.5rem) / 3);
+  min-width: 0;
+  padding: 0.9rem;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 2px solid transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  cursor: default;
+  scroll-snap-align: start;
+}
+
+.wcam-profile-item.active {
+  border-color: #155eef;
+  box-shadow: 0 4px 14px rgba(21, 94, 239, 0.15);
+  background: #eff6ff;
+}
+
+.wcam-profile-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #10213d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wcam-profile-date {
+  font-size: 0.76rem;
+  color: #64748b;
+}
+
+.wcam-profile-badge {
+  display: inline-block;
+  margin-top: 0.2rem;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #166534;
+  font-size: 0.7rem;
+  font-weight: 800;
+  width: fit-content;
+}
+
+/* ============================
+   Register Message
+   ============================ */
+.wcam-register-msg {
+  margin-top: 0.85rem;
+  padding: 0.55rem 0.85rem;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  background-color: #000;
-}
-
-.toggle-button {
-  padding: 12px 32px;
-  font-size: 1rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
-
-.toggle-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.6);
-}
-
-.toggle-button:active {
-  transform: translateY(0);
-}
-
-.loading {
-  font-size: 1rem;
-  color: #667eea;
+  font-size: 0.86rem;
   font-weight: 600;
 }
 
-.result {
+.wcam-register-msg.success { background: #dcfce7; color: #166534; }
+.wcam-register-msg.error   { background: #fee2e2; color: #b91c1c; }
+
+/* ============================
+   Buttons
+   ============================ */
+.wcam-primary-btn {
   width: 100%;
-  padding: 2rem;
-  border-radius: 12px;
-  background-color: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: none;
+  border-radius: 14px;
+  padding: 0.95rem 1.35rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  background: linear-gradient(135deg, #155eef 0%, #0b7a75 100%);
+  color: #fff;
+  box-shadow: 0 14px 28px rgba(21, 94, 239, 0.22);
 }
 
-.result h2 {
-  font-size: 1.5rem;
+.wcam-primary-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 32px rgba(21, 94, 239, 0.32);
+}
+
+.wcam-primary-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.wcam-stop-btn {
+  width: 100%;
+  border: none;
+  border-radius: 14px;
+  padding: 0.95rem 1.35rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.wcam-stop-btn:hover {
+  transform: translateY(-1px);
+  background: #fecaca;
+}
+
+.wcam-add-btn {
+  flex: 0 0 calc((100% - 1.5rem) / 3);
+  min-width: 0;
+  padding: 0.9rem;
+  border-radius: 18px;
+  background: transparent;
+  border: 2px dashed #cbd5e1;
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  scroll-snap-align: start;
+}
+
+.wcam-add-btn:hover {
+  border-color: #155eef;
+  color: #155eef;
+}
+
+.wcam-add-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.wcam-add-btn-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+/* ============================
+   Profile Modal
+   ============================ */
+.wcam-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 1rem;
+  backdrop-filter: blur(2px);
+}
+
+.wcam-modal-card {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(19, 42, 76, 0.08);
+  box-shadow: 0 24px 60px rgba(20, 38, 70, 0.18);
+  padding: 1.5rem;
+  width: min(480px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.wcam-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.35rem;
+}
+
+.wcam-modal-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.wcam-modal-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #10213d;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wcam-modal-icon-btn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.88rem;
+  padding: 0.25rem;
+  border-radius: 8px;
+  transition: background 0.15s;
+  line-height: 1;
+}
+
+.wcam-modal-icon-btn:hover { background: #f1f5f9; }
+
+.wcam-modal-close-btn {
+  flex-shrink: 0;
+  background: #f1f5f9;
+  border: none;
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: #64748b;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  transition: background 0.15s, color 0.15s;
+}
+
+.wcam-modal-close-btn:hover { background: #e2e8f0; color: #1e293b; }
+
+.wcam-modal-name-edit {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.wcam-modal-name-input {
+  flex: 1;
+  min-width: 0;
+  border: 2px solid #155eef;
+  border-radius: 10px;
+  padding: 0.38rem 0.65rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #10213d;
+  outline: none;
+}
+
+.wcam-modal-meta-row {
+  display: flex;
+  justify-content: space-between;
   margin-bottom: 1rem;
 }
 
-.result.good {
-  border-left: 6px solid #10b981;
+.wcam-modal-meta {
+  font-size: 0.82rem;
+  color: #94a3b8;
 }
 
-.result.good h2 {
-  color: #10b981;
+.wcam-modal-skeleton-wrap {
+  border-radius: 16px;
+  overflow: hidden;
+  background: #0f172a;
+  position: relative;
 }
 
-.result.warning {
-  border-left: 6px solid #f59e0b;
+.wcam-modal-canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  aspect-ratio: 4 / 3;
 }
 
-.result.warning h2 {
-  color: #f59e0b;
+.wcam-modal-skeleton-label {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.75rem;
+  margin: 0;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 600;
 }
 
-.result.bad {
-  border-left: 6px solid #ef4444;
+.wcam-modal-divider {
+  height: 1px;
+  background: rgba(19, 42, 76, 0.08);
+  margin: 1rem 0;
 }
 
-.result.bad h2 {
+.wcam-modal-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.wcam-modal-toggle-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.wcam-modal-toggle-label {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #10213d;
+}
+
+.wcam-modal-toggle-desc {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.wcam-toggle-switch {
+  flex-shrink: 0;
+  position: relative;
+  width: 48px;
+  height: 26px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.wcam-toggle-switch.on  { background: #155eef; }
+.wcam-toggle-switch.off { background: #cbd5e1; }
+
+.wcam-toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: left 0.2s;
+}
+
+.wcam-toggle-switch.on::after  { left: calc(100% - 23px); }
+.wcam-toggle-switch.off::after { left: 3px; }
+
+.wcam-modal-error {
+  font-size: 0.78rem;
   color: #ef4444;
+  margin-top: 0.4rem;
 }
 
-.metrics {
-  background-color: #f9fafb;
-  padding: 1.5rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
+.wcam-modal-action-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
 }
 
-.metrics p {
-  margin: 0.5rem 0;
+.wcam-modal-action-btn.save           { background: #155eef; color: #fff; }
+.wcam-modal-action-btn.cancel         { background: #f1f5f9; color: #475569; }
+.wcam-modal-action-btn.delete-confirm { background: #ef4444; color: #fff; }
+.wcam-modal-action-btn:disabled       { opacity: 0.55; cursor: not-allowed; }
+
+.wcam-modal-delete-btn {
+  width: 100%;
+  border: 1.5px solid #fecaca;
+  background: #fff5f5;
+  color: #dc2626;
+  border-radius: 12px;
+  padding: 0.7rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.wcam-modal-delete-btn:hover { background: #fee2e2; border-color: #fca5a5; }
+
+.wcam-modal-confirm-text {
+  margin: 0 0 0.75rem;
+  font-size: 0.88rem;
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.wcam-modal-confirm-row {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+/* ============================
+   Posture Guide Modal
+   ============================ */
+.guide-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+}
+
+.guide-modal {
+  background: #fff;
+  border-radius: 28px;
+  box-shadow: 0 32px 80px rgba(20, 38, 70, 0.22);
+  width: min(820px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.75rem;
+}
+
+/* 헤더: 진행 점 + 닫기 */
+.guide-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.guide-dots {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.guide-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.guide-dot.active {
+  background: #155eef;
+  transform: scale(1.25);
+}
+
+.guide-dot.done {
+  background: #0b7a75;
+}
+
+.guide-close {
+  background: #f1f5f9;
+  border: none;
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: #64748b;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.guide-close:hover:not(:disabled) { background: #e2e8f0; color: #1e293b; }
+.guide-close:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* 본문: 2컬럼 */
+.guide-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+/* 웹캠 프리뷰 */
+.guide-preview-wrap {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #0f172a;
+  aspect-ratio: 4 / 3;
+}
+
+.guide-preview-canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.guide-countdown-badge {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 5rem;
+  font-weight: 900;
+  color: #fff;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+  animation: pulse-in 0.35s ease;
+}
+
+.guide-countdown-badge.done {
+  font-size: 4rem;
+  background: rgba(11, 122, 117, 0.55);
+}
+
+@keyframes pulse-in {
+  from { transform: scale(1.4); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+/* 안내 텍스트 */
+.guide-instruction {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.guide-step-icon {
+  font-size: 2.4rem;
+  line-height: 1;
+}
+
+.guide-step-label {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #0b7a75;
+}
+
+.guide-step-title {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #10213d;
+}
+
+.guide-step-desc {
+  margin: 0;
+  color: #475569;
   font-size: 0.95rem;
-  color: #374151;
+  line-height: 1.65;
 }
 
-.recommendation {
-  font-size: 0.95rem;
-  color: #6b7280;
-  font-style: italic;
-  line-height: 1.6;
+.guide-step-tip {
+  margin: 0;
+  padding: 0.6rem 0.85rem;
+  border-radius: 12px;
+  background: #f0fdf4;
+  color: #166534;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.5;
 }
 
+.guide-error-msg {
+  margin: 0;
+  padding: 0.6rem 0.85rem;
+  border-radius: 12px;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* 푸터 버튼 */
+.guide-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.25rem;
+  border-top: 1px solid rgba(19, 42, 76, 0.07);
+}
+
+.guide-footer-right {
+  margin-left: auto;
+}
+
+.guide-btn-back {
+  background: #f1f5f9;
+  border: none;
+  border-radius: 12px;
+  padding: 0.75rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.guide-btn-back:hover { background: #e2e8f0; }
+
+.guide-btn-next {
+  background: linear-gradient(135deg, #155eef 0%, #0b7a75 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 0.75rem 1.4rem;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(21, 94, 239, 0.2);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.guide-btn-next:hover { transform: translateY(-1px); box-shadow: 0 12px 24px rgba(21, 94, 239, 0.3); }
+
+.guide-btn-register {
+  background: linear-gradient(135deg, #155eef 0%, #0b7a75 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 0.75rem 1.4rem;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(21, 94, 239, 0.2);
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+  white-space: nowrap;
+}
+
+.guide-btn-register:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 12px 24px rgba(21, 94, 239, 0.3); }
+.guide-btn-register:disabled { opacity: 0.65; cursor: not-allowed; transform: none; box-shadow: none; }
+
+@media (max-width: 640px) {
+  .guide-modal { padding: 1.25rem; gap: 1rem; }
+  .guide-body { grid-template-columns: 1fr; }
+  .guide-step-title { font-size: 1.1rem; }
+}
+
+/* ============================
+   Notification permission banner
+   ============================ */
+.wcam-notif-banner {
+  grid-column: 1 / -1;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  background: #451a03;
+  border: 1px solid #92400e;
+  border-radius: 10px;
+  color: #fcd34d;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+.wcam-notif-banner strong {
+  color: #fef08a;
+}
+
+/* ============================
+   Mobile overrides
+   ============================ */
 @media (max-width: 768px) {
-  .webcam-container {
-    gap: 1.5rem;
+  .wcam-card,
+  .wcam-result-card,
+  .wcam-stage-card {
+    border-radius: 20px;
   }
 
-  .webcam-canvas {
-    max-width: 100%;
+  .wcam-card {
+    padding: 1.15rem;
   }
 
-  .result {
-    padding: 1.5rem;
-  }
-
-  .result h2 {
-    font-size: 1.25rem;
-  }
-
-  .metrics p {
-    font-size: 0.9rem;
+  .wcam-result-card {
+    padding: 1.15rem;
   }
 }

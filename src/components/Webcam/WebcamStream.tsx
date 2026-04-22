@@ -2,12 +2,18 @@ import { useRef, useEffect, useState, useCallback } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
 import {
-  analyzePose,
   analyzeWebcam,
-  registerPostureProfile,
   getPostureProfiles,
-  type Landmark,
-} from '../../services/api'
+  updatePostureProfile,
+  deletePostureProfile,
+  saveWebcamSession,
+  getAlertTypes,
+  type PostureProfile,
+} from '../../services/webcamApi'
+import { drawSkeleton } from '../../utils/skeleton'
+import { usePostureNotification } from '../../hooks/usePostureNotification'
+import PostureProfileModal from './PostureProfileModal'
+import PostureGuideModal from './PostureGuideModal'
 import '../../styles/webcam.css'
 
 interface WebcamStreamProps {
@@ -16,9 +22,9 @@ interface WebcamStreamProps {
 }
 
 const STATUS_LABEL: Record<string, string> = {
-  good: '✅ 좋은 자세',
-  warning: '⚠️ 자세 주의',
-  bad: '🚨 자세 불량',
+  good: '좋은 자세',
+  warning: '자세 주의',
+  bad: '자세 불량',
 }
 
 const STATUS_COLOR: Record<string, string> = {
@@ -27,111 +33,84 @@ const STATUS_COLOR: Record<string, string> = {
   bad: '#ef4444',
 }
 
-const SKELETON_CONNECTIONS = [
-  [0, 1], [1, 2], [2, 3],
-  [0, 4], [4, 5], [5, 6],
-  [0, 7], [7, 8],
-  [9, 10],
-  [11, 12],
-  [11, 13], [13, 15],
-  [12, 14], [14, 16],
-] as const
 
-function drawSkeleton(
-  canvas: HTMLCanvasElement,
-  landmarks: Landmark[],
-  frameWidth: number,
-  frameHeight: number,
-  color = '#22c55e',
-) {
-  const ctx = canvas.getContext('2d')
-  if (!ctx || !landmarks.length) return
-
-  canvas.width = frameWidth
-  canvas.height = frameHeight
-
-  ctx.fillStyle = '#000'
-  ctx.fillRect(0, 0, frameWidth, frameHeight)
-
-  landmarks.forEach((lm) => {
-    ctx.fillStyle = lm.visibility > 0.5 ? color : '#60a5fa'
-    ctx.beginPath()
-    ctx.arc(lm.x * frameWidth, lm.y * frameHeight, 4, 0, 2 * Math.PI)
-    ctx.fill()
-  })
-
-  ctx.strokeStyle = color
-  ctx.lineWidth = 2
-  SKELETON_CONNECTIONS.forEach(([s, e]) => {
-    const a = landmarks[s]
-    const b = landmarks[e]
-    if (!a || !b || a.visibility < 0.3 || b.visibility < 0.3) return
-    ctx.beginPath()
-    ctx.moveTo(a.x * frameWidth, a.y * frameHeight)
-    ctx.lineTo(b.x * frameWidth, b.y * frameHeight)
-    ctx.stroke()
-  })
+function formatDate(isoString: string) {
+  return new Date(isoString).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })
 }
 
 export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const captureCanvasRef = useRef<HTMLCanvasElement>(null)
   const displayCanvasRef = useRef<HTMLCanvasElement>(null)
-  const [analyzeResult, setAnalyzeResult] = useState<{ status: string; deviation_score: number; profile_name: string; issues: string[] } | null>(null)
-  const [isRegistering, setIsRegistering] = useState(false)
-  const [registerMsg, setRegisterMsg] = useState<string | null>(null)
-  const animationFrameRef = useRef<number>()
+  const [analyzeResult, setAnalyzeResult] = useState<{
+    status: string
+    deviation_score: number
+    profile_name: string
+    issues: string[]
+  } | null>(null)
+  const [isGuideOpen, setIsGuideOpen] = useState(false)
+  const [selectedProfile, setSelectedProfile] = useState<PostureProfile | null>(null)
+  const analysisTimerRef = useRef<number>()
   const requestInFlightRef = useRef(false)
-  const lastAnalyzeAtRef = useRef(0)
-  const notificationSentRef = useRef(false)
   const queryClient = useQueryClient()
+  const { notify, permission: notifPermission } = usePostureNotification()
+
+  // 세션 누적 카운트 (state 대신 ref → 매 프레임 리렌더 방지)
+  const sessionRef = useRef({
+    startedAt: null as string | null,
+    goodCount: 0,
+    warningCount: 0,
+    badCount: 0,
+    causeCounts: {} as Record<string, number>,
+  })
+  // 중복 카운트 방지용 이전 프레임 상태
+  const prevStatusRef = useRef<string | null>(null)
+  const prevIssuesRef = useRef<Set<string>>(new Set())
 
   const { data: profiles = [] } = useQuery({
     queryKey: ['postureProfiles'],
     queryFn: getPostureProfiles,
   })
+  const { data: alertTypes = [] } = useQuery({
+    queryKey: ['alertTypes'],
+    queryFn: getAlertTypes,
+    staleTime: Infinity,
+  })
+  const alertMap = Object.fromEntries(alertTypes.map((a) => [a.alert_type_id, a]))
+
+  const { mutate: doSaveSession } = useMutation({ mutationFn: saveWebcamSession })
+
   const hasProfile = profiles.length > 0
+  const activeCount = profiles.filter((p) => p.is_active).length
+  const canAddMore = activeCount < 3
 
-  // 브라우저 알림 권한
-  useEffect(() => {
-    if (Notification.permission === 'default') Notification.requestPermission()
-  }, [])
+  const webcamNeeded = isActive || isGuideOpen
 
-  // bad 상태 알림 (30초 쿨다운)
   useEffect(() => {
-    if (analyzeResult?.status === 'bad' && !notificationSentRef.current) {
-      if (Notification.permission === 'granted') {
-        new Notification('척추핑 - 자세 경고', {
-          body: analyzeResult.issues.join(', ') || '자세를 바로잡아 주세요!',
-          icon: '/favicon.ico',
-        })
-      }
-      notificationSentRef.current = true
-      setTimeout(() => { notificationSentRef.current = false }, 30_000)
-    }
-  }, [analyzeResult])
+    if (!webcamNeeded) return
 
-  // 웹캠 마운트 시 시작
-  useEffect(() => {
+    let stopped = false
     const startWebcam = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { width: { ideal: 1280 }, height: { ideal: 720 } },
         })
-        if (videoRef.current) videoRef.current.srcObject = stream
+        if (!stopped && videoRef.current) videoRef.current.srcObject = stream
+        else stream.getTracks().forEach((t) => t.stop())
       } catch (error) {
         console.error('웹캠 접근 실패:', error)
       }
     }
     startWebcam()
     return () => {
+      stopped = true
       if (videoRef.current?.srcObject) {
         (videoRef.current.srcObject as MediaStream).getTracks().forEach((t) => t.stop())
+        videoRef.current.srcObject = null
       }
     }
-  }, [])
+  }, [webcamNeeded])
 
-  // 프레임 캡처 (width/height 지정 시 축소)
   const captureFrame = useCallback((captureWidth = 480, captureHeight = 360): string | null => {
     const canvas = captureCanvasRef.current
     const video = videoRef.current
@@ -146,37 +125,22 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
     return dataUrl.split(',')[1]
   }, [])
 
-  // 기준 자세 등록
-  const handleRegister = useCallback(async () => {
-    setIsRegistering(true)
-    setRegisterMsg(null)
-    try {
-      const imageBase64 = captureFrame()
-      if (!imageBase64) {
-        setRegisterMsg('웹캠이 준비되지 않았습니다.')
-        return
-      }
-      const poseResult = await analyzePose(imageBase64)
-      if (!poseResult.landmarks?.length) {
-        setRegisterMsg('자세를 감지하지 못했습니다. 카메라를 조정해주세요.')
-        return
-      }
-      // 등록 시 스켈레톤 즉시 표시
-      if (displayCanvasRef.current) {
-        drawSkeleton(displayCanvasRef.current, poseResult.landmarks, poseResult.frame_width, poseResult.frame_height)
-      }
-      await registerPostureProfile(poseResult.landmarks)
-      queryClient.invalidateQueries({ queryKey: ['postureProfiles'] })
-      setRegisterMsg('✅ 기준 자세가 등록되었습니다!')
-    } catch (e) {
-      const err = e as AxiosError<{ detail: string }>
-      setRegisterMsg(`등록 실패: ${err.response?.data?.detail ?? '알 수 없는 오류'}`)
-    } finally {
-      setIsRegistering(false)
-    }
-  }, [captureFrame, queryClient])
+  const openGuide = useCallback(() => setIsGuideOpen(true), [])
 
-  // 분석 mutation
+  const { mutateAsync: runUpdate } = useMutation({
+    mutationFn: ({ profileId, data }: { profileId: number; data: Parameters<typeof updatePostureProfile>[1] }) =>
+      updatePostureProfile(profileId, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['postureProfiles'] }),
+  })
+
+  const { mutateAsync: runDelete } = useMutation({
+    mutationFn: (profileId: number) => deletePostureProfile(profileId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['postureProfiles'] })
+      setSelectedProfile(null)
+    },
+  })
+
   const { mutateAsync: runAnalyze } = useMutation({
     mutationFn: (imageBase64: string) => analyzeWebcam(imageBase64),
     onSuccess: (data) => {
@@ -186,6 +150,7 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
         profile_name: data.profile_name,
         issues: data.issues,
       })
+      notify(data.status, data.issues)
       if (displayCanvasRef.current && data.landmarks?.length) {
         drawSkeleton(
           displayCanvasRef.current,
@@ -195,6 +160,22 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
           STATUS_COLOR[data.status],
         )
       }
+
+      // 상태가 바뀔 때만 카운트 (3초 유지해도 1회만)
+      if (data.status !== prevStatusRef.current) {
+        const key = `${data.status}Count` as 'goodCount' | 'warningCount' | 'badCount'
+        sessionRef.current[key]++
+        prevStatusRef.current = data.status
+      }
+
+      // 이전 프레임에 없던 issue만 카운트
+      const newIssues = new Set(data.issues)
+      for (const id of newIssues) {
+        if (!prevIssuesRef.current.has(id)) {
+          sessionRef.current.causeCounts[id] = (sessionRef.current.causeCounts[id] ?? 0) + 1
+        }
+      }
+      prevIssuesRef.current = newIssues
     },
     onError: (error) => {
       const axiosError = error as AxiosError
@@ -202,108 +183,201 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
     },
   })
 
-  // 분석 루프: 이전 요청 완료 즉시 다음 요청 (최소 대기 없음)
   useEffect(() => {
     if (!isActive || !hasProfile) return
 
-    const loop = async (timestamp: number) => {
-      animationFrameRef.current = requestAnimationFrame(loop)
-      if (requestInFlightRef.current) return
+    let cancelled = false
 
-      const imageBase64 = captureFrame()
-      if (!imageBase64) return
-
-      requestInFlightRef.current = true
-      try {
-        await runAnalyze(imageBase64)
-        lastAnalyzeAtRef.current = timestamp
-      } finally {
-        requestInFlightRef.current = false
+    const tick = async () => {
+      if (cancelled) return
+      if (!requestInFlightRef.current) {
+        const imageBase64 = captureFrame()
+        if (imageBase64) {
+          requestInFlightRef.current = true
+          try {
+            await runAnalyze(imageBase64)
+          } finally {
+            requestInFlightRef.current = false
+          }
+        }
       }
+      if (!cancelled) analysisTimerRef.current = window.setTimeout(tick, 300)
     }
 
-    animationFrameRef.current = requestAnimationFrame(loop)
+    analysisTimerRef.current = window.setTimeout(tick, 0)
     return () => {
+      cancelled = true
       requestInFlightRef.current = false
-      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current)
+      clearTimeout(analysisTimerRef.current)
     }
   }, [isActive, hasProfile, captureFrame, runAnalyze])
 
+  // 세션 시작 → ref 초기화 / 세션 종료 → DB 저장
+  useEffect(() => {
+    if (isActive) {
+      sessionRef.current = {
+        startedAt: new Date().toISOString(),
+        goodCount: 0,
+        warningCount: 0,
+        badCount: 0,
+        causeCounts: {},
+      }
+      prevStatusRef.current = null
+      prevIssuesRef.current = new Set()
+    } else {
+      const { startedAt, goodCount, warningCount, badCount, causeCounts } = sessionRef.current
+      const total = goodCount + warningCount + badCount
+      if (startedAt && total > 0) {
+        doSaveSession({
+          started_at: startedAt,
+          ended_at: new Date().toISOString(),
+          good_count: goodCount,
+          warning_count: warningCount,
+          bad_count: badCount,
+          cause_counts: causeCounts,
+        })
+      }
+      sessionRef.current.startedAt = null
+    }
+  }, [isActive])
+
   return (
-    <div className="webcam-container">
+    <>
+    <div className="webcam-page">
+      {notifPermission === 'denied' && (
+        <div className="wcam-notif-banner">
+          알림이 차단되어 있어요. 주소창 자물쇠 아이콘 → 알림 → <strong>허용</strong> 후 새로고침하면 백그라운드 자세 경고를 받을 수 있습니다.
+        </div>
+      )}
+      {/* hidden elements */}
       <video ref={videoRef} autoPlay playsInline style={{ display: 'none' }} />
       <canvas ref={captureCanvasRef} style={{ display: 'none' }} />
-      <canvas ref={displayCanvasRef} className="webcam-canvas" />
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <button
-          onClick={handleRegister}
-          disabled={isRegistering}
-          style={{
-            padding: '8px 16px',
-            background: '#6366f1',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 6,
-            cursor: isRegistering ? 'not-allowed' : 'pointer',
-            opacity: isRegistering ? 0.6 : 1,
-          }}
-        >
-          {isRegistering ? '등록 중...' : hasProfile ? '기준 자세 재등록' : '📸 기준 자세 등록'}
-        </button>
-        {hasProfile && (
-          <span style={{ color: '#22c55e', fontSize: 13 }}>
-            기준 자세 {profiles.length}개 등록됨
-          </span>
+      {/* ── 왼쪽: 캔버스 + 분석 결과 ── */}
+      <div className="webcam-left">
+        <div className="wcam-stage-card">
+          <div className="wcam-stage-inner">
+            <canvas ref={displayCanvasRef} className="webcam-canvas" />
+          </div>
+        </div>
+
+        {analyzeResult && (
+          <div className="wcam-result-card">
+            <div className="wcam-result-header">
+              <h3>분석 결과</h3>
+              <span className={`wcam-status-chip ${analyzeResult.status}`}>
+                {STATUS_LABEL[analyzeResult.status]}
+              </span>
+            </div>
+            <p className="wcam-result-score">
+              이탈 점수&nbsp;<strong>{(analyzeResult.deviation_score * 100).toFixed(1)}</strong>
+              &nbsp;·&nbsp;기준: {analyzeResult.profile_name}
+            </p>
+            {analyzeResult.issues.length > 0 && (
+              <div className="wcam-issue-block">
+                <h4>개선 필요 항목</h4>
+                <ul>
+                  {analyzeResult.issues.map((typeId) => (
+                    <li key={typeId}>{alertMap[typeId]?.alert_name ?? typeId}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         )}
       </div>
 
-      {registerMsg && (
-        <p style={{ margin: '4px 0', fontSize: 13, color: registerMsg.startsWith('✅') ? '#22c55e' : '#ef4444' }}>
-          {registerMsg}
-        </p>
-      )}
+      {/* ── 오른쪽: 기준 자세 + 분석 버튼 ── */}
+      <div className="webcam-right">
+        <div className="wcam-card">
+          <p className="wcam-kicker">기준 자세</p>
 
-      {!hasProfile && (
-        <p style={{ color: '#f59e0b', fontSize: 13 }}>
-          ⚠️ 기준 자세를 먼저 등록해야 분석을 시작할 수 있습니다.
-        </p>
-      )}
-
-      <button
-        onClick={onToggle}
-        disabled={!hasProfile}
-        className="toggle-button"
-        style={{ opacity: hasProfile ? 1 : 0.4, cursor: hasProfile ? 'pointer' : 'not-allowed' }}
-      >
-        {isActive ? '분석 중지' : '분석 시작'}
-      </button>
-
-      {analyzeResult && (
-        <div
-          style={{
-            padding: 16,
-            borderRadius: 8,
-            border: `2px solid ${STATUS_COLOR[analyzeResult.status]}`,
-            background: `${STATUS_COLOR[analyzeResult.status]}18`,
-            width: '100%',
-            maxWidth: 640,
-          }}
-        >
-          <h3 style={{ margin: '0 0 8px', color: STATUS_COLOR[analyzeResult.status] }}>
-            {STATUS_LABEL[analyzeResult.status]}
-          </h3>
-          <p style={{ margin: '0 0 4px', fontSize: 13 }}>
-            이탈 점수: <strong>{(analyzeResult.deviation_score * 100).toFixed(1)}</strong>
-            &nbsp;/ 기준: {analyzeResult.profile_name}
-          </p>
-          {analyzeResult.issues.length > 0 && (
-            <ul style={{ margin: '8px 0 0', paddingLeft: 18, fontSize: 13 }}>
-              {analyzeResult.issues.map((issue, i) => <li key={i}>{issue}</li>)}
-            </ul>
+          {!hasProfile ? (
+            /* 기준 자세 없음 — 빈 상태 */
+            <div className="wcam-empty-state">
+              <div className="wcam-empty-icon">📋</div>
+              <h4>등록된 기준 자세가 없습니다</h4>
+              <p>카메라 앞에 바르게 앉은 후 기준 자세를 등록하면 실시간 분석을 시작할 수 있습니다.</p>
+              <button
+                className="wcam-primary-btn"
+                onClick={openGuide}
+              >
+                📸 기준 자세 등록하기
+              </button>
+            </div>
+          ) : (
+            /* 기준 자세 있음 — 카드 목록 */
+            <>
+              <div className="wcam-profile-list-header">
+                <h4>등록된 자세 ({profiles.length}개)</h4>
+                <div className="wcam-info-badge">
+                  ?
+                  <div className="wcam-info-tooltip">
+                    활성 기준 자세는 최대 3개까지 등록할 수 있습니다.<br />
+                    추가 등록하려면 기존 자세의 &apos;분석에 사용 여부&apos;를 해제해 주세요.
+                  </div>
+                </div>
+              </div>
+              <div className="wcam-profile-scroll">
+                {profiles.map((profile) => (
+                  <div
+                    key={profile.profile_id}
+                    className={`wcam-profile-item${profile.is_active ? ' active' : ''}`}
+                    onClick={() => setSelectedProfile(profile)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <span className="wcam-profile-name">{profile.profile_name}</span>
+                    <span className="wcam-profile-date">{formatDate(profile.created_at)}</span>
+                    {profile.is_active && <span className="wcam-profile-badge">사용 중</span>}
+                  </div>
+                ))}
+                <button
+                  className="wcam-add-btn"
+                  onClick={openGuide}
+                  disabled={!canAddMore}
+                  title={!canAddMore ? '활성 기준 자세는 최대 3개까지 등록할 수 있습니다' : undefined}
+                >
+                  <span className="wcam-add-btn-icon">+</span>
+                  <span>{canAddMore ? '추가' : '최대 3개'}</span>
+                </button>
+              </div>
+            </>
           )}
+
         </div>
-      )}
+
+        {hasProfile && (
+          <button
+            onClick={onToggle}
+            className={isActive ? 'wcam-stop-btn' : 'wcam-primary-btn'}
+          >
+            {isActive ? '■ 분석 중지' : '▶ 분석 시작'}
+          </button>
+        )}
+      </div>
     </div>
+
+    {isGuideOpen && (
+      <PostureGuideModal
+        videoRef={videoRef}
+        onClose={() => setIsGuideOpen(false)}
+        onComplete={() => setIsGuideOpen(false)}
+      />
+    )}
+
+    {selectedProfile && (
+      <PostureProfileModal
+        profile={selectedProfile}
+        onClose={() => setSelectedProfile(null)}
+        onUpdate={async (data) => {
+          const updated = await runUpdate({ profileId: selectedProfile.profile_id, data })
+          setSelectedProfile(updated)
+        }}
+        onDelete={async () => {
+          await runDelete(selectedProfile.profile_id)
+        }}
+      />
+    )}
+    </>
   )
 }
