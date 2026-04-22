@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
 import { analyzePose } from '../../services/api'
 import { registerPostureProfile } from '../../services/webcamApi'
+import { useSkeletonPreview } from '../../hooks/useSkeletonPreview'
 
 interface PostureGuideModalProps {
   videoRef: React.RefObject<HTMLVideoElement>
@@ -42,7 +43,6 @@ type Status = 'idle' | 'capturing' | 'done' | 'error'
 export default function PostureGuideModal({ videoRef, onClose, onComplete }: PostureGuideModalProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const captureCanvasRef = useRef<HTMLCanvasElement>(null)
-  const animFrameRef = useRef<number>()
   const queryClient = useQueryClient()
 
   const [step, setStep] = useState(0)
@@ -50,27 +50,8 @@ export default function PostureGuideModal({ videoRef, onClose, onComplete }: Pos
   const [status, setStatus] = useState<Status>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
-  // 미러링된 라이브 프리뷰
-  useEffect(() => {
-    const draw = () => {
-      const canvas = canvasRef.current
-      const video = videoRef.current
-      if (canvas && video && video.readyState >= 2 && video.videoWidth) {
-        const ctx = canvas.getContext('2d')
-        if (ctx) {
-          canvas.width = video.videoWidth
-          canvas.height = video.videoHeight
-          ctx.save()
-          ctx.scale(-1, 1)
-          ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height)
-          ctx.restore()
-        }
-      }
-      animFrameRef.current = requestAnimationFrame(draw)
-    }
-    animFrameRef.current = requestAnimationFrame(draw)
-    return () => { if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current) }
-  }, [videoRef])
+  // 실시간 스켈레톤 프리뷰
+  useSkeletonPreview(videoRef, canvasRef)
 
   const captureFrame = useCallback((): string | null => {
     const canvas = captureCanvasRef.current
@@ -121,7 +102,6 @@ export default function PostureGuideModal({ videoRef, onClose, onComplete }: Pos
   return (
     <div className="guide-overlay" onClick={(e) => { if (e.target === e.currentTarget && !isBusy) onClose() }}>
       <div className="guide-modal">
-        {/* hidden canvas for capture */}
         <canvas ref={captureCanvasRef} style={{ display: 'none' }} />
 
         {/* 헤더 */}
@@ -136,7 +116,6 @@ export default function PostureGuideModal({ videoRef, onClose, onComplete }: Pos
 
         {/* 본문 */}
         <div className="guide-body">
-          {/* 웹캠 프리뷰 */}
           <div className="guide-preview-wrap">
             <canvas ref={canvasRef} className="guide-preview-canvas" />
             {isCountingDown && (
@@ -150,7 +129,6 @@ export default function PostureGuideModal({ videoRef, onClose, onComplete }: Pos
             )}
           </div>
 
-          {/* 안내 텍스트 */}
           <div className="guide-instruction">
             <div className="guide-step-icon">{current.icon}</div>
             <p className="guide-step-label">{step + 1} / {STEPS.length}</p>
@@ -165,7 +143,7 @@ export default function PostureGuideModal({ videoRef, onClose, onComplete }: Pos
           </div>
         </div>
 
-        {/* 푸터 버튼 */}
+        {/* 푸터 */}
         <div className="guide-footer">
           {step > 0 && !isBusy && status !== 'error' && (
             <button className="guide-btn-back" onClick={() => setStep((s) => s - 1)}>
@@ -179,25 +157,21 @@ export default function PostureGuideModal({ videoRef, onClose, onComplete }: Pos
                 다음 →
               </button>
             )}
-
             {isLastStep && status === 'idle' && !isCountingDown && (
               <button className="guide-btn-register" onClick={() => setCountdown(3)}>
                 📸 지금 등록하기
               </button>
             )}
-
             {isLastStep && isCountingDown && (
               <button className="guide-btn-register" disabled>
                 {countdown}초 후 자동 등록...
               </button>
             )}
-
             {isLastStep && status === 'capturing' && (
               <button className="guide-btn-register" disabled>
                 등록 중...
               </button>
             )}
-
             {status === 'error' && (
               <button
                 className="guide-btn-register"
