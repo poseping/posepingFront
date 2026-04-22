@@ -600,6 +600,254 @@
 }
 
 /* ============================
+   Posture Guide Modal
+   ============================ */
+.guide-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+}
+
+.guide-modal {
+  background: #fff;
+  border-radius: 28px;
+  box-shadow: 0 32px 80px rgba(20, 38, 70, 0.22);
+  width: min(820px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.75rem;
+}
+
+/* 헤더: 진행 점 + 닫기 */
+.guide-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.guide-dots {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.guide-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.guide-dot.active {
+  background: #155eef;
+  transform: scale(1.25);
+}
+
+.guide-dot.done {
+  background: #0b7a75;
+}
+
+.guide-close {
+  background: #f1f5f9;
+  border: none;
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: #64748b;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.guide-close:hover:not(:disabled) { background: #e2e8f0; color: #1e293b; }
+.guide-close:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* 본문: 2컬럼 */
+.guide-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+/* 웹캠 프리뷰 */
+.guide-preview-wrap {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #0f172a;
+  aspect-ratio: 4 / 3;
+}
+
+.guide-preview-canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.guide-countdown-badge {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 5rem;
+  font-weight: 900;
+  color: #fff;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+  animation: pulse-in 0.35s ease;
+}
+
+.guide-countdown-badge.done {
+  font-size: 4rem;
+  background: rgba(11, 122, 117, 0.55);
+}
+
+@keyframes pulse-in {
+  from { transform: scale(1.4); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+/* 안내 텍스트 */
+.guide-instruction {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.guide-step-icon {
+  font-size: 2.4rem;
+  line-height: 1;
+}
+
+.guide-step-label {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #0b7a75;
+}
+
+.guide-step-title {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #10213d;
+}
+
+.guide-step-desc {
+  margin: 0;
+  color: #475569;
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+.guide-step-tip {
+  margin: 0;
+  padding: 0.6rem 0.85rem;
+  border-radius: 12px;
+  background: #f0fdf4;
+  color: #166534;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.guide-error-msg {
+  margin: 0;
+  padding: 0.6rem 0.85rem;
+  border-radius: 12px;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* 푸터 버튼 */
+.guide-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.25rem;
+  border-top: 1px solid rgba(19, 42, 76, 0.07);
+}
+
+.guide-footer-right {
+  margin-left: auto;
+}
+
+.guide-btn-back {
+  background: #f1f5f9;
+  border: none;
+  border-radius: 12px;
+  padding: 0.75rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.guide-btn-back:hover { background: #e2e8f0; }
+
+.guide-btn-next {
+  background: linear-gradient(135deg, #155eef 0%, #0b7a75 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 0.75rem 1.4rem;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(21, 94, 239, 0.2);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.guide-btn-next:hover { transform: translateY(-1px); box-shadow: 0 12px 24px rgba(21, 94, 239, 0.3); }
+
+.guide-btn-register {
+  background: linear-gradient(135deg, #155eef 0%, #0b7a75 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 0.75rem 1.4rem;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(21, 94, 239, 0.2);
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+  white-space: nowrap;
+}
+
+.guide-btn-register:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 12px 24px rgba(21, 94, 239, 0.3); }
+.guide-btn-register:disabled { opacity: 0.65; cursor: not-allowed; transform: none; box-shadow: none; }
+
+@media (max-width: 640px) {
+  .guide-modal { padding: 1.25rem; gap: 1rem; }
+  .guide-body { grid-template-columns: 1fr; }
+  .guide-step-title { font-size: 1.1rem; }
+}
+
+/* ============================
    Mobile overrides
    ============================ */
 @media (max-width: 768px) {

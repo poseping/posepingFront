@@ -1,10 +1,8 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
-import { analyzePose } from '../../services/api'
 import {
   analyzeWebcam,
-  registerPostureProfile,
   getPostureProfiles,
   updatePostureProfile,
   deletePostureProfile,
@@ -12,6 +10,7 @@ import {
   type PostureProfile,
 } from '../../services/webcamApi'
 import PostureProfileModal from './PostureProfileModal'
+import PostureGuideModal from './PostureGuideModal'
 import '../../styles/webcam.css'
 
 interface WebcamStreamProps {
@@ -91,8 +90,7 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
     profile_name: string
     issues: string[]
   } | null>(null)
-  const [isRegistering, setIsRegistering] = useState(false)
-  const [registerMsg, setRegisterMsg] = useState<string | null>(null)
+  const [isGuideOpen, setIsGuideOpen] = useState(false)
   const [selectedProfile, setSelectedProfile] = useState<PostureProfile | null>(null)
   const animationFrameRef = useRef<number>()
   const requestInFlightRef = useRef(false)
@@ -155,33 +153,7 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
     return dataUrl.split(',')[1]
   }, [])
 
-  const handleRegister = useCallback(async () => {
-    setIsRegistering(true)
-    setRegisterMsg(null)
-    try {
-      const imageBase64 = captureFrame()
-      if (!imageBase64) {
-        setRegisterMsg('웹캠이 준비되지 않았습니다.')
-        return
-      }
-      const poseResult = await analyzePose(imageBase64)
-      if (!poseResult.landmarks?.length) {
-        setRegisterMsg('자세를 감지하지 못했습니다. 카메라를 조정해주세요.')
-        return
-      }
-      if (displayCanvasRef.current) {
-        drawSkeleton(displayCanvasRef.current, poseResult.landmarks, poseResult.frame_width, poseResult.frame_height)
-      }
-      await registerPostureProfile(poseResult.landmarks)
-      queryClient.invalidateQueries({ queryKey: ['postureProfiles'] })
-      setRegisterMsg('✅ 기준 자세가 등록되었습니다!')
-    } catch (e) {
-      const err = e as AxiosError<{ detail: string }>
-      setRegisterMsg(`등록 실패: ${err.response?.data?.detail ?? '알 수 없는 오류'}`)
-    } finally {
-      setIsRegistering(false)
-    }
-  }, [captureFrame, queryClient])
+  const openGuide = useCallback(() => setIsGuideOpen(true), [])
 
   const { mutateAsync: runUpdate } = useMutation({
     mutationFn: ({ profileId, data }: { profileId: number; data: Parameters<typeof updatePostureProfile>[1] }) =>
@@ -300,10 +272,9 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
               <p>카메라 앞에 바르게 앉은 후 기준 자세를 등록하면 실시간 분석을 시작할 수 있습니다.</p>
               <button
                 className="wcam-primary-btn"
-                onClick={handleRegister}
-                disabled={isRegistering}
+                onClick={openGuide}
               >
-                {isRegistering ? '등록 중...' : '📸 기준 자세 등록하기'}
+                📸 기준 자세 등록하기
               </button>
             </div>
           ) : (
@@ -327,21 +298,15 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
                 ))}
                 <button
                   className="wcam-add-btn"
-                  onClick={handleRegister}
-                  disabled={isRegistering}
+                  onClick={openGuide}
                 >
                   <span className="wcam-add-btn-icon">+</span>
-                  <span>{isRegistering ? '등록 중' : '추가'}</span>
+                  <span>추가</span>
                 </button>
               </div>
             </>
           )}
 
-          {registerMsg && (
-            <p className={`wcam-register-msg ${registerMsg.startsWith('✅') ? 'success' : 'error'}`}>
-              {registerMsg}
-            </p>
-          )}
         </div>
 
         {hasProfile && (
@@ -354,6 +319,14 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
         )}
       </div>
     </div>
+
+    {isGuideOpen && (
+      <PostureGuideModal
+        videoRef={videoRef}
+        onClose={() => setIsGuideOpen(false)}
+        onComplete={() => setIsGuideOpen(false)}
+      />
+    )}
 
     {selectedProfile && (
       <PostureProfileModal
