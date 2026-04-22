@@ -894,6 +894,24 @@
 }
 
 /* ============================
+   Notification permission banner
+   ============================ */
+.wcam-notif-banner {
+  grid-column: 1 / -1;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  background: #451a03;
+  border: 1px solid #92400e;
+  border-radius: 10px;
+  color: #fcd34d;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+.wcam-notif-banner strong {
+  color: #fef08a;
+}
+
+/* ============================
    Mobile overrides
    ============================ */
 @media (max-width: 768px) {

@@ -9,6 +9,7 @@ import {
   type PostureProfile,
 } from '../../services/webcamApi'
 import { drawSkeleton } from '../../utils/skeleton'
+import { usePostureNotification } from '../../hooks/usePostureNotification'
 import PostureProfileModal from './PostureProfileModal'
 import PostureGuideModal from './PostureGuideModal'
 import '../../styles/webcam.css'
@@ -47,10 +48,10 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
   } | null>(null)
   const [isGuideOpen, setIsGuideOpen] = useState(false)
   const [selectedProfile, setSelectedProfile] = useState<PostureProfile | null>(null)
-  const animationFrameRef = useRef<number>()
+  const analysisTimerRef = useRef<number>()
   const requestInFlightRef = useRef(false)
-  const notificationSentRef = useRef(false)
   const queryClient = useQueryClient()
+  const { notify, permission: notifPermission } = usePostureNotification()
 
   const { data: profiles = [] } = useQuery({
     queryKey: ['postureProfiles'],
@@ -59,23 +60,6 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
   const hasProfile = profiles.length > 0
   const activeCount = profiles.filter((p) => p.is_active).length
   const canAddMore = activeCount < 3
-
-  useEffect(() => {
-    if (Notification.permission === 'default') Notification.requestPermission()
-  }, [])
-
-  useEffect(() => {
-    if (analyzeResult?.status === 'bad' && !notificationSentRef.current) {
-      if (Notification.permission === 'granted') {
-        new Notification('척추핑 - 자세 경고', {
-          body: analyzeResult.issues.join(', ') || '자세를 바로잡아 주세요!',
-          icon: '/favicon.ico',
-        })
-      }
-      notificationSentRef.current = true
-      setTimeout(() => { notificationSentRef.current = false }, 30_000)
-    }
-  }, [analyzeResult])
 
   useEffect(() => {
     const startWebcam = async () => {
@@ -135,6 +119,7 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
         profile_name: data.profile_name,
         issues: data.issues,
       })
+      notify(data.status, data.issues)
       if (displayCanvasRef.current && data.landmarks?.length) {
         drawSkeleton(
           displayCanvasRef.current,
@@ -154,32 +139,40 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
   useEffect(() => {
     if (!isActive || !hasProfile) return
 
-    const loop = async (timestamp: number) => {
-      animationFrameRef.current = requestAnimationFrame(loop)
-      if (requestInFlightRef.current) return
+    let cancelled = false
 
-      const imageBase64 = captureFrame()
-      if (!imageBase64) return
-
-      requestInFlightRef.current = true
-      try {
-        await runAnalyze(imageBase64)
-      } finally {
-        requestInFlightRef.current = false
+    const tick = async () => {
+      if (cancelled) return
+      if (!requestInFlightRef.current) {
+        const imageBase64 = captureFrame()
+        if (imageBase64) {
+          requestInFlightRef.current = true
+          try {
+            await runAnalyze(imageBase64)
+          } finally {
+            requestInFlightRef.current = false
+          }
+        }
       }
-      void timestamp
+      if (!cancelled) analysisTimerRef.current = window.setTimeout(tick, 300)
     }
 
-    animationFrameRef.current = requestAnimationFrame(loop)
+    analysisTimerRef.current = window.setTimeout(tick, 0)
     return () => {
+      cancelled = true
       requestInFlightRef.current = false
-      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current)
+      clearTimeout(analysisTimerRef.current)
     }
   }, [isActive, hasProfile, captureFrame, runAnalyze])
 
   return (
     <>
     <div className="webcam-page">
+      {notifPermission === 'denied' && (
+        <div className="wcam-notif-banner">
+          알림이 차단되어 있어요. 주소창 자물쇠 아이콘 → 알림 → <strong>허용</strong> 후 새로고침하면 백그라운드 자세 경고를 받을 수 있습니다.
+        </div>
+      )}
       {/* hidden elements */}
       <video ref={videoRef} autoPlay playsInline style={{ display: 'none' }} />
       <canvas ref={captureCanvasRef} style={{ display: 'none' }} />
