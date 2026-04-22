@@ -74,6 +74,7 @@ export default function PostureProfileModal({ profile, onClose, onUpdate, onDele
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   useEffect(() => {
     if (!canvasRef.current) return
@@ -84,10 +85,13 @@ export default function PostureProfileModal({ profile, onClose, onUpdate, onDele
   const handleToggleActive = async () => {
     const next = !isActive
     setIsActive(next)
+    setErrorMsg(null)
     try {
       await onUpdate({ is_active: next })
-    } catch {
+    } catch (err: unknown) {
       setIsActive(!next)
+      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
+      setErrorMsg(detail ?? '변경에 실패했습니다.')
     }
   }
 
@@ -178,6 +182,7 @@ export default function PostureProfileModal({ profile, onClose, onUpdate, onDele
             aria-label={isActive ? '비활성화' : '활성화'}
           />
         </div>
+        {errorMsg && <p className="wcam-modal-error">{errorMsg}</p>}
 
         {/* 삭제 */}
         <div className="wcam-modal-divider" />

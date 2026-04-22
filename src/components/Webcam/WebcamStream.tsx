@@ -57,6 +57,8 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
     queryFn: getPostureProfiles,
   })
   const hasProfile = profiles.length > 0
+  const activeCount = profiles.filter((p) => p.is_active).length
+  const canAddMore = activeCount < 3
 
   useEffect(() => {
     if (Notification.permission === 'default') Notification.requestPermission()
@@ -237,6 +239,13 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
             <>
               <div className="wcam-profile-list-header">
                 <h4>등록된 자세 ({profiles.length}개)</h4>
+                <div className="wcam-info-badge">
+                  ?
+                  <div className="wcam-info-tooltip">
+                    활성 기준 자세는 최대 3개까지 등록할 수 있습니다.<br />
+                    추가 등록하려면 기존 자세의 &apos;분석에 사용 여부&apos;를 해제해 주세요.
+                  </div>
+                </div>
               </div>
               <div className="wcam-profile-scroll">
                 {profiles.map((profile) => (
@@ -254,9 +263,11 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
                 <button
                   className="wcam-add-btn"
                   onClick={openGuide}
+                  disabled={!canAddMore}
+                  title={!canAddMore ? '활성 기준 자세는 최대 3개까지 등록할 수 있습니다' : undefined}
                 >
                   <span className="wcam-add-btn-icon">+</span>
-                  <span>추가</span>
+                  <span>{canAddMore ? '추가' : '최대 3개'}</span>
                 </button>
               </div>
             </>

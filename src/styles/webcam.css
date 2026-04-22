@@ -201,6 +201,46 @@
   font-weight: 700;
 }
 
+.wcam-info-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #64748b;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: default;
+  flex-shrink: 0;
+}
+
+.wcam-info-badge:hover .wcam-info-tooltip {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.wcam-info-tooltip {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 220px;
+  background: #1e293b;
+  color: #f1f5f9;
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.5;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: opacity 0.15s ease;
+  z-index: 10;
+}
+
 .wcam-profile-scroll {
   display: flex;
   gap: 0.75rem;
@@ -554,6 +594,12 @@
 
 .wcam-toggle-switch.on::after  { left: calc(100% - 23px); }
 .wcam-toggle-switch.off::after { left: 3px; }
+
+.wcam-modal-error {
+  font-size: 0.78rem;
+  color: #ef4444;
+  margin-top: 0.4rem;
+}
 
 .wcam-modal-action-btn {
   border: none;
