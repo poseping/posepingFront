@@ -176,8 +176,7 @@ export default function LoginPage() {
             onClick={handleKakaoLogin}
             disabled={loading}
           >
-            <span className="btn-icon">💬</span>
-            {loading ? '로그인 중...' : '카카오로 계속하기'}
+            <img src="/assets/img/kakao_login_medium_narrow.png" alt="카카오 로그인"/>
           </button>
 
           <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
