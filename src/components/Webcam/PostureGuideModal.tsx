@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useCallback } from 'react'
+import { useRef, useEffect, useState, useCallback, useLayoutEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
 import { analyzePose } from '../../services/api'
@@ -83,16 +83,20 @@ export default function PostureGuideModal({ videoRef, onClose, onComplete }: Pos
     }
   }, [captureFrame, queryClient, onComplete])
 
-  // 카운트다운 → 0 되면 자동 캡처
+  // doRegister를 ref로 유지 — countdown effect가 doRegister 참조 변경에 반응하지 않도록
+  const doRegisterRef = useRef(doRegister)
+  useLayoutEffect(() => { doRegisterRef.current = doRegister }, [doRegister])
+
+  // 카운트다운 → 0 되면 자동 캡처 (deps에 doRegister 없음 → 참조 변경으로 재실행 방지)
   useEffect(() => {
     if (countdown === null) return
     if (countdown === 0) {
-      doRegister()
+      doRegisterRef.current()
       return
     }
     const timer = setTimeout(() => setCountdown((c) => (c !== null ? c - 1 : null)), 1000)
     return () => clearTimeout(timer)
-  }, [countdown, doRegister])
+  }, [countdown])
 
   const isLastStep = step === STEPS.length - 1
   const current = STEPS[step]
