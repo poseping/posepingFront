@@ -3,7 +3,7 @@
  */
 
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { UserInfo } from "../services/authService"
+import { UserInfo, getToken, getUserInfo } from "../services/authService"
 
 interface AuthState {
   user: UserInfo | null
@@ -13,10 +13,13 @@ interface AuthState {
   error: string | null
 }
 
+const savedToken = getToken()
+const savedUser = getUserInfo()
+
 const initialState: AuthState = {
-  user: null,
-  token: null,
-  isAuthenticated: false,
+  user: savedUser,
+  token: savedToken,
+  isAuthenticated: !!savedToken && !!savedUser,
   loading: false,
   error: null,
 }
