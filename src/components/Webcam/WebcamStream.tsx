@@ -6,6 +6,8 @@ import {
   getPostureProfiles,
   updatePostureProfile,
   deletePostureProfile,
+  saveWebcamSession,
+  getAlertTypes,
   type PostureProfile,
 } from '../../services/webcamApi'
 import { drawSkeleton } from '../../utils/skeleton'
@@ -53,10 +55,31 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
   const queryClient = useQueryClient()
   const { notify, permission: notifPermission } = usePostureNotification()
 
+  // 세션 누적 카운트 (state 대신 ref → 매 프레임 리렌더 방지)
+  const sessionRef = useRef({
+    startedAt: null as string | null,
+    goodCount: 0,
+    warningCount: 0,
+    badCount: 0,
+    causeCounts: {} as Record<string, number>,
+  })
+  // 중복 카운트 방지용 이전 프레임 상태
+  const prevStatusRef = useRef<string | null>(null)
+  const prevIssuesRef = useRef<Set<string>>(new Set())
+
   const { data: profiles = [] } = useQuery({
     queryKey: ['postureProfiles'],
     queryFn: getPostureProfiles,
   })
+  const { data: alertTypes = [] } = useQuery({
+    queryKey: ['alertTypes'],
+    queryFn: getAlertTypes,
+    staleTime: Infinity,
+  })
+  const alertMap = Object.fromEntries(alertTypes.map((a) => [a.alert_type_id, a]))
+
+  const { mutate: doSaveSession } = useMutation({ mutationFn: saveWebcamSession })
+
   const hasProfile = profiles.length > 0
   const activeCount = profiles.filter((p) => p.is_active).length
   const canAddMore = activeCount < 3
@@ -137,6 +160,22 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
           STATUS_COLOR[data.status],
         )
       }
+
+      // 상태가 바뀔 때만 카운트 (3초 유지해도 1회만)
+      if (data.status !== prevStatusRef.current) {
+        const key = `${data.status}Count` as 'goodCount' | 'warningCount' | 'badCount'
+        sessionRef.current[key]++
+        prevStatusRef.current = data.status
+      }
+
+      // 이전 프레임에 없던 issue만 카운트
+      const newIssues = new Set(data.issues)
+      for (const id of newIssues) {
+        if (!prevIssuesRef.current.has(id)) {
+          sessionRef.current.causeCounts[id] = (sessionRef.current.causeCounts[id] ?? 0) + 1
+        }
+      }
+      prevIssuesRef.current = newIssues
     },
     onError: (error) => {
       const axiosError = error as AxiosError
@@ -172,6 +211,35 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
       clearTimeout(analysisTimerRef.current)
     }
   }, [isActive, hasProfile, captureFrame, runAnalyze])
+
+  // 세션 시작 → ref 초기화 / 세션 종료 → DB 저장
+  useEffect(() => {
+    if (isActive) {
+      sessionRef.current = {
+        startedAt: new Date().toISOString(),
+        goodCount: 0,
+        warningCount: 0,
+        badCount: 0,
+        causeCounts: {},
+      }
+      prevStatusRef.current = null
+      prevIssuesRef.current = new Set()
+    } else {
+      const { startedAt, goodCount, warningCount, badCount, causeCounts } = sessionRef.current
+      const total = goodCount + warningCount + badCount
+      if (startedAt && total > 0) {
+        doSaveSession({
+          started_at: startedAt,
+          ended_at: new Date().toISOString(),
+          good_count: goodCount,
+          warning_count: warningCount,
+          bad_count: badCount,
+          cause_counts: causeCounts,
+        })
+      }
+      sessionRef.current.startedAt = null
+    }
+  }, [isActive])
 
   return (
     <>
@@ -209,7 +277,9 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
               <div className="wcam-issue-block">
                 <h4>개선 필요 항목</h4>
                 <ul>
-                  {analyzeResult.issues.map((issue, i) => <li key={i}>{issue}</li>)}
+                  {analyzeResult.issues.map((typeId) => (
+                    <li key={typeId}>{alertMap[typeId]?.alert_name ?? typeId}</li>
+                  ))}
                 </ul>
               </div>
             )}
