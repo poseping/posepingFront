@@ -894,6 +894,95 @@
 }
 
 /* ============================
+   Stretch Reminder Bar
+   ============================ */
+.wcam-stretch-bar {
+  padding: 1rem 1.25rem;
+}
+
+.wcam-stretch-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.wcam-stretch-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.wcam-stretch-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.wcam-stretch-label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #10213d;
+}
+
+.wcam-stretch-countdown {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #155eef;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+}
+
+.wcam-stretch-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.wcam-stretch-select {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #374151;
+  background: #f8fafc;
+  cursor: pointer;
+  outline: none;
+}
+
+.wcam-stretch-select:hover {
+  border-color: #94a3b8;
+}
+
+.wcam-stretch-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 0.38rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+
+.wcam-stretch-btn.off {
+  background: linear-gradient(135deg, #155eef, #0b7a75);
+  color: #fff;
+}
+
+.wcam-stretch-btn.on {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.wcam-stretch-btn.on:hover {
+  background: #e2e8f0;
+}
+
+/* ============================
    Notification permission banner
    ============================ */
 .wcam-notif-banner {

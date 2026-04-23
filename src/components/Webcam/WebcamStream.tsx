@@ -12,6 +12,7 @@ import {
 } from '../../services/webcamApi'
 import { drawSkeleton } from '../../utils/skeleton'
 import { usePostureNotification } from '../../hooks/usePostureNotification'
+import { useStretchReminder, type StretchInterval } from '../../hooks/useStretchReminder'
 import PostureProfileModal from './PostureProfileModal'
 import PostureGuideModal from './PostureGuideModal'
 import '../../styles/webcam.css'
@@ -38,6 +39,12 @@ function formatDate(isoString: string) {
   return new Date(isoString).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })
 }
 
+function formatTimeLeft(seconds: number): string {
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+}
+
 export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const captureCanvasRef = useRef<HTMLCanvasElement>(null)
@@ -54,6 +61,7 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
   const requestInFlightRef = useRef(false)
   const queryClient = useQueryClient()
   const { notify, permission: notifPermission } = usePostureNotification()
+  const stretchReminder = useStretchReminder()
 
   // 세션 누적 카운트 (state 대신 ref → 매 프레임 리렌더 방지)
   const sessionRef = useRef({
@@ -354,6 +362,43 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
             {isActive ? '■ 분석 중지' : '▶ 분석 시작'}
           </button>
         )}
+
+        {/* ── 스트레칭 알림 ── */}
+        <div className="wcam-card wcam-stretch-bar">
+          <div className="wcam-stretch-inner">
+            <span className="wcam-stretch-icon">⏰</span>
+            <div className="wcam-stretch-info">
+              <span className="wcam-stretch-label">스트레칭 알림</span>
+              {stretchReminder.isEnabled && (
+                <span className="wcam-stretch-countdown">
+                  {formatTimeLeft(stretchReminder.timeLeft)}
+                </span>
+              )}
+            </div>
+            <div className="wcam-stretch-controls">
+              {!stretchReminder.isEnabled && (
+                <select
+                  className="wcam-stretch-select"
+                  value={stretchReminder.intervalMinutes}
+                  onChange={(e) =>
+                    stretchReminder.setIntervalMinutes(Number(e.target.value) as StretchInterval)
+                  }
+                >
+                  <option value={1}>1분</option>
+                  <option value={30}>30분</option>
+                  <option value={60}>1시간</option>
+                  <option value={120}>2시간</option>
+                </select>
+              )}
+              <button
+                className={`wcam-stretch-btn ${stretchReminder.isEnabled ? 'on' : 'off'}`}
+                onClick={stretchReminder.toggle}
+              >
+                {stretchReminder.isEnabled ? '끄기' : '켜기'}
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
