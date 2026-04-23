@@ -10,7 +10,7 @@ import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google'
 import { loginSuccess, loginFailure } from '../store/authSlice'
 import { saveToken, saveUserInfo } from '../services/authService'
 import apiClient from '../services/api'
-import '../styles/login.css'
+import '../styles/login.scss'
 
 declare global {
   interface Window {

@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import PageHeader from '../components/PageHeader'
 import { logout } from '../store/authSlice'
 import { clearAuth } from '../services/authService'
-import '../styles/page-header.css'
-import '../styles/my-page.css'
+import '../styles/my-page.scss'
 
 export default function MyPage() {
   const dispatch = useDispatch()

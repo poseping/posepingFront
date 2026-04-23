@@ -23,8 +23,8 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--background);
@@ -37,5 +37,36 @@ html,
 body,
 #root {
   width: 100%;
-  height: 100%;
+}
+
+/* 앱 프레임: 기본은 꽉 차게, 큰 화면에서는 중앙 정렬 */
+.app-frame {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--background);
+  position: relative;
+  padding-bottom: 64px
+}
+
+@media screen and (min-width: 768px) {
+  .app-frame{
+    padding: 0;
+  }
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main, .sub {
+  word-break: keep-all;
+}
+
+@media (max-width: 768px) {
+
+  .history-page .sub {
+    padding-top: 0;
+  }
 }

@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import WebcamStream from '../components/Webcam/WebcamStream'
 import PageHeader from '../components/PageHeader'
-import '../styles/main-page.css'
 
 function MainPage() {
   const [isActive, setIsActive] = useState(false)
