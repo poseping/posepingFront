@@ -1,22 +1,33 @@
 import { NavLink, useLocation } from 'react-router-dom'
 import { useSelector } from 'react-redux'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {
+  faCamera,
+  faChartColumn,
+  faClipboardList,
+  faGear,
+  faHouse,
+  faShieldHalved,
+  faUser,
+  faUsers,
+} from '@fortawesome/free-solid-svg-icons'
 import { RootState } from '../store/store'
 import '../styles/page-header.css'
 
 const navItems = [
-  { to: '/home', label: '홈', icon: '🏠' },
-  { to: '/main', label: '분석', icon: '📷' },
-  { to: '/history', label: '기록', icon: '📊' },
-  { to: '/mypage', label: '마이페이지', icon: '👤' },
-  { to: '/settings', label: '설정', icon: '⚙️' },
+  { to: '/home', label: '홈', icon: faHouse },
+  { to: '/main', label: '분석', icon: faCamera },
+  { to: '/history', label: '기록', icon: faChartColumn },
+  { to: '/mypage', label: '마이페이지', icon: faUser },
+  { to: '/settings', label: '설정', icon: faGear },
 ]
 
-const adminNavItem = { to: '/admin', label: '관리자', icon: '🛡️' }
+const adminNavItem = { to: '/admin', label: '관리자', icon: faShieldHalved }
 
 const adminNavItems = [
-  { to: '/admin', label: '대시보드', icon: '📋' },
-  { to: '/admin/members', label: '회원', icon: '👥' },
-  { to: '/home', label: '척추PING', icon: '🏠' },
+  { to: '/admin', label: '대시보드', icon: faClipboardList },
+  { to: '/admin/members', label: '회원', icon: faUsers },
+  { to: '/home', label: '척추PING', icon: faHouse },
 ]
 
 interface PageHeaderProps {
@@ -43,11 +54,12 @@ export default function PageHeader({ title, description }: PageHeaderProps) {
           <NavLink
             key={to}
             to={to}
+            end={to === '/admin'}
             className={({ isActive }) =>
               `page-header__nav-item${isActive ? ' page-header__nav-item--active' : ''}`
             }
           >
-            <span className="page-header__nav-icon">{icon}</span>
+            <span className="page-header__nav-icon"><FontAwesomeIcon icon={icon} /></span>
             <span className="page-header__nav-label">{label}</span>
           </NavLink>
         ))}

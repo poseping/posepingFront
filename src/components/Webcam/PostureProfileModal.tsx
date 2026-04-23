@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPen, faXmark } from '@fortawesome/free-solid-svg-icons'
 import type { PostureProfile } from '../../services/webcamApi'
 
 const SKELETON_CONNECTIONS = [
@@ -149,11 +151,13 @@ export default function PostureProfileModal({ profile, onClose, onUpdate, onDele
             <div className="wcam-modal-name-row">
               <h2 className="wcam-modal-title">{nameValue}</h2>
               <button className="wcam-modal-icon-btn" onClick={() => setEditingName(true)} title="이름 수정">
-                ✏️
+                <FontAwesomeIcon icon={faPen} />
               </button>
             </div>
           )}
-          <button className="wcam-modal-close-btn" onClick={onClose}>✕</button>
+          <button className="wcam-modal-close-btn" onClick={onClose}>
+            <FontAwesomeIcon icon={faXmark} />
+          </button>
         </div>
 
         <div className="wcam-modal-meta-row">

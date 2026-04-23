@@ -1,0 +1,28 @@
+.settings-empty {
+  min-height: calc(100vh - 60px);
+  padding: 24px 20px 96px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  color: var(--muted-foreground);
+  text-align: center;
+}
+
+.settings-empty__icon {
+  color: #cbd5e1;
+  font-size: 3.4rem;
+}
+
+.settings-empty p {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+@media (max-width: 767px) {
+  .settings-empty {
+    min-height: calc(100vh - 64px);
+  }
+}

@@ -54,6 +54,12 @@ main, .sub {
   display: flex;
   justify-content: center;
   align-items: flex-start;
+  word-break: keep-all;
+}
+
+.history-page .sub {
+  overflow-x: hidden;
+  padding-top: 0;
 }
 
 @media (max-width: 768px) {
@@ -63,5 +69,9 @@ main, .sub {
 
   main, .sub {
     padding: 1rem;
+  }
+
+  .history-page .sub {
+    padding-top: 0;
   }
 }

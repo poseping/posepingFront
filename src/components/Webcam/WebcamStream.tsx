@@ -1,6 +1,8 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCamera, faClipboardList, faPause, faPlay, faPlus } from '@fortawesome/free-solid-svg-icons'
 import {
   analyzeWebcam,
   getPostureProfiles,
@@ -295,14 +297,15 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
           {!hasProfile ? (
             /* 기준 자세 없음 — 빈 상태 */
             <div className="wcam-empty-state">
-              <div className="wcam-empty-icon">📋</div>
+              <div className="wcam-empty-icon"><FontAwesomeIcon icon={faClipboardList} /></div>
               <h4>등록된 기준 자세가 없습니다</h4>
               <p>카메라 앞에 바르게 앉은 후 기준 자세를 등록하면 실시간 분석을 시작할 수 있습니다.</p>
               <button
                 className="wcam-primary-btn"
                 onClick={openGuide}
               >
-                📸 기준 자세 등록하기
+                <FontAwesomeIcon icon={faCamera} />
+                기준 자세 등록하기
               </button>
             </div>
           ) : (
@@ -337,7 +340,7 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
                   disabled={!canAddMore}
                   title={!canAddMore ? '활성 기준 자세는 최대 3개까지 등록할 수 있습니다' : undefined}
                 >
-                  <span className="wcam-add-btn-icon">+</span>
+                  <span className="wcam-add-btn-icon"><FontAwesomeIcon icon={faPlus} /></span>
                   <span>{canAddMore ? '추가' : '최대 3개'}</span>
                 </button>
               </div>
@@ -351,7 +354,8 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
             onClick={onToggle}
             className={isActive ? 'wcam-stop-btn' : 'wcam-primary-btn'}
           >
-            {isActive ? '■ 분석 중지' : '▶ 분석 시작'}
+            <FontAwesomeIcon icon={isActive ? faPause : faPlay} />
+            {isActive ? '분석 중지' : '분석 시작'}
           </button>
         )}
       </div>

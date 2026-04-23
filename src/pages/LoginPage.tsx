@@ -51,14 +51,14 @@ export default function LoginPage() {
       window.Kakao.Auth.login({
         success: async (authObj: any) => {
           try {
-            console.log('✅ 카카오 인가 성공:', authObj)
+            console.log('카카오 인가 성공:', authObj)
 
             // 백엔드에 카카오 액세스 토큰 전송
             const response = await apiClient.post('/auth/kakao', {
               access_token: authObj.access_token,
             })
 
-            console.log('✅ 백엔드 응답:', response.data)
+            console.log('백엔드 응답:', response.data)
 
             const { access_token, user } = response.data
 
@@ -70,9 +70,9 @@ export default function LoginPage() {
             dispatch(loginSuccess({ user, token: access_token }))
 
             // 메인 페이지로 이동
-            navigate('/main')
+            navigate('/home')
           } catch (err: any) {
-            console.error('❌ 백엔드 에러:', err.response?.data || err.message)
+            console.error('백엔드 에러:', err.response?.data || err.message)
             const errorMsg = err.response?.data?.detail || err.message || '로그인 실패'
             setError(errorMsg)
             dispatch(loginFailure(errorMsg))
@@ -81,7 +81,7 @@ export default function LoginPage() {
           }
         },
         fail: (error: any) => {
-          console.error('❌ 카카오 로그인 실패:', error)
+          console.error('카카오 로그인 실패:', error)
           setError(`카카오 로그인 실패: ${error?.error_description || '알 수 없는 오류'}`)
           setLoading(false)
         },
@@ -106,7 +106,7 @@ export default function LoginPage() {
       saveToken(access_token)
       saveUserInfo(user)
       dispatch(loginSuccess({ user, token: access_token }))
-      navigate('/main')
+      navigate('/home')
     } catch (err: any) {
       setError('개발용 로그인 실패')
     } finally {
@@ -128,7 +128,7 @@ export default function LoginPage() {
       saveToken(access_token)
       saveUserInfo(user)
       dispatch(loginSuccess({ user, token: access_token }))
-      navigate('/main')
+      navigate('/admin')
     } catch (err: any) {
       setError('개발용 관리자 로그인 실패')
     } finally {
@@ -142,14 +142,14 @@ export default function LoginPage() {
       setLoading(true)
       setError(null)
 
-      console.log('✅ 구글 인가 성공')
+      console.log('구글 인가 성공')
 
       // 백엔드에 구글 ID Token 전송
       const response = await apiClient.post('/auth/google', {
         token: credentialResponse.credential,
       })
 
-      console.log('✅ 백엔드 응답:', response.data)
+      console.log('백엔드 응답:', response.data)
 
       const { access_token, user } = response.data
 
@@ -160,9 +160,9 @@ export default function LoginPage() {
       // Redux 상태 업데이트
       dispatch(loginSuccess({ user, token: access_token }))
 
-      navigate('/main')
+      navigate('/home')
     } catch (err: any) {
-      logRequestError('❌ 백엔드 에러:', err)
+      logRequestError('백엔드 에러:', err)
       const errorMsg = err.response?.data?.detail || err.message || '로그인 실패'
       setError(errorMsg)
       dispatch(loginFailure(errorMsg))

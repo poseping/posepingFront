@@ -326,9 +326,34 @@
   font-weight: 800;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
-  background: linear-gradient(135deg, #155eef 0%, #0b7a75 100%);
+  background: linear-gradient(135deg, #0667bb 0%, #08aaab 100%);
   color: #fff;
   box-shadow: 0 14px 28px rgba(21, 94, 239, 0.22);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+}
+
+.wcam-empty-icon .svg-inline--fa,
+.wcam-add-btn-icon .svg-inline--fa,
+.wcam-modal-icon-btn .svg-inline--fa,
+.wcam-modal-close-btn .svg-inline--fa,
+.guide-close .svg-inline--fa,
+.guide-countdown-badge .svg-inline--fa,
+.guide-step-icon .svg-inline--fa,
+.guide-step-tip .svg-inline--fa,
+.guide-btn-back .svg-inline--fa,
+.guide-btn-next .svg-inline--fa,
+.guide-btn-register .svg-inline--fa {
+  color: #0667bb;
+}
+
+.wcam-primary-btn .svg-inline--fa,
+.guide-countdown-badge .svg-inline--fa,
+.guide-btn-next .svg-inline--fa,
+.guide-btn-register .svg-inline--fa {
+  color: inherit;
 }
 
 .wcam-primary-btn:hover {
@@ -354,6 +379,10 @@
   transition: transform 0.2s ease, opacity 0.2s ease;
   background: #fee2e2;
   color: #b91c1c;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
 }
 
 .wcam-stop-btn:hover {
@@ -815,6 +844,9 @@
   font-size: 0.85rem;
   font-weight: 600;
   line-height: 1.5;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .guide-error-msg {
@@ -851,12 +883,15 @@
   color: #475569;
   cursor: pointer;
   transition: background 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
 }
 
 .guide-btn-back:hover { background: #e2e8f0; }
 
 .guide-btn-next {
-  background: linear-gradient(135deg, #155eef 0%, #0b7a75 100%);
+  background: linear-gradient(135deg, #0667bb 0%, #08aaab 100%);
   border: none;
   border-radius: 12px;
   padding: 0.75rem 1.4rem;
@@ -866,12 +901,15 @@
   cursor: pointer;
   box-shadow: 0 8px 20px rgba(21, 94, 239, 0.2);
   transition: transform 0.15s, box-shadow 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
 }
 
 .guide-btn-next:hover { transform: translateY(-1px); box-shadow: 0 12px 24px rgba(21, 94, 239, 0.3); }
 
 .guide-btn-register {
-  background: linear-gradient(135deg, #155eef 0%, #0b7a75 100%);
+  background: linear-gradient(135deg, #0667bb 0%, #08aaab 100%);
   border: none;
   border-radius: 12px;
   padding: 0.75rem 1.4rem;
@@ -882,6 +920,9 @@
   box-shadow: 0 8px 20px rgba(21, 94, 239, 0.2);
   transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
 }
 
 .guide-btn-register:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 12px 24px rgba(21, 94, 239, 0.3); }
