@@ -17,7 +17,7 @@ import { usePostureNotification } from '../../hooks/usePostureNotification'
 import { useStretchReminder, type StretchInterval } from '../../hooks/useStretchReminder'
 import PostureProfileModal from './PostureProfileModal'
 import PostureGuideModal from './PostureGuideModal'
-import '../../styles/webcam.css'
+import '../../styles/webcam.scss'
 
 interface WebcamStreamProps {
   isActive: boolean

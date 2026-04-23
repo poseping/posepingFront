@@ -1,8 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGear } from '@fortawesome/free-solid-svg-icons'
 import PageHeader from '../components/PageHeader'
-import '../styles/page-header.css'
-import '../styles/settings.css'
+import '../styles/settings.scss'
 
 export default function SettingsPage() {
   return (

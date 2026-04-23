@@ -2,18 +2,15 @@
   width: 100%;
   max-width: 1080px;
   margin: 0 auto;
-  padding: 0 20px 96px;
+  padding: 2rem;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
 .home-hero {
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
-  padding: 30px 22px;
-  border-radius: 0 0 8px 8px;
+  width: 100%;
+  padding: 8rem 4rem 4rem;
   background: linear-gradient(135deg, #0667bb 0%, #08aaab 100%);
   color: #fff;
 }
@@ -142,7 +139,7 @@
 
 @media (max-width: 767px) {
   .home-page {
-    padding: 0 14px 88px;
+    padding: 1.4rem;
   }
 
   .home-hero {
