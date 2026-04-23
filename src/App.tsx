@@ -12,12 +12,14 @@ import MyPage from './pages/MyPage'
 import SettingsPage from './pages/SettingsPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import AppLayout from './components/AppLayout'
+import ScrollToTop from './components/ScrollToTop'
 import './styles/global.css'
 
 function App() {
 
   return (
     <Router>
+      <ScrollToTop />
       <div className="app-frame">
       <Routes>
         <Route path="/login" element={<LoginPage />} />
