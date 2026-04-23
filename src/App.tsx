@@ -15,6 +15,7 @@ import AdminDashboardPage from './pages/AdminDashboardPage'
 import AdminMembersPage from './pages/AdminMembersPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import AppLayout from './components/AppLayout'
+import ScrollToTop from './components/ScrollToTop'
 import { RootState } from './store/store'
 import './styles/global.css'
 
@@ -24,6 +25,7 @@ function App() {
 
   return (
     <Router>
+      <ScrollToTop />
       <div className="app-frame">
       <Routes>
         <Route path="/login" element={<LoginPage />} />
