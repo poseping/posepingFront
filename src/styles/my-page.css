@@ -1,0 +1,19 @@
+.my-page {
+  padding: 20px;
+}
+
+.my-page__logout-button {
+  border: none;
+  border-radius: 14px;
+  padding: 0.95rem 1.35rem;
+  background: #edf2f7;
+  color: #334155;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 800;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.my-page__logout-button:hover {
+  transform: translateY(-1px);
+}

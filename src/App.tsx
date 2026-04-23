@@ -4,20 +4,28 @@
  */
 
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import LoginPage from './pages/LoginPage'
 import MainPage from './pages/MainPage'
 import HomePage from './pages/HomePage'
 import HistoryPage from './pages/HistoryPage'
 import MyPage from './pages/MyPage'
 import SettingsPage from './pages/SettingsPage'
+import AdminDashboardPage from './pages/AdminDashboardPage'
+import AdminMembersPage from './pages/AdminMembersPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import AppLayout from './components/AppLayout'
+import ScrollToTop from './components/ScrollToTop'
+import { RootState } from './store/store'
 import './styles/global.css'
 
 function App() {
+  const user = useSelector((state: RootState) => state.auth.user)
+  const isAdmin = user?.role?.toLowerCase() === 'admin'
 
   return (
     <Router>
+      <ScrollToTop />
       <div className="app-frame">
       <Routes>
         <Route path="/login" element={<LoginPage />} />
@@ -35,6 +43,8 @@ function App() {
           <Route path="/history"  element={<HistoryPage />} />
           <Route path="/mypage"   element={<MyPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/admin" element={isAdmin ? <AdminDashboardPage /> : <Navigate to="/main" replace />} />
+          <Route path="/admin/members" element={isAdmin ? <AdminMembersPage /> : <Navigate to="/main" replace />} />
         </Route>
 
         <Route path="/" element={<Navigate to="/main" replace />} />

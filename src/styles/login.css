@@ -126,6 +126,14 @@
   height: 18px !important;
 }
 
+.dev-login-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
 /* 개발용 로그인 */
 .dev-login-btn {
   width: 100%;
@@ -137,7 +145,6 @@
   font-size: 13px;
   cursor: pointer;
   transition: background 0.15s;
-  margin-top: 4px;
 }
 
 .dev-login-btn:hover:not(:disabled) {

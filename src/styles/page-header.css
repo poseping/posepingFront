@@ -45,6 +45,12 @@
   display: none;
 }
 
+@media (max-width: 767px) {
+  .page-header {
+    display: none;
+  }
+}
+
 /* ── 데스크톱 (768px+): nav만 추가 표시 ── */
 @media (min-width: 768px) {
   .page-header {
@@ -86,6 +92,7 @@
   }
 
   .page-header__nav-icon {
+    color: inherit;
     font-size: 1rem;
     line-height: 1;
   }

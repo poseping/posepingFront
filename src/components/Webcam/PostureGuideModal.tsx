@@ -1,6 +1,18 @@
 import { useRef, useEffect, useState, useCallback, useLayoutEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {
+  faArrowLeft,
+  faArrowRight,
+  faBone,
+  faCamera,
+  faCheck,
+  faCircleCheck,
+  faLightbulb,
+  faPerson,
+  faXmark,
+} from '@fortawesome/free-solid-svg-icons'
 import { analyzePose } from '../../services/api'
 import { registerPostureProfile } from '../../services/webcamApi'
 import { useSkeletonPreview } from '../../hooks/useSkeletonPreview'
@@ -14,25 +26,25 @@ interface PostureGuideModalProps {
 const STEPS = [
   {
     title: '위치 확인',
-    icon: '📷',
+    icon: faCamera,
     instruction: '카메라와 눈높이를 맞추고, 머리부터 허리까지 화면에 보이도록 거리를 조정해주세요.',
     tip: '카메라에서 약 50~80cm 거리가 적당해요',
   },
   {
     title: '허리·등',
-    icon: '🦴',
+    icon: faBone,
     instruction: '등받이에 기대지 말고 허리를 곧게 세워주세요. 골반을 살짝 앞으로 기울이면 자연스럽게 허리가 펴집니다.',
     tip: '배꼽을 앞으로 내민다는 느낌으로 앉아보세요',
   },
   {
     title: '어깨·목',
-    icon: '💆',
+    icon: faPerson,
     instruction: '양쪽 어깨를 수평으로 내리고, 턱을 살짝 당겨주세요. 귀와 어깨가 일직선이 되면 좋아요.',
     tip: '머리를 천장 방향으로 당기는 느낌으로',
   },
   {
     title: '등록',
-    icon: '✅',
+    icon: faCircleCheck,
     instruction: '이 자세 그대로 유지해주세요. 잠시 후 기준 자세가 자동으로 등록됩니다.',
     tip: null,
   },
@@ -115,7 +127,9 @@ export default function PostureGuideModal({ videoRef, onClose, onComplete }: Pos
               <div key={i} className={`guide-dot ${i < step ? 'done' : i === step ? 'active' : ''}`} />
             ))}
           </div>
-          <button className="guide-close" onClick={onClose} disabled={isBusy}>✕</button>
+          <button className="guide-close" onClick={onClose} disabled={isBusy}>
+            <FontAwesomeIcon icon={faXmark} />
+          </button>
         </div>
 
         {/* 본문 */}
@@ -126,20 +140,23 @@ export default function PostureGuideModal({ videoRef, onClose, onComplete }: Pos
               <div className="guide-countdown-badge">{countdown}</div>
             )}
             {status === 'capturing' && (
-              <div className="guide-countdown-badge">📸</div>
+              <div className="guide-countdown-badge"><FontAwesomeIcon icon={faCamera} /></div>
             )}
             {status === 'done' && (
-              <div className="guide-countdown-badge done">✅</div>
+              <div className="guide-countdown-badge done"><FontAwesomeIcon icon={faCheck} /></div>
             )}
           </div>
 
           <div className="guide-instruction">
-            <div className="guide-step-icon">{current.icon}</div>
+            <div className="guide-step-icon"><FontAwesomeIcon icon={current.icon} /></div>
             <p className="guide-step-label">{step + 1} / {STEPS.length}</p>
             <h3 className="guide-step-title">{current.title}</h3>
             <p className="guide-step-desc">{current.instruction}</p>
             {current.tip && (
-              <p className="guide-step-tip">💡 {current.tip}</p>
+              <p className="guide-step-tip">
+                <FontAwesomeIcon icon={faLightbulb} />
+                {current.tip}
+              </p>
             )}
             {status === 'error' && (
               <p className="guide-error-msg">{errorMsg}</p>
@@ -151,19 +168,22 @@ export default function PostureGuideModal({ videoRef, onClose, onComplete }: Pos
         <div className="guide-footer">
           {step > 0 && !isBusy && status !== 'error' && (
             <button className="guide-btn-back" onClick={() => setStep((s) => s - 1)}>
-              ← 이전
+              <FontAwesomeIcon icon={faArrowLeft} />
+              이전
             </button>
           )}
 
           <div className="guide-footer-right">
             {!isLastStep && (
               <button className="guide-btn-next" onClick={() => setStep((s) => s + 1)}>
-                다음 →
+                다음
+                <FontAwesomeIcon icon={faArrowRight} />
               </button>
             )}
             {isLastStep && status === 'idle' && !isCountingDown && (
               <button className="guide-btn-register" onClick={() => setCountdown(3)}>
-                📸 지금 등록하기
+                <FontAwesomeIcon icon={faCamera} />
+                지금 등록하기
               </button>
             )}
             {isLastStep && isCountingDown && (
