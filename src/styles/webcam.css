@@ -1,5 +1,5 @@
 /* ============================
-   Webcam Page — 2-col desktop / 1-col mobile
+   1. Layout
    ============================ */
 .webcam-page {
   display: grid;
@@ -9,42 +9,38 @@
   align-items: start;
 }
 
-@media (max-width: 768px) {
-  .webcam-page {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-}
-
-/* ============================
-   Shared Card Base
-   ============================ */
-.wcam-card {
-  background: #fff;
-  border-radius: 24px;
-  border: 1px solid rgba(19, 42, 76, 0.08);
-  box-shadow: 0 18px 45px rgba(20, 38, 70, 0.08);
-  padding: 1.5rem;
-}
-
-/* ============================
-   Left Column (Canvas + Result)
-   ============================ */
-.webcam-left {
+.webcam-left,
+.webcam-right {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
   min-width: 0;
 }
 
-.wcam-stage-card {
+/* ============================
+   2. Cards — shared base
+   ============================ */
+.wcam-card,
+.wcam-stage-card,
+.wcam-result-card {
   background: #fff;
   border-radius: 24px;
   border: 1px solid rgba(19, 42, 76, 0.08);
   box-shadow: 0 18px 45px rgba(20, 38, 70, 0.08);
+}
+
+.wcam-card,
+.wcam-result-card {
+  padding: 1.5rem;
+}
+
+.wcam-stage-card {
   overflow: hidden;
 }
 
+/* ============================
+   3. Stage (canvas area)
+   ============================ */
 .wcam-stage-inner {
   display: flex;
   justify-content: center;
@@ -64,16 +60,8 @@
 }
 
 /* ============================
-   Result Card
+   4. Result Card
    ============================ */
-.wcam-result-card {
-  background: #fff;
-  border-radius: 24px;
-  border: 1px solid rgba(19, 42, 76, 0.08);
-  box-shadow: 0 18px 45px rgba(20, 38, 70, 0.08);
-  padding: 1.5rem;
-}
-
 .wcam-result-header {
   display: flex;
   align-items: center;
@@ -133,15 +121,8 @@
 }
 
 /* ============================
-   Right Column (Profile + Controls)
+   5. Kicker (section label)
    ============================ */
-.webcam-right {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  min-width: 0;
-}
-
 .wcam-kicker {
   margin-bottom: 0.35rem;
   font-size: 0.78rem;
@@ -152,7 +133,7 @@
 }
 
 /* ============================
-   Empty State (no profiles)
+   6. Empty State
    ============================ */
 .wcam-empty-state {
   display: flex;
@@ -185,7 +166,7 @@
 }
 
 /* ============================
-   Profile List (has profiles)
+   7. Profile List
    ============================ */
 .wcam-profile-list-header {
   display: flex;
@@ -236,7 +217,7 @@
   line-height: 1.5;
   padding: 0.55rem 0.75rem;
   border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   transition: opacity 0.15s ease;
   z-index: 10;
 }
@@ -252,10 +233,15 @@
   scroll-snap-type: x mandatory;
 }
 
-.wcam-profile-item {
-  /* 3개가 정확히 보이도록: (100% - gap×2) / 3 */
+/* profile card & add button share the same slot width */
+.wcam-profile-item,
+.wcam-add-btn {
   flex: 0 0 calc((100% - 1.5rem) / 3);
   min-width: 0;
+  scroll-snap-align: start;
+}
+
+.wcam-profile-item {
   padding: 0.9rem;
   border-radius: 18px;
   background: #f8fafc;
@@ -265,7 +251,6 @@
   gap: 0.3rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   cursor: default;
-  scroll-snap-align: start;
 }
 
 .wcam-profile-item.active {
@@ -301,7 +286,7 @@
 }
 
 /* ============================
-   Register Message
+   8. Register Message
    ============================ */
 .wcam-register-msg {
   margin-top: 0.85rem;
@@ -315,9 +300,38 @@
 .wcam-register-msg.error   { background: #fee2e2; color: #b91c1c; }
 
 /* ============================
-   Buttons
+   9. Buttons
    ============================ */
+
+/* Primary gradient — start / guide-next / guide-register */
+.wcam-primary-btn,
+.guide-btn-next,
+.guide-btn-register {
+  border: none;
+  font-weight: 800;
+  cursor: pointer;
+  background: linear-gradient(135deg, #0667bb 0%, #08aaab 100%);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+}
+
 .wcam-primary-btn {
+  width: 100%;
+  border-radius: 14px;
+  padding: 0.95rem 1.35rem;
+  font-size: 0.95rem;
+  box-shadow: 0 14px 28px rgba(21, 94, 239, 0.22);
+}
+
+.wcam-primary-btn:hover { transform: translateY(-1px); box-shadow: 0 18px 32px rgba(21, 94, 239, 0.32); }
+.wcam-primary-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* Stop / danger */
+.wcam-stop-btn {
   width: 100%;
   border: none;
   border-radius: 14px;
@@ -325,27 +339,52 @@
   font-size: 0.95rem;
   font-weight: 800;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
-  background: linear-gradient(135deg, #0667bb 0%, #08aaab 100%);
-  color: #fff;
-  box-shadow: 0 14px 28px rgba(21, 94, 239, 0.22);
+  background: #fee2e2;
+  color: #b91c1c;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
+  transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
+.wcam-stop-btn:hover { transform: translateY(-1px); background: #fecaca; }
+
+/* Add profile (dashed outline slot) */
+.wcam-add-btn {
+  padding: 0.9rem;
+  border-radius: 18px;
+  background: transparent;
+  border: 2px dashed #cbd5e1;
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.wcam-add-btn:hover    { border-color: #155eef; color: #155eef; }
+.wcam-add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.wcam-add-btn-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+/* FontAwesome icon color overrides */
 .wcam-empty-icon .svg-inline--fa,
 .wcam-add-btn-icon .svg-inline--fa,
 .wcam-modal-icon-btn .svg-inline--fa,
 .wcam-modal-close-btn .svg-inline--fa,
 .guide-close .svg-inline--fa,
-.guide-countdown-badge .svg-inline--fa,
 .guide-step-icon .svg-inline--fa,
 .guide-step-tip .svg-inline--fa,
-.guide-btn-back .svg-inline--fa,
-.guide-btn-next .svg-inline--fa,
-.guide-btn-register .svg-inline--fa {
+.guide-btn-back .svg-inline--fa {
   color: #0667bb;
 }
 
@@ -356,77 +395,8 @@
   color: inherit;
 }
 
-.wcam-primary-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 18px 32px rgba(21, 94, 239, 0.32);
-}
-
-.wcam-primary-btn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-.wcam-stop-btn {
-  width: 100%;
-  border: none;
-  border-radius: 14px;
-  padding: 0.95rem 1.35rem;
-  font-size: 0.95rem;
-  font-weight: 800;
-  cursor: pointer;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-  background: #fee2e2;
-  color: #b91c1c;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-}
-
-.wcam-stop-btn:hover {
-  transform: translateY(-1px);
-  background: #fecaca;
-}
-
-.wcam-add-btn {
-  flex: 0 0 calc((100% - 1.5rem) / 3);
-  min-width: 0;
-  padding: 0.9rem;
-  border-radius: 18px;
-  background: transparent;
-  border: 2px dashed #cbd5e1;
-  color: #64748b;
-  font-size: 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: border-color 0.2s ease, color 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.3rem;
-  scroll-snap-align: start;
-}
-
-.wcam-add-btn:hover {
-  border-color: #155eef;
-  color: #155eef;
-}
-
-.wcam-add-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.wcam-add-btn-icon {
-  font-size: 1.3rem;
-  line-height: 1;
-}
-
 /* ============================
-   Profile Modal
+   10. Profile Modal
    ============================ */
 .wcam-modal-overlay {
   position: fixed;
@@ -485,8 +455,8 @@
   font-size: 0.88rem;
   padding: 0.25rem;
   border-radius: 8px;
-  transition: background 0.15s;
   line-height: 1;
+  transition: background 0.15s;
 }
 
 .wcam-modal-icon-btn:hover { background: #f1f5f9; }
@@ -637,8 +607,8 @@
   font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
-  transition: opacity 0.15s;
   white-space: nowrap;
+  transition: opacity 0.15s;
 }
 
 .wcam-modal-action-btn.save           { background: #155eef; color: #fff; }
@@ -675,7 +645,7 @@
 }
 
 /* ============================
-   Posture Guide Modal
+   11. Posture Guide Modal
    ============================ */
 .guide-overlay {
   position: fixed;
@@ -702,7 +672,7 @@
   padding: 1.75rem;
 }
 
-/* 헤더: 진행 점 + 닫기 */
+/* header: progress dots + close */
 .guide-header {
   display: flex;
   align-items: center;
@@ -723,14 +693,8 @@
   transition: background 0.2s, transform 0.2s;
 }
 
-.guide-dot.active {
-  background: #155eef;
-  transform: scale(1.25);
-}
-
-.guide-dot.done {
-  background: #0b7a75;
-}
+.guide-dot.active { background: #155eef; transform: scale(1.25); }
+.guide-dot.done   { background: #0b7a75; }
 
 .guide-close {
   background: #f1f5f9;
@@ -745,14 +709,14 @@
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  transition: background 0.15s, color 0.15s;
   flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
 }
 
 .guide-close:hover:not(:disabled) { background: #e2e8f0; color: #1e293b; }
 .guide-close:disabled { opacity: 0.4; cursor: not-allowed; }
 
-/* 본문: 2컬럼 */
+/* 2-column body */
 .guide-body {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -760,7 +724,6 @@
   align-items: center;
 }
 
-/* 웹캠 프리뷰 */
 .guide-preview-wrap {
   position: relative;
   border-radius: 20px;
@@ -800,17 +763,14 @@
   to   { transform: scale(1);   opacity: 1; }
 }
 
-/* 안내 텍스트 */
+/* instruction panel */
 .guide-instruction {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
 }
 
-.guide-step-icon {
-  font-size: 2.4rem;
-  line-height: 1;
-}
+.guide-step-icon  { font-size: 2.4rem; line-height: 1; }
 
 .guide-step-label {
   margin: 0;
@@ -859,7 +819,7 @@
   font-weight: 600;
 }
 
-/* 푸터 버튼 */
+/* footer buttons */
 .guide-footer {
   display: flex;
   align-items: center;
@@ -869,9 +829,7 @@
   border-top: 1px solid rgba(19, 42, 76, 0.07);
 }
 
-.guide-footer-right {
-  margin-left: auto;
-}
+.guide-footer-right { margin-left: auto; }
 
 .guide-btn-back {
   background: #f1f5f9;
@@ -882,64 +840,36 @@
   font-weight: 700;
   color: #475569;
   cursor: pointer;
-  transition: background 0.15s;
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
+  transition: background 0.15s;
 }
 
 .guide-btn-back:hover { background: #e2e8f0; }
 
-.guide-btn-next {
-  background: linear-gradient(135deg, #0667bb 0%, #08aaab 100%);
-  border: none;
-  border-radius: 12px;
-  padding: 0.75rem 1.4rem;
-  font-size: 0.9rem;
-  font-weight: 800;
-  color: #fff;
-  cursor: pointer;
-  box-shadow: 0 8px 20px rgba(21, 94, 239, 0.2);
-  transition: transform 0.15s, box-shadow 0.15s;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-
-.guide-btn-next:hover { transform: translateY(-1px); box-shadow: 0 12px 24px rgba(21, 94, 239, 0.3); }
-
+/* next & register share gradient base (defined in section 9) */
+.guide-btn-next,
 .guide-btn-register {
-  background: linear-gradient(135deg, #0667bb 0%, #08aaab 100%);
-  border: none;
   border-radius: 12px;
   padding: 0.75rem 1.4rem;
   font-size: 0.9rem;
-  font-weight: 800;
-  color: #fff;
-  cursor: pointer;
   box-shadow: 0 8px 20px rgba(21, 94, 239, 0.2);
-  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
   white-space: nowrap;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
 }
 
-.guide-btn-register:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 12px 24px rgba(21, 94, 239, 0.3); }
+.guide-btn-next:hover,
+.guide-btn-register:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(21, 94, 239, 0.3);
+}
+
 .guide-btn-register:disabled { opacity: 0.65; cursor: not-allowed; transform: none; box-shadow: none; }
 
-@media (max-width: 640px) {
-  .guide-modal { padding: 1.25rem; gap: 1rem; }
-  .guide-body { grid-template-columns: 1fr; }
-  .guide-step-title { font-size: 1.1rem; }
-}
-
 /* ============================
-   Stretch Reminder Bar
+   12. Stretch Reminder Bar
    ============================ */
-.wcam-stretch-bar {
-  padding: 1rem 1.25rem;
-}
+.wcam-stretch-bar { padding: 1rem 1.25rem; }
 
 .wcam-stretch-inner {
   display: flex;
@@ -994,9 +924,7 @@
   outline: none;
 }
 
-.wcam-stretch-select:hover {
-  border-color: #94a3b8;
-}
+.wcam-stretch-select:hover { border-color: #94a3b8; }
 
 .wcam-stretch-btn {
   border: none;
@@ -1005,26 +933,16 @@
   font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
-  transition: opacity 0.15s, background 0.15s;
   white-space: nowrap;
+  transition: opacity 0.15s, background 0.15s;
 }
 
-.wcam-stretch-btn.off {
-  background: linear-gradient(135deg, #155eef, #0b7a75);
-  color: #fff;
-}
-
-.wcam-stretch-btn.on {
-  background: #f1f5f9;
-  color: #475569;
-}
-
-.wcam-stretch-btn.on:hover {
-  background: #e2e8f0;
-}
+.wcam-stretch-btn.off { background: linear-gradient(135deg, #155eef, #0b7a75); color: #fff; }
+.wcam-stretch-btn.on  { background: #f1f5f9; color: #475569; }
+.wcam-stretch-btn.on:hover { background: #e2e8f0; }
 
 /* ============================
-   Notification permission banner
+   13. Notification Banner
    ============================ */
 .wcam-notif-banner {
   grid-column: 1 / -1;
@@ -1037,25 +955,25 @@
   font-size: 0.82rem;
   line-height: 1.5;
 }
-.wcam-notif-banner strong {
-  color: #fef08a;
-}
+
+.wcam-notif-banner strong { color: #fef08a; }
 
 /* ============================
-   Mobile overrides
+   14. Responsive
    ============================ */
 @media (max-width: 768px) {
+  .webcam-page { grid-template-columns: 1fr; gap: 1rem; }
+
+  .wcam-card,
+  .wcam-result-card { padding: 1.15rem; }
+
   .wcam-card,
   .wcam-result-card,
-  .wcam-stage-card {
-    border-radius: 20px;
-  }
+  .wcam-stage-card { border-radius: 20px; }
+}
 
-  .wcam-card {
-    padding: 1.15rem;
-  }
-
-  .wcam-result-card {
-    padding: 1.15rem;
-  }
+@media (max-width: 640px) {
+  .guide-modal     { padding: 1.25rem; gap: 1rem; }
+  .guide-body      { grid-template-columns: 1fr; }
+  .guide-step-title { font-size: 1.1rem; }
 }
