@@ -110,3 +110,30 @@ export const saveWebcamSession = async (
 ): Promise<void> => {
   await apiClient.post("/webcam/session", data);
 };
+
+export interface WebcamSessionHistoryItem {
+  session_id: number;
+  started_at: string;
+  ended_at: string | null;
+  good_count: number;
+  warning_count: number;
+  bad_count: number;
+  total_count: number;
+  good_ratio: number;
+  cause_counts: Record<string, number> | null;
+}
+
+export interface WebcamHistoryResponse {
+  sessions: WebcamSessionHistoryItem[];
+  total: number;
+}
+
+export const getWebcamHistory = async (
+  limit = 10,
+): Promise<WebcamHistoryResponse> => {
+  const response = await apiClient.get<WebcamHistoryResponse>(
+    "/webcam/history",
+    { params: { limit } },
+  );
+  return response.data;
+};

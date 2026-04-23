@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import WebcamStream from '../components/Webcam/WebcamStream'
+import WebcamHistoryStats from '../components/Webcam/WebcamHistoryStats'
 import PageHeader from '../components/PageHeader'
 
 function MainPage() {
@@ -11,6 +12,7 @@ function MainPage() {
       <main>
         <div className="main-page-content">
           <WebcamStream isActive={isActive} onToggle={() => setIsActive(!isActive)} />
+          <WebcamHistoryStats />
         </div>
       </main>
     </div>
