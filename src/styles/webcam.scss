@@ -1,26 +1,50 @@
+// ─────────────────────────────────────────────────────────────────────────
+// webcam.scss  ·  Webcam feature styles
+// Global design tokens → global.scss (:root CSS variables)
+// ─────────────────────────────────────────────────────────────────────────
+
+// Private SCSS tokens — values not in the global design system
+$_dark:       #0f172a;  // dark canvas bg & strong text
+$_heading:    #10213d;  // primary heading text
+$_surface:    #f8fafc;  // light surface (metrics, profile items)
+$_btn:        #f1f5f9;  // secondary button / hover surface
+$_success-bg: #dcfce7;
+$_success-fg: #166534;
+$_danger-bg:  #fee2e2;
+$_danger-fg:  #b91c1c;
+
+// Shared kicker label style (uppercase section label)
+%kicker {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+
+// ─── Page Layout ──────────────────────────────────────────────────────────
 .main-page-content {
   width: min(1180px, 100%);
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   padding: 2rem;
+
+  @media (max-width: 768px) { padding: 1rem; }
 }
 
-@media (max-width: 768px) {
-  .main-page-content {
-    padding: 1rem;
-  }
-}
 
-/* ============================
-   1. Layout
-   ============================ */
+// ─── Layout ───────────────────────────────────────────────────────────────
 .webcam-page {
   display: grid;
   grid-template-columns: 3fr 2fr;
   gap: 1.5rem;
   width: 100%;
   align-items: start;
+
+  @media (max-width: 768px) { grid-template-columns: 1fr; gap: 1rem; }
 }
 
 .webcam-left,
@@ -31,9 +55,8 @@
   min-width: 0;
 }
 
-/* ============================
-   2. Cards — shared base
-   ============================ */
+
+// ─── Cards ────────────────────────────────────────────────────────────────
 .wcam-card,
 .wcam-stage-card,
 .wcam-result-card {
@@ -46,15 +69,18 @@
 .wcam-card,
 .wcam-result-card {
   padding: 1.5rem;
+
+  @media (max-width: 768px) { padding: 1.15rem; border-radius: 20px; }
 }
 
 .wcam-stage-card {
   overflow: hidden;
+
+  @media (max-width: 768px) { border-radius: 20px; }
 }
 
-/* ============================
-   3. Stage (canvas area)
-   ============================ */
+
+// ─── Stage (canvas area) ──────────────────────────────────────────────────
 .wcam-stage-inner {
   display: flex;
   justify-content: center;
@@ -62,7 +88,7 @@
   min-height: 300px;
   background:
     linear-gradient(135deg, rgba(17, 94, 239, 0.06), rgba(11, 122, 117, 0.08)),
-    #0f172a;
+    $_dark;
 }
 
 .webcam-canvas {
@@ -73,21 +99,43 @@
   object-fit: contain;
 }
 
-/* ============================
-   4. Result Card
-   ============================ */
+
+// ─── Kicker & Empty State (shared patterns) ───────────────────────────────
+.wcam-kicker {
+  @extend %kicker;
+  margin-bottom: 0.35rem;
+}
+
+.wcam-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.5rem 0.5rem;
+  gap: 0.65rem;
+
+  .wcam-empty-icon { font-size: 2.4rem; line-height: 1; margin-bottom: 0.25rem; }
+
+  h4 { margin: 0; color: $_heading; font-size: 1rem; font-weight: 700; }
+
+  p {
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: 0.88rem;
+    line-height: 1.55;
+    max-width: 26ch;
+  }
+}
+
+
+// ─── Result Card ──────────────────────────────────────────────────────────
 .wcam-result-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 0.85rem;
-}
 
-.wcam-result-header h3 {
-  margin: 0;
-  color: #10213d;
-  font-size: 1rem;
-  font-weight: 700;
+  h3 { margin: 0; color: $_heading; font-size: 1rem; font-weight: 700; }
 }
 
 .wcam-status-chip {
@@ -97,103 +145,39 @@
   border-radius: 999px;
   font-size: 0.78rem;
   font-weight: 800;
-}
 
-.wcam-status-chip.good    { background: #dcfce7; color: #166534; }
-.wcam-status-chip.warning { background: #fef3c7; color: #92400e; }
-.wcam-status-chip.bad     { background: #fee2e2; color: #b91c1c; }
+  &.good    { background: $_success-bg; color: $_success-fg; }
+  &.warning { background: #fef3c7; color: #92400e; }
+  &.bad     { background: $_danger-bg;  color: $_danger-fg; }
+}
 
 .wcam-result-score {
-  color: #64748b;
+  color: var(--muted-foreground);
   font-size: 0.88rem;
   margin: 0 0 0.75rem;
-}
 
-.wcam-result-score strong {
-  color: #0f172a;
+  strong { color: $_dark; }
 }
 
 .wcam-issue-block {
   padding: 0.85rem 1rem;
   border-radius: 16px;
   background: #fff7ed;
+
+  h4 { margin: 0 0 0.4rem; color: #1e293b; font-size: 0.85rem; font-weight: 700; }
+
+  ul { margin: 0; padding-left: 1rem; color: #475569; font-size: 0.85rem; line-height: 1.65; }
 }
 
-.wcam-issue-block h4 {
-  margin: 0 0 0.4rem;
-  color: #1e293b;
-  font-size: 0.85rem;
-  font-weight: 700;
-}
 
-.wcam-issue-block ul {
-  margin: 0;
-  padding-left: 1rem;
-  color: #475569;
-  font-size: 0.85rem;
-  line-height: 1.65;
-}
-
-/* ============================
-   5. Kicker (section label)
-   ============================ */
-.wcam-kicker {
-  margin-bottom: 0.35rem;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #0b7a75;
-}
-
-/* ============================
-   6. Empty State
-   ============================ */
-.wcam-empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 1.5rem 0.5rem;
-  gap: 0.65rem;
-}
-
-.wcam-empty-icon {
-  font-size: 2.4rem;
-  line-height: 1;
-  margin-bottom: 0.25rem;
-}
-
-.wcam-empty-state h4 {
-  margin: 0;
-  color: #10213d;
-  font-size: 1rem;
-  font-weight: 700;
-}
-
-.wcam-empty-state p {
-  margin: 0;
-  color: #64748b;
-  font-size: 0.88rem;
-  line-height: 1.55;
-  max-width: 26ch;
-}
-
-/* ============================
-   7. Profile List
-   ============================ */
+// ─── Profile List ─────────────────────────────────────────────────────────
 .wcam-profile-list-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 0.85rem;
-}
 
-.wcam-profile-list-header h4 {
-  margin: 0;
-  color: #10213d;
-  font-size: 0.95rem;
-  font-weight: 700;
+  h4 { margin: 0; color: $_heading; font-size: 0.95rem; font-weight: 700; }
 }
 
 .wcam-info-badge {
@@ -204,17 +188,14 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #e2e8f0;
-  color: #64748b;
+  background: var(--border);
+  color: var(--muted-foreground);
   font-size: 0.7rem;
   font-weight: 700;
   cursor: default;
   flex-shrink: 0;
-}
 
-.wcam-info-badge:hover .wcam-info-tooltip {
-  opacity: 1;
-  pointer-events: auto;
+  &:hover .wcam-info-tooltip { opacity: 1; pointer-events: auto; }
 }
 
 .wcam-info-tooltip {
@@ -247,7 +228,6 @@
   scroll-snap-type: x mandatory;
 }
 
-/* profile card & add button share the same slot width */
 .wcam-profile-item,
 .wcam-add-btn {
   flex: 0 0 calc((100% - 1.5rem) / 3);
@@ -258,66 +238,58 @@
 .wcam-profile-item {
   padding: 0.9rem;
   border-radius: 18px;
-  background: #f8fafc;
+  background: $_surface;
   border: 2px solid transparent;
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   cursor: default;
-}
 
-.wcam-profile-item.active {
-  border-color: #155eef;
-  box-shadow: 0 4px 14px rgba(21, 94, 239, 0.15);
-  background: #eff6ff;
+  &.active {
+    border-color: var(--primary);
+    box-shadow: 0 4px 14px rgba(8, 145, 178, 0.15);
+    background: var(--secondary);
+  }
 }
 
 .wcam-profile-name {
   font-size: 0.88rem;
   font-weight: 700;
-  color: #10213d;
+  color: $_heading;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.wcam-profile-date {
-  font-size: 0.76rem;
-  color: #64748b;
-}
+.wcam-profile-date { font-size: 0.76rem; color: var(--muted-foreground); }
 
 .wcam-profile-badge {
   display: inline-block;
   margin-top: 0.2rem;
   padding: 0.18rem 0.5rem;
   border-radius: 999px;
-  background: #dcfce7;
-  color: #166534;
+  background: $_success-bg;
+  color: $_success-fg;
   font-size: 0.7rem;
   font-weight: 800;
   width: fit-content;
 }
 
-/* ============================
-   8. Register Message
-   ============================ */
 .wcam-register-msg {
   margin-top: 0.85rem;
   padding: 0.55rem 0.85rem;
   border-radius: 12px;
   font-size: 0.86rem;
   font-weight: 600;
+
+  &.success { background: $_success-bg; color: $_success-fg; }
+  &.error   { background: $_danger-bg;  color: $_danger-fg; }
 }
 
-.wcam-register-msg.success { background: #dcfce7; color: #166534; }
-.wcam-register-msg.error   { background: #fee2e2; color: #b91c1c; }
 
-/* ============================
-   9. Buttons
-   ============================ */
-
-/* Primary gradient — start / guide-next / guide-register */
+// ─── Buttons ──────────────────────────────────────────────────────────────
+// Primary gradient — webcam start / guide next / guide register
 .wcam-primary-btn,
 .guide-btn-next,
 .guide-btn-register {
@@ -338,13 +310,12 @@
   border-radius: 14px;
   padding: 0.95rem 1.35rem;
   font-size: 0.95rem;
-  box-shadow: 0 14px 28px rgba(21, 94, 239, 0.22);
+  box-shadow: 0 14px 28px rgba(8, 145, 178, 0.22);
+
+  &:hover    { transform: translateY(-1px); box-shadow: 0 18px 32px rgba(8, 145, 178, 0.32); }
+  &:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
 }
 
-.wcam-primary-btn:hover { transform: translateY(-1px); box-shadow: 0 18px 32px rgba(21, 94, 239, 0.32); }
-.wcam-primary-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
-
-/* Stop / danger */
 .wcam-stop-btn {
   width: 100%;
   border: none;
@@ -353,24 +324,23 @@
   font-size: 0.95rem;
   font-weight: 800;
   cursor: pointer;
-  background: #fee2e2;
-  color: #b91c1c;
+  background: $_danger-bg;
+  color: $_danger-fg;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
   transition: transform 0.2s ease, opacity 0.2s ease;
+
+  &:hover { transform: translateY(-1px); background: #fecaca; }
 }
 
-.wcam-stop-btn:hover { transform: translateY(-1px); background: #fecaca; }
-
-/* Add profile (dashed outline slot) */
 .wcam-add-btn {
   padding: 0.9rem;
   border-radius: 18px;
   background: transparent;
   border: 2px dashed #cbd5e1;
-  color: #64748b;
+  color: var(--muted-foreground);
   font-size: 0.85rem;
   font-weight: 700;
   cursor: pointer;
@@ -380,38 +350,34 @@
   justify-content: center;
   gap: 0.3rem;
   transition: border-color 0.2s ease, color 0.2s ease;
+
+  &:hover    { border-color: var(--primary); color: var(--primary); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .wcam-add-btn-icon { font-size: 1.3rem; line-height: 1; }
 }
 
-.wcam-add-btn:hover    { border-color: #155eef; color: #155eef; }
-.wcam-add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.wcam-add-btn-icon {
-  font-size: 1.3rem;
-  line-height: 1;
+// FontAwesome — standalone icon buttons use brand color, gradient buttons inherit
+.wcam-empty-icon,
+.wcam-add-btn-icon,
+.wcam-modal-icon-btn,
+.wcam-modal-close-btn,
+.guide-close,
+.guide-step-icon,
+.guide-step-tip,
+.guide-btn-back {
+  .svg-inline--fa { color: #0667bb; }
 }
 
-/* FontAwesome icon color overrides */
-.wcam-empty-icon .svg-inline--fa,
-.wcam-add-btn-icon .svg-inline--fa,
-.wcam-modal-icon-btn .svg-inline--fa,
-.wcam-modal-close-btn .svg-inline--fa,
-.guide-close .svg-inline--fa,
-.guide-step-icon .svg-inline--fa,
-.guide-step-tip .svg-inline--fa,
-.guide-btn-back .svg-inline--fa {
-  color: #0667bb;
+.wcam-primary-btn,
+.guide-countdown-badge,
+.guide-btn-next,
+.guide-btn-register {
+  .svg-inline--fa { color: inherit; }
 }
 
-.wcam-primary-btn .svg-inline--fa,
-.guide-countdown-badge .svg-inline--fa,
-.guide-btn-next .svg-inline--fa,
-.guide-btn-register .svg-inline--fa {
-  color: inherit;
-}
 
-/* ============================
-   10. Profile Modal
-   ============================ */
+// ─── Profile Modal ────────────────────────────────────────────────────────
 .wcam-modal-overlay {
   position: fixed;
   inset: 0;
@@ -443,7 +409,9 @@
   margin-bottom: 0.35rem;
 }
 
-.wcam-modal-name-row {
+// Both name row variants share the same layout
+.wcam-modal-name-row,
+.wcam-modal-name-edit {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -455,7 +423,7 @@
   margin: 0;
   font-size: 1.15rem;
   font-weight: 800;
-  color: #10213d;
+  color: $_heading;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -471,17 +439,17 @@
   border-radius: 8px;
   line-height: 1;
   transition: background 0.15s;
-}
 
-.wcam-modal-icon-btn:hover { background: #f1f5f9; }
+  &:hover { background: $_btn; }
+}
 
 .wcam-modal-close-btn {
   flex-shrink: 0;
-  background: #f1f5f9;
+  background: $_btn;
   border: none;
   cursor: pointer;
   font-size: 0.82rem;
-  color: #64748b;
+  color: var(--muted-foreground);
   width: 30px;
   height: 30px;
   border-radius: 50%;
@@ -490,45 +458,29 @@
   justify-content: center;
   font-weight: 700;
   transition: background 0.15s, color 0.15s;
-}
 
-.wcam-modal-close-btn:hover { background: #e2e8f0; color: #1e293b; }
-
-.wcam-modal-name-edit {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex: 1;
-  min-width: 0;
+  &:hover { background: var(--border); color: #1e293b; }
 }
 
 .wcam-modal-name-input {
   flex: 1;
   min-width: 0;
-  border: 2px solid #155eef;
+  border: 2px solid var(--primary);
   border-radius: 10px;
   padding: 0.38rem 0.65rem;
   font-size: 1rem;
   font-weight: 700;
-  color: #10213d;
+  color: $_heading;
   outline: none;
 }
 
-.wcam-modal-meta-row {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-}
-
-.wcam-modal-meta {
-  font-size: 0.82rem;
-  color: #94a3b8;
-}
+.wcam-modal-meta-row { display: flex; justify-content: space-between; margin-bottom: 1rem; }
+.wcam-modal-meta     { font-size: 0.82rem; color: #94a3b8; }
 
 .wcam-modal-skeleton-wrap {
   border-radius: 16px;
   overflow: hidden;
-  background: #0f172a;
+  background: $_dark;
   position: relative;
 }
 
@@ -549,11 +501,7 @@
   font-weight: 600;
 }
 
-.wcam-modal-divider {
-  height: 1px;
-  background: rgba(19, 42, 76, 0.08);
-  margin: 1rem 0;
-}
+.wcam-modal-divider { height: 1px; background: rgba(19, 42, 76, 0.08); margin: 1rem 0; }
 
 .wcam-modal-toggle-row {
   display: flex;
@@ -568,16 +516,8 @@
   gap: 0.2rem;
 }
 
-.wcam-modal-toggle-label {
-  font-size: 0.92rem;
-  font-weight: 700;
-  color: #10213d;
-}
-
-.wcam-modal-toggle-desc {
-  font-size: 0.78rem;
-  color: #64748b;
-}
+.wcam-modal-toggle-label { font-size: 0.92rem; font-weight: 700; color: $_heading; }
+.wcam-modal-toggle-desc  { font-size: 0.78rem; color: var(--muted-foreground); }
 
 .wcam-toggle-switch {
   flex-shrink: 0;
@@ -588,31 +528,27 @@
   border: none;
   cursor: pointer;
   transition: background 0.2s;
+
+  &.on  { background: var(--primary); }
+  &.off { background: #cbd5e1; }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transition: left 0.2s;
+  }
+
+  &.on::after  { left: calc(100% - 23px); }
+  &.off::after { left: 3px; }
 }
 
-.wcam-toggle-switch.on  { background: #155eef; }
-.wcam-toggle-switch.off { background: #cbd5e1; }
-
-.wcam-toggle-switch::after {
-  content: '';
-  position: absolute;
-  top: 3px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  transition: left 0.2s;
-}
-
-.wcam-toggle-switch.on::after  { left: calc(100% - 23px); }
-.wcam-toggle-switch.off::after { left: 3px; }
-
-.wcam-modal-error {
-  font-size: 0.78rem;
-  color: #ef4444;
-  margin-top: 0.4rem;
-}
+.wcam-modal-error { font-size: 0.78rem; color: var(--destructive); margin-top: 0.4rem; }
 
 .wcam-modal-action-btn {
   border: none;
@@ -623,12 +559,12 @@
   cursor: pointer;
   white-space: nowrap;
   transition: opacity 0.15s;
-}
 
-.wcam-modal-action-btn.save           { background: #155eef; color: #fff; }
-.wcam-modal-action-btn.cancel         { background: #f1f5f9; color: #475569; }
-.wcam-modal-action-btn.delete-confirm { background: #ef4444; color: #fff; }
-.wcam-modal-action-btn:disabled       { opacity: 0.55; cursor: not-allowed; }
+  &.save           { background: var(--primary); color: #fff; }
+  &.cancel         { background: $_btn; color: #475569; }
+  &.delete-confirm { background: var(--destructive); color: #fff; }
+  &:disabled       { opacity: 0.55; cursor: not-allowed; }
+}
 
 .wcam-modal-delete-btn {
   width: 100%;
@@ -641,26 +577,15 @@
   font-weight: 700;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
+
+  &:hover { background: $_danger-bg; border-color: #fca5a5; }
 }
 
-.wcam-modal-delete-btn:hover { background: #fee2e2; border-color: #fca5a5; }
+.wcam-modal-confirm-text { margin: 0 0 0.75rem; font-size: 0.88rem; color: #dc2626; font-weight: 600; }
+.wcam-modal-confirm-row  { display: flex; gap: 0.5rem; justify-content: flex-end; }
 
-.wcam-modal-confirm-text {
-  margin: 0 0 0.75rem;
-  font-size: 0.88rem;
-  color: #dc2626;
-  font-weight: 600;
-}
 
-.wcam-modal-confirm-row {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: flex-end;
-}
-
-/* ============================
-   11. Posture Guide Modal
-   ============================ */
+// ─── Posture Guide Modal ──────────────────────────────────────────────────
 .guide-overlay {
   position: fixed;
   inset: 0;
@@ -684,9 +609,10 @@
   flex-direction: column;
   gap: 1.25rem;
   padding: 1.75rem;
+
+  @media (max-width: 640px) { padding: 1.25rem; gap: 1rem; }
 }
 
-/* header: progress dots + close */
 .guide-header {
   display: flex;
   align-items: center;
@@ -703,19 +629,19 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #e2e8f0;
+  background: var(--border);
   transition: background 0.2s, transform 0.2s;
+
+  &.active, &.done { background: var(--primary); }
+  &.active          { transform: scale(1.25); }
 }
 
-.guide-dot.active { background: #155eef; transform: scale(1.25); }
-.guide-dot.done   { background: #0b7a75; }
-
 .guide-close {
-  background: #f1f5f9;
+  background: $_btn;
   border: none;
   cursor: pointer;
   font-size: 0.82rem;
-  color: #64748b;
+  color: var(--muted-foreground);
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -725,33 +651,29 @@
   font-weight: 700;
   flex-shrink: 0;
   transition: background 0.15s, color 0.15s;
+
+  &:hover:not(:disabled) { background: var(--border); color: #1e293b; }
+  &:disabled             { opacity: 0.4; cursor: not-allowed; }
 }
 
-.guide-close:hover:not(:disabled) { background: #e2e8f0; color: #1e293b; }
-.guide-close:disabled { opacity: 0.4; cursor: not-allowed; }
-
-/* 2-column body */
 .guide-body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
   align-items: center;
+
+  @media (max-width: 640px) { grid-template-columns: 1fr; }
 }
 
 .guide-preview-wrap {
   position: relative;
   border-radius: 20px;
   overflow: hidden;
-  background: #0f172a;
+  background: $_dark;
   aspect-ratio: 4 / 3;
 }
 
-.guide-preview-canvas {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
+.guide-preview-canvas { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 .guide-countdown-badge {
   position: absolute;
@@ -765,11 +687,8 @@
   background: rgba(15, 23, 42, 0.45);
   backdrop-filter: blur(2px);
   animation: pulse-in 0.35s ease;
-}
 
-.guide-countdown-badge.done {
-  font-size: 4rem;
-  background: rgba(11, 122, 117, 0.55);
+  &.done { font-size: 4rem; background: rgba(8, 145, 178, 0.55); }
 }
 
 @keyframes pulse-in {
@@ -777,44 +696,32 @@
   to   { transform: scale(1);   opacity: 1; }
 }
 
-/* instruction panel */
-.guide-instruction {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
+.guide-instruction { display: flex; flex-direction: column; gap: 0.6rem; }
 
 .guide-step-icon  { font-size: 2.4rem; line-height: 1; }
 
 .guide-step-label {
-  margin: 0;
-  font-size: 0.78rem;
-  font-weight: 800;
+  @extend %kicker;
   letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #0b7a75;
 }
 
 .guide-step-title {
   margin: 0;
   font-size: 1.3rem;
   font-weight: 800;
-  color: #10213d;
+  color: $_heading;
+
+  @media (max-width: 640px) { font-size: 1.1rem; }
 }
 
-.guide-step-desc {
-  margin: 0;
-  color: #475569;
-  font-size: 0.95rem;
-  line-height: 1.65;
-}
+.guide-step-desc { margin: 0; color: #475569; font-size: 0.95rem; line-height: 1.65; }
 
 .guide-step-tip {
   margin: 0;
   padding: 0.6rem 0.85rem;
   border-radius: 12px;
   background: #f0fdf4;
-  color: #166534;
+  color: $_success-fg;
   font-size: 0.85rem;
   font-weight: 600;
   line-height: 1.5;
@@ -827,13 +734,12 @@
   margin: 0;
   padding: 0.6rem 0.85rem;
   border-radius: 12px;
-  background: #fee2e2;
-  color: #b91c1c;
+  background: $_danger-bg;
+  color: $_danger-fg;
   font-size: 0.85rem;
   font-weight: 600;
 }
 
-/* footer buttons */
 .guide-footer {
   display: flex;
   align-items: center;
@@ -846,7 +752,7 @@
 .guide-footer-right { margin-left: auto; }
 
 .guide-btn-back {
-  background: #f1f5f9;
+  background: $_btn;
   border: none;
   border-radius: 12px;
   padding: 0.75rem 1.1rem;
@@ -858,44 +764,30 @@
   align-items: center;
   gap: 0.45rem;
   transition: background 0.15s;
+
+  &:hover { background: var(--border); }
 }
 
-.guide-btn-back:hover { background: #e2e8f0; }
-
-/* next & register share gradient base (defined in section 9) */
 .guide-btn-next,
 .guide-btn-register {
   border-radius: 12px;
   padding: 0.75rem 1.4rem;
   font-size: 0.9rem;
-  box-shadow: 0 8px 20px rgba(21, 94, 239, 0.2);
+  box-shadow: 0 8px 20px rgba(8, 145, 178, 0.2);
   white-space: nowrap;
-}
 
-.guide-btn-next:hover,
-.guide-btn-register:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 24px rgba(21, 94, 239, 0.3);
+  &:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 12px 24px rgba(8, 145, 178, 0.3); }
 }
 
 .guide-btn-register:disabled { opacity: 0.65; cursor: not-allowed; transform: none; box-shadow: none; }
 
-/* ============================
-   12. Stretch Reminder Bar
-   ============================ */
+
+// ─── Stretch Reminder Bar ─────────────────────────────────────────────────
 .wcam-stretch-bar { padding: 1rem 1.25rem; }
 
-.wcam-stretch-inner {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
+.wcam-stretch-inner { display: flex; align-items: center; gap: 0.75rem; }
 
-.wcam-stretch-icon {
-  font-size: 1.2rem;
-  flex-shrink: 0;
-  line-height: 1;
-}
+.wcam-stretch-icon { font-size: 1.2rem; flex-shrink: 0; line-height: 1; }
 
 .wcam-stretch-info {
   flex: 1;
@@ -905,40 +797,31 @@
   gap: 0.1rem;
 }
 
-.wcam-stretch-label {
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: #10213d;
-}
+.wcam-stretch-label    { font-size: 0.88rem; font-weight: 700; color: $_heading; }
 
 .wcam-stretch-countdown {
   font-size: 1.05rem;
   font-weight: 800;
-  color: #155eef;
+  color: var(--primary);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.03em;
 }
 
-.wcam-stretch-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-shrink: 0;
-}
+.wcam-stretch-controls { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
 
 .wcam-stretch-select {
-  border: 1.5px solid #e2e8f0;
+  border: 1.5px solid var(--border);
   border-radius: 8px;
   padding: 0.35rem 0.6rem;
   font-size: 0.82rem;
   font-weight: 600;
   color: #374151;
-  background: #f8fafc;
+  background: $_surface;
   cursor: pointer;
   outline: none;
-}
 
-.wcam-stretch-select:hover { border-color: #94a3b8; }
+  &:hover { border-color: #94a3b8; }
+}
 
 .wcam-stretch-btn {
   border: none;
@@ -949,15 +832,19 @@
   cursor: pointer;
   white-space: nowrap;
   transition: opacity 0.15s, background 0.15s;
+
+  &.off { background: var(--primary); color: #fff; }
+
+  &.on {
+    background: $_btn;
+    color: #475569;
+
+    &:hover { background: var(--border); }
+  }
 }
 
-.wcam-stretch-btn.off { background: linear-gradient(135deg, #155eef, #0b7a75); color: #fff; }
-.wcam-stretch-btn.on  { background: #f1f5f9; color: #475569; }
-.wcam-stretch-btn.on:hover { background: #e2e8f0; }
 
-/* ============================
-   13. Notification Banner
-   ============================ */
+// ─── Notification Banner ──────────────────────────────────────────────────
 .wcam-notif-banner {
   grid-column: 1 / -1;
   width: 100%;
@@ -968,36 +855,17 @@
   color: #fcd34d;
   font-size: 0.82rem;
   line-height: 1.5;
+
+  strong { color: #fef08a; }
 }
 
-.wcam-notif-banner strong { color: #fef08a; }
 
-/* ============================
-   14. Responsive
-   ============================ */
-@media (max-width: 768px) {
-  .webcam-page { grid-template-columns: 1fr; gap: 1rem; }
+// ─── History Stats ────────────────────────────────────────────────────────
+.wcam-history-stats { display: flex; flex-direction: column; }
 
-  .wcam-card,
-  .wcam-result-card { padding: 1.15rem; }
-
-  .wcam-card,
-  .wcam-result-card,
-  .wcam-stage-card { border-radius: 20px; }
-}
-
-@media (max-width: 640px) {
-  .guide-modal     { padding: 1.25rem; gap: 1rem; }
-  .guide-body      { grid-template-columns: 1fr; }
-  .guide-step-title { font-size: 1.1rem; }
-}
-
-/* ============================
-   History Stats
-   ============================ */
-.wcam-history-stats {
-  display: flex;
-  flex-direction: column;
+.wcam-history-kicker {
+  @extend %kicker;
+  margin-bottom: 0.5rem;
 }
 
 .wcam-history-header {
@@ -1006,47 +874,18 @@
   align-items: flex-start;
   gap: 1rem;
   margin-bottom: 1rem;
-}
 
-.wcam-history-kicker {
-  margin-bottom: 0.5rem;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #0b7a75;
-}
-
-.wcam-history-header h3 {
-  margin: 0;
-  color: #13223f;
-  font-size: 1.1rem;
+  h3 { margin: 0; color: #13223f; font-size: 1.1rem; }
 }
 
 .wcam-history-metrics {
   display: flex;
   gap: 0.75rem;
   flex-shrink: 0;
-}
 
-.wcam-history-metrics div {
-  min-width: 110px;
-  padding: 0.85rem 1rem;
-  border-radius: 14px;
-  background: #f8fafc;
-}
-
-.wcam-history-metrics span {
-  display: block;
-  margin-bottom: 0.35rem;
-  color: #64748b;
-  font-size: 0.8rem;
-  font-weight: 700;
-}
-
-.wcam-history-metrics strong {
-  color: #0f172a;
-  font-size: 1.05rem;
+  div    { min-width: 110px; padding: 0.85rem 1rem; border-radius: 14px; background: $_surface; }
+  span   { display: block; margin-bottom: 0.35rem; color: var(--muted-foreground); font-size: 0.8rem; font-weight: 700; }
+  strong { color: $_dark; font-size: 1.05rem; }
 }
 
 .wcam-history-chart-label {
@@ -1055,22 +894,29 @@
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #64748b;
+  color: var(--muted-foreground);
 }
 
 .wcam-history-chart {
   width: 100%;
   height: 220px;
+
+  text { font-family: inherit; }
 }
 
 .wcam-history-empty {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   min-height: 180px;
-  place-items: center;
   border-radius: 16px;
-  background: #f8fafc;
-  color: #64748b;
+  background: $_surface;
+  color: var(--muted-foreground);
   font-weight: 700;
+
+  .svg-inline--fa { font-size: 1.5rem; opacity: 0.4; }
 }
 
 .wcam-history-tooltip {
@@ -1082,28 +928,11 @@
   min-width: 160px;
 }
 
-.wcam-history-tooltip-title {
-  margin-bottom: 0.25rem;
-  font-size: 0.82rem;
-  font-weight: 800;
-  color: #f1f5f9;
-}
+.wcam-history-tooltip-title  { margin-bottom: 0.25rem; font-size: 0.82rem; font-weight: 800; color: #f1f5f9; }
+.wcam-history-tooltip-time   { margin-bottom: 0.55rem; font-size: 0.8rem; color: #94a3b8; }
+.wcam-history-tooltip-duration { color: var(--muted-foreground); }
 
-.wcam-history-tooltip-time {
-  margin-bottom: 0.55rem;
-  font-size: 0.8rem;
-  color: #94a3b8;
-}
-
-.wcam-history-tooltip-duration {
-  color: #64748b;
-}
-
-.wcam-history-tooltip-rows p {
-  margin: 0.15rem 0;
-  font-size: 0.82rem;
-}
-
-.wcam-history-tooltip-rows strong {
-  color: #f1f5f9;
+.wcam-history-tooltip-rows {
+  p      { margin: 0.15rem 0; font-size: 0.82rem; }
+  strong { color: #f1f5f9; }
 }
