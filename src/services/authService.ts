@@ -7,7 +7,8 @@ const TOKEN_KEY = "access_token"
 const USER_KEY = "user_info"
 
 export interface UserInfo {
-  member_no: number
+  member_id?: number
+  member_no?: number
   provider: string
   nickname?: string
   profile_image_url?: string

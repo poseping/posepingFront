@@ -4,6 +4,7 @@ import PageHeader from '../components/PageHeader'
 import { logout } from '../store/authSlice'
 import { clearAuth } from '../services/authService'
 import '../styles/page-header.css'
+import '../styles/my-page.css'
 
 export default function MyPage() {
   const dispatch = useDispatch()
@@ -18,11 +19,11 @@ export default function MyPage() {
   return (
     <>
       <PageHeader title="마이페이지" description="내 프로필과 계정 정보를 관리하세요" />
-      <div style={{ padding: '20px' }}>
-        <button onClick={handleLogout} style={{ padding: '8px 20px', cursor: 'pointer' }}>
+      <main className="my-page">
+        <button className="my-page__logout-button" onClick={handleLogout}>
           로그아웃
         </button>
-      </div>
+      </main>
     </>
   )
 }
