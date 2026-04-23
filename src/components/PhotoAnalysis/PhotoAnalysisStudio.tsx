@@ -21,7 +21,7 @@ import {
   getPhotoAnalysisHistory,
   savePhotoAnalysis,
 } from '../../services/photoAnalysisApi'
-import '../../styles/photo-analysis.css'
+import '../../styles/photo-analysis.scss'
 
 interface DragState {
   landmarkId: number
@@ -650,12 +650,12 @@ export default function PhotoAnalysisStudio() {
                       최종 분석과 DB 저장 여부를 결정할 수 있습니다.
                     </p>
                   </div>
+                  <div className="photo-action-row">
+                    <button className="photo-primary-button" onClick={() => setActiveStep(2)}>
+                      내 자세 확인하기
+                    </button>
+                  </div>
                 </section>
-                <div className="photo-action-row">
-                  <button className="photo-primary-button" onClick={() => setActiveStep(2)}>
-                    내 자세 확인하기
-                  </button>
-                </div>
               </div>
               <PhotoHistoryStats />
             </>

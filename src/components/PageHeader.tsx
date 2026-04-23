@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -12,7 +13,7 @@ import {
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
 import { RootState } from '../store/store'
-import '../styles/page-header.css'
+import '../styles/page-header.scss'
 
 const navItems = [
   { to: '/home', label: '홈', icon: faHouse },
@@ -38,12 +39,29 @@ interface PageHeaderProps {
 export default function PageHeader({ title, description }: PageHeaderProps) {
   const user = useSelector((state: RootState) => state.auth.user)
   const location = useLocation()
+  const [isScrolled, setIsScrolled] = useState(false)
   const isAdmin = user?.role?.toLowerCase() === 'admin'
   const isAdminArea = location.pathname === '/admin' || location.pathname.startsWith('/admin/')
+  const isHome = location.pathname === '/home'
   const visibleNavItems = isAdminArea ? adminNavItems : isAdmin ? [...navItems, adminNavItem] : navItems
 
+  useEffect(() => {
+    if (!isHome) {
+      setIsScrolled(false)
+      return
+    }
+
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0)
+    }
+
+    handleScroll()
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [isHome])
+
   return (
-    <header className="page-header">
+    <header className={`page-header${isHome ? ' home-header' : ''}${isHome && isScrolled ? ' home-header--scrolled' : ''}`}>
       <div className="page-header__left">
         <h1 className="page-header__title">{title}</h1>
         {description && <p className="page-header__desc">{description}</p>}

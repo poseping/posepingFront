@@ -12,7 +12,6 @@ import {
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
 import { RootState } from '../store/store'
-import '../styles/bottom-nav.css'
 
 const navItems = [
   { to: '/home', label: '홈', icon: faHouse },

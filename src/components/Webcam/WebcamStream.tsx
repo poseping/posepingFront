@@ -16,7 +16,7 @@ import { drawSkeleton } from '../../utils/skeleton'
 import { usePostureNotification } from '../../hooks/usePostureNotification'
 import PostureProfileModal from './PostureProfileModal'
 import PostureGuideModal from './PostureGuideModal'
-import '../../styles/webcam.css'
+import '../../styles/webcam.scss'
 
 interface WebcamStreamProps {
   isActive: boolean

@@ -1,6 +1,5 @@
 import PhotoAnalysisStudio from '../components/PhotoAnalysis/PhotoAnalysisStudio'
 import PageHeader from '../components/PageHeader'
-import '../styles/page-header.css'
 
 export default function HistoryPage() {
   return (
