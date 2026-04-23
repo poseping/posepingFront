@@ -1,5 +1,7 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faChartBar } from '@fortawesome/free-solid-svg-icons'
 import {
   Bar,
   BarChart,
@@ -18,7 +20,7 @@ const CAUSE_META: Record<string, { label: string; color: string }> = {
   HEAD_TILT:      { label: '머리 기울어짐',  color: '#a855f7' },
   SHOULDER_SLOPE: { label: '어깨 기울기',    color: '#ef4444' },
   HIP_DEVIATION:  { label: '골반 틀어짐',    color: '#eab308' },
-  BAD_POSTURE:    { label: '나쁜 자세',      color: '#64748b' },
+  BAD_POSTURE:    { label: '나쁜 자세',      color: '#6b7280' },
 }
 
 interface ChartEntry {
@@ -128,7 +130,10 @@ export default function WebcamHistoryStats() {
       {isLoading && <div className="wcam-history-empty">기록을 불러오는 중입니다.</div>}
       {isError && <div className="wcam-history-empty">웹캠 분석 기록을 불러오지 못했습니다.</div>}
       {!isLoading && !isError && chartData.length === 0 && (
-        <div className="wcam-history-empty">저장된 웹캠 분석 기록이 없습니다.</div>
+        <div className="wcam-history-empty">
+          <FontAwesomeIcon icon={faChartBar} />
+          <span>저장된 웹캠 분석 기록이 없습니다.</span>
+        </div>
       )}
 
       {!isLoading && !isError && chartData.length > 0 && (
@@ -138,13 +143,13 @@ export default function WebcamHistoryStats() {
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={chartData} margin={{ top: 8, right: 12, bottom: 4, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(100, 116, 139, 0.22)" />
-                <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
-                <YAxis tickLine={false} axisLine={false} width={36} />
+                <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fontFamily: 'inherit' }} />
+                <YAxis tickLine={false} axisLine={false} width={36} tick={{ fontFamily: 'inherit' }} />
                 <Tooltip content={<SessionTooltip />} />
-                <Legend />
-                <Bar dataKey="good" name="좋음" stackId="a" fill="#16a34a" />
-                <Bar dataKey="warning" name="경고" stackId="a" fill="#d97706" />
-                <Bar dataKey="bad" name="나쁨" stackId="a" fill="#dc2626" radius={[4, 4, 0, 0]} />
+                <Legend wrapperStyle={{ fontFamily: 'inherit', fontSize: '0.82rem' }} />
+                <Bar dataKey="good" name="좋음" stackId="a" fill="#10b981" />
+                <Bar dataKey="warning" name="경고" stackId="a" fill="#f59e0b" />
+                <Bar dataKey="bad" name="나쁨" stackId="a" fill="#ef4444" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -156,10 +161,10 @@ export default function WebcamHistoryStats() {
                 <ResponsiveContainer width="100%" height={220}>
                   <BarChart data={chartData} margin={{ top: 8, right: 12, bottom: 4, left: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(100, 116, 139, 0.22)" />
-                    <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
-                    <YAxis tickLine={false} axisLine={false} width={36} />
+                    <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fontFamily: 'inherit' }} />
+                    <YAxis tickLine={false} axisLine={false} width={36} tick={{ fontFamily: 'inherit' }} />
                     <Tooltip content={<SessionTooltip />} />
-                    <Legend />
+                    <Legend wrapperStyle={{ fontFamily: 'inherit', fontSize: '0.82rem' }} />
                     {activeCauses.map(key => (
                       <Bar
                         key={key}

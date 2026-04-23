@@ -2,7 +2,7 @@ import { useRef, useEffect, useState, useCallback } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCamera, faClipboardList, faPause, faPlay, faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faCamera, faClipboardList, faClock, faPause, faPlay, faPlus } from '@fortawesome/free-solid-svg-icons'
 import {
   analyzeWebcam,
   getPostureProfiles,
@@ -31,7 +31,7 @@ const STATUS_LABEL: Record<string, string> = {
 }
 
 const STATUS_COLOR: Record<string, string> = {
-  good: '#22c55e',
+  good: '#10b981',
   warning: '#f59e0b',
   bad: '#ef4444',
 }
@@ -370,7 +370,7 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
         {/* ── 스트레칭 알림 ── */}
         <div className="wcam-card wcam-stretch-bar">
           <div className="wcam-stretch-inner">
-            <span className="wcam-stretch-icon">⏰</span>
+            <FontAwesomeIcon icon={faClock} className="wcam-stretch-icon" />
             <div className="wcam-stretch-info">
               <span className="wcam-stretch-label">스트레칭 알림</span>
               {stretchReminder.isEnabled && (
