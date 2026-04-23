@@ -114,6 +114,28 @@ export default function LoginPage() {
     }
   }
 
+  const handleDevAdminLogin = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const response = await apiClient.post('/auth/admin-login', {
+        admin_id: 'admin',
+        password: 'admin1234',
+      })
+      const { access_token, user } = response.data
+
+      saveToken(access_token)
+      saveUserInfo(user)
+      dispatch(loginSuccess({ user, token: access_token }))
+      navigate('/main')
+    } catch (err: any) {
+      setError('개발용 관리자 로그인 실패')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   // ==================== 구글 로그인 ====================
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
@@ -191,9 +213,14 @@ export default function LoginPage() {
         </div>
 
         {import.meta.env.DEV && (
-          <button className="dev-login-btn" onClick={handleDevLogin} disabled={loading}>
-            개발용 로그인
-          </button>
+          <div className="dev-login-actions">
+            <button className="dev-login-btn" onClick={handleDevLogin} disabled={loading}>
+              개발용 로그인
+            </button>
+            <button className="dev-login-btn" onClick={handleDevAdminLogin} disabled={loading}>
+              개발용 관리자 로그인
+            </button>
+          </div>
         )}
       </div>
 

@@ -7,7 +7,7 @@
   background: var(--background);
   border-top: 1px solid var(--border);
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
   z-index: 50;
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
 }
