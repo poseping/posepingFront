@@ -15,6 +15,7 @@ import {
 import { drawSkeleton } from '../../utils/skeleton'
 import { usePostureNotification } from '../../hooks/usePostureNotification'
 import { useStretchReminder, type StretchInterval } from '../../hooks/useStretchReminder'
+import { useWebcamAssistantComment, type WebcamAssistantAnalyzeInput } from '../../hooks/useWebcamAssistantComment'
 import PostureProfileModal from './PostureProfileModal'
 import PostureGuideModal from './PostureGuideModal'
 import '../../styles/webcam.scss'
@@ -64,6 +65,13 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
   const queryClient = useQueryClient()
   const { notify, permission: notifPermission } = usePostureNotification()
   const stretchReminder = useStretchReminder()
+  const {
+    assistantComment,
+    assistantError,
+    isAssistantCommentPending,
+    handleAnalyzeResult,
+    resetAssistantComment,
+  } = useWebcamAssistantComment(isActive)
 
   // 세션 누적 카운트 (state 대신 ref → 매 프레임 리렌더 방지)
   const sessionRef = useRef({
@@ -160,6 +168,7 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
         profile_name: data.profile_name,
         issues: data.issues,
       })
+      handleAnalyzeResult(data as WebcamAssistantAnalyzeInput)
       notify(data.status, data.issues)
       if (displayCanvasRef.current && data.landmarks?.length) {
         drawSkeleton(
@@ -234,6 +243,7 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
       }
       prevStatusRef.current = null
       prevIssuesRef.current = new Set()
+      resetAssistantComment()
     } else {
       const { startedAt, goodCount, warningCount, badCount, causeCounts } = sessionRef.current
       const total = goodCount + warningCount + badCount
@@ -249,7 +259,7 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
       }
       sessionRef.current.startedAt = null
     }
-  }, [isActive])
+  }, [isActive, doSaveSession, resetAssistantComment])
 
   return (
     <>
@@ -293,6 +303,18 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
                 </ul>
               </div>
             )}
+            <div className="wcam-comment-block">
+              <h4>AI 코멘트</h4>
+              {isAssistantCommentPending && !assistantComment ? (
+                <p className="wcam-comment-muted">코멘트를 생성하는 중입니다...</p>
+              ) : assistantError ? (
+                <p className="wcam-comment-error">{assistantError}</p>
+              ) : assistantComment ? (
+                <p>{assistantComment}</p>
+              ) : (
+                <p className="wcam-comment-muted">판정이 바뀌면 새 코멘트를 표시합니다.</p>
+              )}
+            </div>
           </div>
         )}
       </div>
