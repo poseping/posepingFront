@@ -128,12 +128,24 @@ export interface WebcamHistoryResponse {
   total: number;
 }
 
+export type HistoryPeriod = 'day' | 'week' | 'month'
+
 export const getWebcamHistory = async (
   limit = 10,
 ): Promise<WebcamHistoryResponse> => {
   const response = await apiClient.get<WebcamHistoryResponse>(
     "/webcam/history",
     { params: { limit } },
+  );
+  return response.data;
+};
+
+export const getWebcamHistoryByPeriod = async (
+  period: HistoryPeriod,
+): Promise<WebcamHistoryResponse> => {
+  const response = await apiClient.get<WebcamHistoryResponse>(
+    "/webcam/history",
+    { params: { period } },
   );
   return response.data;
 };
