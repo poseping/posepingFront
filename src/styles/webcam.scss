@@ -169,6 +169,31 @@ $_danger-fg:  #b91c1c;
   ul { margin: 0; padding-left: 1rem; color: #475569; font-size: 0.85rem; line-height: 1.65; }
 }
 
+.wcam-comment-block {
+  margin-top: 0.85rem;
+  padding: 0.95rem 1rem;
+  border-radius: 16px;
+  background: #f8fafc;
+
+  h4 {
+    margin: 0 0 0.45rem;
+    color: #1e293b;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0;
+    color: #475569;
+    font-size: 0.88rem;
+    line-height: 1.65;
+    word-break: keep-all;
+  }
+}
+
+.wcam-comment-muted { color: #64748b; }
+.wcam-comment-error { color: #b91c1c; }
+
 
 // ─── Profile List ─────────────────────────────────────────────────────────
 .wcam-profile-list-header {
