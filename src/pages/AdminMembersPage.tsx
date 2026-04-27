@@ -146,7 +146,7 @@ export default function AdminMembersPage() {
         <section className="admin-members__toolbar" aria-label="회원 목록 요약">
           <div>
             <p className="admin-members__eyebrow">Members</p>
-            <h2 className="admin-members__title">가입 회원</h2>
+            <h2>가입 회원</h2>
           </div>
           <div className="admin-members__count">{members.length.toLocaleString('ko-KR')}</div>
         </section>
