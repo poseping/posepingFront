@@ -22,9 +22,9 @@ export default function HomePage() {
                 <p>AI와 대화하며 앉는 습관, 운동 패턴, 수면 환경을 점검하고 자세 개선에 필요한 생활습관을 찾아보세요.</p>
               </div>
             </div>
-            <button className="home-action-card__button" type="button" disabled>
+            <Link className="home-action-card__button" to="/onboarding">
               AI와 대화하기
-            </button>
+            </Link>
           </section>
 
           <section className="home-action-card">

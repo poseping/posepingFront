@@ -21,6 +21,7 @@ import {
   getPhotoAnalysisHistory,
   savePhotoAnalysis,
 } from '../../services/photoAnalysisApi'
+import { buildPhotoCommentPayload, getAssistantErrorMessage, getPhotoComment } from '../../services/assistantApi'
 import '../../styles/photo-analysis.scss'
 
 interface DragState {
@@ -449,9 +450,15 @@ function buildObjectUrl(file: File | null) {
 function ResultSummary({
                          title,
                          result,
+                         assistantComment,
+                         assistantCommentError,
+                         isAssistantCommentPending,
                        }: {
   title: string
   result: PhotoAnalysisResponse
+  assistantComment: string | null
+  assistantCommentError: string | null
+  isAssistantCommentPending: boolean
 }) {
   return (
       <section className="photo-summary-card">
@@ -515,6 +522,18 @@ function ResultSummary({
               </ul>
             </div>
         )}
+        <div className="photo-message-block photo-message-block--assistant">
+          <h4>AI 코멘트</h4>
+          {isAssistantCommentPending && !assistantComment ? (
+              <p className="photo-message-muted">코멘트를 작성하는 중입니다...</p>
+          ) : assistantCommentError ? (
+              <p className="photo-message-error">{assistantCommentError}</p>
+          ) : assistantComment ? (
+              <p>{assistantComment}</p>
+          ) : (
+              <p className="photo-message-muted">최종 분석이 완료되면 맞춤 코멘트를 보여드릴게요.</p>
+          )}
+        </div>
       </section>
   )
 }
@@ -533,6 +552,8 @@ export default function PhotoAnalysisStudio() {
   const [selectedFrontLandmarkId, setSelectedFrontLandmarkId] = useState<number | null>(null)
   const [selectedSideLandmarkId, setSelectedSideLandmarkId] = useState<number | null>(null)
   const [savedMessage, setSavedMessage] = useState<string | null>(null)
+  const [assistantComment, setAssistantComment] = useState<string | null>(null)
+  const [assistantCommentError, setAssistantCommentError] = useState<string | null>(null)
 
   useEffect(() => {
     const nextFrontUrl = buildObjectUrl(frontFile)
@@ -594,6 +615,8 @@ export default function PhotoAnalysisStudio() {
     onSuccess: (data) => {
       setFinalResult(data)
       setSavedMessage(null)
+      setAssistantComment(null)
+      setAssistantCommentError(null)
       setActiveStep(4)
     },
     onError: (error) => {
@@ -620,6 +643,23 @@ export default function PhotoAnalysisStudio() {
     },
   })
 
+  const photoCommentMutation = useMutation({
+    mutationFn: getPhotoComment,
+    onSuccess: (data) => {
+      setAssistantComment(data.comment)
+      setAssistantCommentError(null)
+    },
+    onError: (error) => {
+      setAssistantCommentError(getAssistantErrorMessage(error, '사진 코멘트를 불러오지 못했어요.'))
+    },
+  })
+
+  useEffect(() => {
+    if (!finalResult) return
+
+    photoCommentMutation.mutate(buildPhotoCommentPayload(finalResult))
+  }, [finalResult])
+
   const handleFileChange =
       (kind: 'front' | 'side') => (event: ChangeEvent<HTMLInputElement>) => {
         const nextFile = event.target.files?.[0] ?? null
@@ -631,6 +671,8 @@ export default function PhotoAnalysisStudio() {
 
         setFinalResult(null)
         setSavedMessage(null)
+        setAssistantComment(null)
+        setAssistantCommentError(null)
         setFrontLandmarks([])
         setSideLandmarks([])
         setActiveStep(2)
@@ -738,7 +780,13 @@ export default function PhotoAnalysisStudio() {
 
         {activeStep === 4 && finalResult && (
             <>
-              <ResultSummary title="최종 분석 결과" result={finalResult} />
+              <ResultSummary
+                  title="최종 분석 결과"
+                  result={finalResult}
+                  assistantComment={assistantComment}
+                  assistantCommentError={assistantCommentError}
+                  isAssistantCommentPending={photoCommentMutation.isPending}
+              />
               <section className="photo-save-panel">
                 <div>
                   <h3>3. 결과 저장 여부 선택</h3>

@@ -14,6 +14,7 @@ import { RootState } from './store/store'
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const MainPage = lazy(() => import('./pages/MainPage'))
 const HomePage = lazy(() => import('./pages/HomePage'))
+const OnboardingChatPage = lazy(() => import('./pages/AssistantPage.tsx'))
 const HistoryPage = lazy(() => import('./pages/HistoryPage'))
 const MyPage = lazy(() => import('./pages/MyPage'))
 const SettingsPage = lazy(() => import('./pages/SettingsPage'))
@@ -41,6 +42,7 @@ function App() {
             }
           >
             <Route path="/home"     element={<HomePage />} />
+            <Route path="/onboarding" element={<OnboardingChatPage />} />
             <Route path="/main"     element={<MainPage />} />
             <Route path="/history"  element={<HistoryPage />} />
             <Route path="/mypage"   element={<MyPage />} />
