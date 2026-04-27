@@ -144,7 +144,7 @@ export default function MyPage() {
       <main className="my-page">
 
         {/* ── 회원 정보 카드 ── */}
-        <section className="mp-card">
+        <section className="card">
           <p className="mp-kicker">My Profile</p>
           <div className="mp-profile-body">
             <div className="mp-avatar">
@@ -236,7 +236,7 @@ export default function MyPage() {
         </section>
 
         {/* ── 기간별 자세 통계 ── */}
-        <section className="mp-card">
+        <section className="card">
           <div className="mp-stats-header">
             <div>
               <p className="mp-kicker">My Stats</p>
@@ -325,7 +325,7 @@ export default function MyPage() {
         </section>
 
         {/* ── 사진 분석 현황 ── */}
-        <section className="mp-card">
+        <section className="card">
           <p className="mp-kicker">Photo Analysis</p>
           <h3 className="mp-stats-title" style={{ marginBottom: '1.25rem' }}>사진 자세 현황</h3>
 

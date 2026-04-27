@@ -17,17 +17,6 @@ $_btn:     #f1f5f9;
   @media (max-width: 768px) { padding: 1rem; }
 }
 
-// ─── Card ─────────────────────────────────────────────────────────────────
-.mp-card {
-  background: #fff;
-  border-radius: 24px;
-  border: 1px solid rgba(19, 42, 76, 0.08);
-  box-shadow: 0 18px 45px rgba(20, 38, 70, 0.08);
-  padding: 1.5rem;
-
-  @media (max-width: 768px) { padding: 1.15rem; border-radius: 20px; }
-}
-
 // ─── Kicker ───────────────────────────────────────────────────────────────
 .mp-kicker {
   margin: 0 0 0.35rem;
@@ -84,7 +73,6 @@ $_btn:     #f1f5f9;
 .mp-nickname {
   margin: 0;
   font-size: 1.2rem;
-  font-weight: 800;
   color: $_heading;
 }
 
@@ -219,7 +207,6 @@ $_btn:     #f1f5f9;
 .mp-stats-title {
   margin: 0;
   font-size: 1.05rem;
-  font-weight: 800;
   color: $_heading;
 }
 
