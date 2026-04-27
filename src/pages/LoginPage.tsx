@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google'
 import { loginSuccess, loginFailure } from '../store/authSlice'
-import { saveToken, saveUserInfo } from '../services/authService'
+import { getPostLoginPath, saveToken, saveUserInfo } from '../services/authService'
 import apiClient from '../services/api'
 import '../styles/login.scss'
 
@@ -18,11 +18,20 @@ declare global {
   }
 }
 
+interface DevMemberOption {
+  member_id: number
+  provider: string
+  nickname?: string | null
+  role: string
+}
+
 export default function LoginPage() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [devMembers, setDevMembers] = useState<DevMemberOption[]>([])
+  const [isDevPickerOpen, setIsDevPickerOpen] = useState(false)
 
   const logRequestError = (label: string, err: any) => {
     console.error(label, {
@@ -69,8 +78,7 @@ export default function LoginPage() {
             // Redux 상태 업데이트
             dispatch(loginSuccess({ user, token: access_token }))
 
-            // 메인 페이지로 이동
-            navigate('/home')
+            navigate(getPostLoginPath(user, response.data))
           } catch (err: any) {
             console.error('백엔드 에러:', err.response?.data || err.message)
             const errorMsg = err.response?.data?.detail || err.message || '로그인 실패'
@@ -100,15 +108,33 @@ export default function LoginPage() {
       setLoading(true)
       setError(null)
 
-      const response = await apiClient.post('/auth/dev-login')
+      const response = await apiClient.get<DevMemberOption[]>('/auth/dev-members')
+      setDevMembers(response.data)
+      setIsDevPickerOpen(true)
+    } catch (err: any) {
+      setError('개발용 회원 목록을 불러오지 못했습니다.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDevMemberLogin = async (memberId: number) => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const response = await apiClient.post('/auth/dev-login', {
+        member_id: memberId,
+      })
       const { access_token, user } = response.data
 
       saveToken(access_token)
       saveUserInfo(user)
       dispatch(loginSuccess({ user, token: access_token }))
-      navigate('/home')
+      setIsDevPickerOpen(false)
+      navigate(getPostLoginPath(user, response.data))
     } catch (err: any) {
-      setError('개발용 로그인 실패')
+      setError('선택한 개발용 회원으로 로그인하지 못했습니다.')
     } finally {
       setLoading(false)
     }
@@ -128,7 +154,7 @@ export default function LoginPage() {
       saveToken(access_token)
       saveUserInfo(user)
       dispatch(loginSuccess({ user, token: access_token }))
-      navigate('/admin')
+      navigate(getPostLoginPath(user, response.data))
     } catch (err: any) {
       setError('개발용 관리자 로그인 실패')
     } finally {
@@ -160,7 +186,7 @@ export default function LoginPage() {
       // Redux 상태 업데이트
       dispatch(loginSuccess({ user, token: access_token }))
 
-      navigate('/home')
+      navigate(getPostLoginPath(user, response.data))
     } catch (err: any) {
       logRequestError('백엔드 에러:', err)
       const errorMsg = err.response?.data?.detail || err.message || '로그인 실패'
@@ -225,6 +251,37 @@ export default function LoginPage() {
       </div>
 
       <p className="login-footer">로그인 시 서비스 이용약관 및 개인정보 처리방침에 동의한 것으로 간주됩니다</p>
+
+      {import.meta.env.DEV && isDevPickerOpen && (
+        <div className="dev-member-overlay" onClick={() => !loading && setIsDevPickerOpen(false)}>
+          <div className="dev-member-modal" onClick={(event) => event.stopPropagation()}>
+            <div className="dev-member-modal__header">
+              <h2>개발용 회원 선택</h2>
+              <button type="button" onClick={() => setIsDevPickerOpen(false)} disabled={loading}>
+                닫기
+              </button>
+            </div>
+            <p className="dev-member-modal__desc">member id 6~15 중 로그인할 회원을 선택하세요.</p>
+            <div className="dev-member-list">
+              {devMembers.map((member) => (
+                <button
+                  key={member.member_id}
+                  type="button"
+                  className="dev-member-item"
+                  onClick={() => handleDevMemberLogin(member.member_id)}
+                  disabled={loading}
+                >
+                  <span className="dev-member-item__id">#{member.member_id}</span>
+                  <span className="dev-member-item__name">{member.nickname || '이름 없음'}</span>
+                  <span className="dev-member-item__meta">
+                    {member.provider} · {member.role}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

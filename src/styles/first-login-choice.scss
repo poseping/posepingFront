@@ -1,0 +1,97 @@
+.first-login-choice {
+  width: min(1080px, 100%);
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.first-login-choice__intro {
+  margin-bottom: 1.5rem;
+}
+
+.first-login-choice__eyebrow {
+  margin-bottom: 0.5rem;
+  color: var(--primary);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.first-login-choice__intro h1 {
+  margin-bottom: 0.75rem;
+  color: #10213d;
+}
+
+.first-login-choice__intro p:last-child {
+  max-width: 62ch;
+  color: var(--muted-foreground);
+  line-height: 1.65;
+}
+
+.first-login-choice__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.first-login-choice__card {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.first-login-choice__card:hover {
+  border-color: rgba(8, 145, 178, 0.35);
+  transform: translateY(-1px);
+}
+
+.first-login-choice__card.is-primary {
+  background:
+    radial-gradient(circle at top left, rgba(255, 214, 153, 0.38), transparent 32%),
+    linear-gradient(135deg, #f8fafc 0%, #eef7ff 54%, #f5fbf5 100%);
+}
+
+.first-login-choice__icon {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--secondary);
+  color: var(--primary);
+  font-size: 1.35rem;
+}
+
+.first-login-choice__card strong,
+.first-login-choice__card small {
+  display: block;
+}
+
+.first-login-choice__card strong {
+  margin-bottom: 0.4rem;
+  color: #10213d;
+  font-size: 1rem;
+}
+
+.first-login-choice__card small {
+  color: var(--muted-foreground);
+  line-height: 1.55;
+}
+
+@media (max-width: 768px) {
+  .first-login-choice {
+    padding: 1rem;
+  }
+
+  .first-login-choice__grid {
+    grid-template-columns: 1fr;
+  }
+}
