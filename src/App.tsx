@@ -14,6 +14,7 @@ import { RootState } from './store/store'
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const MainPage = lazy(() => import('./pages/MainPage'))
 const HomePage = lazy(() => import('./pages/HomePage'))
+const FirstLoginChoicePage = lazy(() => import('./pages/FirstLoginChoicePage'))
 const OnboardingChatPage = lazy(() => import('./pages/AssistantPage.tsx'))
 const HistoryPage = lazy(() => import('./pages/HistoryPage'))
 const MyPage = lazy(() => import('./pages/MyPage'))
@@ -32,6 +33,14 @@ function App() {
       <Suspense fallback={null}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/first-login"
+            element={
+              <ProtectedRoute>
+                <FirstLoginChoicePage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* 로그인 후 공통 레이아웃 (하단 메뉴바 포함) */}
           <Route

@@ -5,6 +5,7 @@
 
 const TOKEN_KEY = "access_token"
 const USER_KEY = "user_info"
+const FIRST_LOGIN_CHOICE_PENDING_PREFIX = "first_login_choice_pending"
 
 export interface UserInfo {
   member_id?: number
@@ -13,6 +14,7 @@ export interface UserInfo {
   nickname?: string
   profile_image_url?: string
   role: string
+  is_new_member?: boolean
 }
 
 export interface LoginResponse {
@@ -21,6 +23,7 @@ export interface LoginResponse {
   token_type: string
   expires_in: number
   user: UserInfo
+  is_new_member?: boolean
 }
 
 /**
@@ -65,4 +68,36 @@ export const clearAuth = (): void => {
  */
 export const isAuthenticated = (): boolean => {
   return !!getToken()
+}
+
+const getFirstLoginChoicePendingKey = (user: UserInfo): string => {
+  const userId = user.member_id ?? user.member_no ?? user.nickname ?? user.provider
+  return `${FIRST_LOGIN_CHOICE_PENDING_PREFIX}:${user.provider}:${userId}`
+}
+
+export const hasPendingFirstLoginChoice = (user: UserInfo | null): boolean => {
+  if (!user) return false
+  return sessionStorage.getItem(getFirstLoginChoicePendingKey(user)) === "true"
+}
+
+export const markFirstLoginChoicePending = (user: UserInfo): void => {
+  sessionStorage.setItem(getFirstLoginChoicePendingKey(user), "true")
+}
+
+export const markFirstLoginChoiceSeen = (user: UserInfo): void => {
+  sessionStorage.removeItem(getFirstLoginChoicePendingKey(user))
+}
+
+export const getPostLoginPath = (user: UserInfo, loginResponse?: LoginResponse): string => {
+  if (user.role?.toLowerCase() === "admin") {
+    return "/admin"
+  }
+
+  if (loginResponse?.is_new_member === true) {
+    markFirstLoginChoicePending(user)
+    return "/first-login"
+  }
+
+  markFirstLoginChoiceSeen(user)
+  return "/home"
 }
