@@ -57,20 +57,11 @@ $_danger-fg:  #b91c1c;
 
 
 // ─── Cards ────────────────────────────────────────────────────────────────
-.wcam-card,
-.wcam-stage-card,
-.wcam-result-card {
+.wcam-stage-card {
   background: #fff;
   border-radius: 24px;
   border: 1px solid rgba(19, 42, 76, 0.08);
   box-shadow: 0 18px 45px rgba(20, 38, 70, 0.08);
-}
-
-.wcam-card,
-.wcam-result-card {
-  padding: 1.5rem;
-
-  @media (max-width: 768px) { padding: 1.15rem; border-radius: 20px; }
 }
 
 .wcam-stage-card {
@@ -116,7 +107,7 @@ $_danger-fg:  #b91c1c;
 
   .wcam-empty-icon { font-size: 2.4rem; line-height: 1; margin-bottom: 0.25rem; }
 
-  h4 { margin: 0; color: $_heading; font-size: 1rem; font-weight: 700; }
+  h4 { color: $_heading; }
 
   p {
     margin: 0;
@@ -135,7 +126,7 @@ $_danger-fg:  #b91c1c;
   justify-content: space-between;
   margin-bottom: 0.85rem;
 
-  h3 { margin: 0; color: $_heading; font-size: 1rem; font-weight: 700; }
+  h3 { color: $_heading; font-size: 1rem; font-weight: 700; }
 }
 
 .wcam-status-chip {
@@ -314,8 +305,7 @@ $_danger-fg:  #b91c1c;
 
 
 // ─── Buttons ──────────────────────────────────────────────────────────────
-// Primary gradient — webcam start / guide next / guide register
-.wcam-primary-btn,
+// Primary gradient — guide next / guide register
 .guide-btn-next,
 .guide-btn-register {
   border: none;
@@ -330,15 +320,9 @@ $_danger-fg:  #b91c1c;
   transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
 }
 
-.wcam-primary-btn {
+.webcam-right > .primary-button,
+.wcam-empty-state .primary-button {
   width: 100%;
-  border-radius: 14px;
-  padding: 0.95rem 1.35rem;
-  font-size: 0.95rem;
-  box-shadow: 0 14px 28px rgba(8, 145, 178, 0.22);
-
-  &:hover    { transform: translateY(-1px); box-shadow: 0 18px 32px rgba(8, 145, 178, 0.32); }
-  &:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
 }
 
 .wcam-stop-btn {
@@ -394,7 +378,7 @@ $_danger-fg:  #b91c1c;
   .svg-inline--fa { color: #0667bb; }
 }
 
-.wcam-primary-btn,
+.primary-button,
 .guide-countdown-badge,
 .guide-btn-next,
 .guide-btn-register {
@@ -445,9 +429,7 @@ $_danger-fg:  #b91c1c;
 }
 
 .wcam-modal-title {
-  margin: 0;
   font-size: 1.15rem;
-  font-weight: 800;
   color: $_heading;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -731,9 +713,7 @@ $_danger-fg:  #b91c1c;
 }
 
 .guide-step-title {
-  margin: 0;
   font-size: 1.3rem;
-  font-weight: 800;
   color: $_heading;
 
   @media (max-width: 640px) { font-size: 1.1rem; }
@@ -900,7 +880,7 @@ $_danger-fg:  #b91c1c;
   gap: 1rem;
   margin-bottom: 1rem;
 
-  h3 { margin: 0; color: #13223f; font-size: 1.1rem; }
+  h3 { color: #13223f; }
 }
 
 .wcam-history-metrics {

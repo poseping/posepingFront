@@ -282,7 +282,7 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
         </div>
 
         {analyzeResult && (
-          <div className="wcam-result-card">
+          <div className="card">
             <div className="wcam-result-header">
               <h3>분석 결과</h3>
               <span className={`wcam-status-chip ${analyzeResult.status}`}>
@@ -321,7 +321,7 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
 
       {/* ── 오른쪽: 기준 자세 + 분석 버튼 ── */}
       <div className="webcam-right">
-        <div className="wcam-card">
+        <div className="card">
           <p className="wcam-kicker">기준 자세</p>
 
           {!hasProfile ? (
@@ -331,7 +331,7 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
               <h4>등록된 기준 자세가 없습니다</h4>
               <p>카메라 앞에 바르게 앉은 후 기준 자세를 등록하면 실시간 분석을 시작할 수 있습니다.</p>
               <button
-                className="wcam-primary-btn"
+                className="primary-button"
                 onClick={openGuide}
               >
                 <FontAwesomeIcon icon={faCamera} />
@@ -382,7 +382,7 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
         {hasProfile && (
           <button
             onClick={onToggle}
-            className={isActive ? 'wcam-stop-btn' : 'wcam-primary-btn'}
+            className={isActive ? 'wcam-stop-btn' : 'primary-button'}
           >
             <FontAwesomeIcon icon={isActive ? faPause : faPlay} />
             {isActive ? '분석 중지' : '분석 시작'}
@@ -390,7 +390,7 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
         )}
 
         {/* ── 스트레칭 알림 ── */}
-        <div className="wcam-card wcam-stretch-bar">
+        <div className="card wcam-stretch-bar">
           <div className="wcam-stretch-inner">
             <FontAwesomeIcon icon={faClock} className="wcam-stretch-icon" />
             <div className="wcam-stretch-info">

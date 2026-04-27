@@ -107,7 +107,7 @@ export default function WebcamHistoryStats() {
   const latest = sessions[0]
 
   return (
-    <section className="wcam-card wcam-history-stats">
+    <section className="card wcam-history-stats">
       <div className="wcam-history-header">
         <div>
           <p className="wcam-history-kicker">Session History</p>
