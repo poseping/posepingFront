@@ -179,7 +179,7 @@ function PhotoHistoryStats() {
   const latest = trendData[trendData.length - 1]
 
   return (
-      <section className="photo-stats-card">
+      <section className="card">
         <div className="photo-stats-header">
           <div>
             <p className="photo-kicker">Saved History</p>
@@ -345,7 +345,7 @@ function EditableLandmarkCanvas({
   const labelFontSize = 14 * svgUnitsPerScreenPixel
 
   return (
-      <section className="photo-editor-card">
+      <section className="card">
         <div className="photo-editor-header">
           <h3>{title}</h3>
           {selectedLandmark && (
@@ -461,7 +461,7 @@ function ResultSummary({
   isAssistantCommentPending: boolean
 }) {
   return (
-      <section className="photo-summary-card">
+      <section className="card">
         <div className="photo-summary-header">
           <h3>{title}</h3>
           <span className={`photo-status-chip ${result.status}`}>{result.status}</span>
@@ -633,9 +633,9 @@ export default function PhotoAnalysisStudio() {
 
       return savePhotoAnalysis(finalResult.save_token)
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['photo-analysis-history'] })
-      setSavedMessage(`분석 결과를 저장했습니다. 분석 ID: ${data.analysis_id}`)
+      setSavedMessage(`오늘의 자세를 기록했습니다!`)
     },
     onError: (error) => {
       console.error('분석 저장 실패:', error)
@@ -679,142 +679,139 @@ export default function PhotoAnalysisStudio() {
       }
 
   return (
-      <div className="photo-analysis-page">
+      <>
         {activeStep === 1 && (
-            <>
+            <section className="photo-hero-card">
               <div>
-                <section className="photo-hero-card">
-                  <div>
-                    <p className="photo-kicker">Photo Analysis</p>
-                    <h2>업로드한 사진으로 자세를 세밀하게 보정해 분석합니다</h2>
-                    <p>
-                      정면 사진과 측면 사진을 올리면 랜드마크를 먼저 잡아주고, 사용자가 직접 위치를 끌어 수정한 뒤
-                      최종 분석과 DB 저장 여부를 결정할 수 있습니다.
-                    </p>
-                  </div>
-                  <div className="photo-action-row">
-                    <button className="photo-primary-button" onClick={() => setActiveStep(2)}>
-                      내 자세 확인하기
-                    </button>
-                  </div>
-                </section>
-              </div>
-              <PhotoHistoryStats />
-            </>
-        )}
-
-        {activeStep === 2 && (
-            <section className="photo-upload-card">
-              <div className="photo-upload-grid">
-                <label className="photo-upload-field">
-                  <span>정면 사진</span>
-                  <input type="file" accept="image/*" onChange={handleFileChange('front')} />
-                  <small>{frontFile ? frontFile.name : '머리부터 골반까지 보이는 사진을 권장합니다.'}</small>
-                </label>
-                <label className="photo-upload-field">
-                  <span>측면 사진</span>
-                  <input type="file" accept="image/*" onChange={handleFileChange('side')} />
-                  <small>{sideFile ? sideFile.name : '왼쪽 또는 오른쪽 측면 사진을 선택하세요.'}</small>
-                </label>
-                <label className="photo-upload-field compact">
-                  <span>측면 방향</span>
-                  <select value={sideView} onChange={(event) => setSideView(event.target.value as PhotoSideView)}>
-                    <option value="left">왼쪽 측면</option>
-                    <option value="right">오른쪽 측면</option>
-                  </select>
-                </label>
+                <p className="photo-kicker">Photo Analysis</p>
+                <h2>업로드한 사진으로 자세를 세밀하게 보정해 분석합니다</h2>
+                <p>
+                  정면 사진과 측면 사진을 올리면 랜드마크를 먼저 잡아주고, 사용자가 직접 위치를 끌어 수정한 뒤
+                  최종 분석과 DB 저장 여부를 결정할 수 있습니다.
+                </p>
               </div>
               <div className="photo-action-row">
-                <button className="photo-secondary-button" onClick={() => setActiveStep(1)}>
-                  이전
-                </button>
-                <button
-                    className="photo-primary-button"
-                    onClick={() => analyzePhotosMutation.mutate()}
-                    disabled={!frontFile || !sideFile || analyzePhotosMutation.isPending}
-                >
-                  {analyzePhotosMutation.isPending ? '랜드마크 감지 중...' : '1. 랜드마크 감지'}
+                <button className="primary-button" onClick={() => setActiveStep(2)}>
+                  내 자세 확인하기
                 </button>
               </div>
             </section>
         )}
 
-        {activeStep === 3 && (
-            <>
-              <section className="photo-editor-grid">
-                <EditableLandmarkCanvas
-                    title="정면 사진"
-                    imageUrl={frontPreviewUrl}
-                    landmarks={frontLandmarks}
-                    panel="front"
-                    sideView={sideView}
-                    selectedLandmarkId={selectedFrontLandmarkId}
-                    onSelect={setSelectedFrontLandmarkId}
-                    onChange={setFrontLandmarks}
-                />
-                <EditableLandmarkCanvas
-                    title="측면 사진"
-                    imageUrl={sidePreviewUrl}
-                    landmarks={sideLandmarks}
-                    panel="side"
-                    sideView={sideView}
-                    selectedLandmarkId={selectedSideLandmarkId}
-                    onSelect={setSelectedSideLandmarkId}
-                    onChange={setSideLandmarks}
-                />
-              </section>
-              <section className="photo-action-panel">
-                <button className="photo-secondary-button" onClick={() => setActiveStep(2)}>
-                  이전
-                </button>
-                <button
-                    className="photo-primary-button"
-                    onClick={() => finalAnalyzeMutation.mutate()}
-                    disabled={frontLandmarks.length === 0 || sideLandmarks.length === 0 || finalAnalyzeMutation.isPending}
-                >
-                  {finalAnalyzeMutation.isPending ? '최종 분석 중...' : '다음'}
-                </button>
-              </section>
-            </>
-        )}
+        <div className="photo-analysis-page">
+          {activeStep === 1 && (
+              <PhotoHistoryStats />
+          )}
 
-        {activeStep === 4 && finalResult && (
-            <>
-              <ResultSummary
-                  title="최종 분석 결과"
-                  result={finalResult}
-                  assistantComment={assistantComment}
-                  assistantCommentError={assistantCommentError}
-                  isAssistantCommentPending={photoCommentMutation.isPending}
-              />
-              <section className="photo-save-panel">
-                <div>
-                  <h3>3. 결과 저장 여부 선택</h3>
-                  <p>최종 분석 결과를 확인한 뒤 DB에 저장할지 결정하세요.</p>
-                  {savedMessage && <p className="photo-save-message">{savedMessage}</p>}
-                </div>
-                <div className="photo-save-actions">
-                  <button
-                      className="photo-primary-button"
-                      onClick={() => saveMutation.mutate()}
-                      disabled={!finalResult.can_save || !finalResult.save_token || saveMutation.isPending}
-                  >
-                    {saveMutation.isPending ? '저장 중...' : '저장'}
+          {activeStep === 2 && (
+              <>
+                <section className="card">
+                  <div className="photo-upload-grid">
+                    <label className="photo-upload-field">
+                      <span>정면 사진</span>
+                      <input type="file" accept="image/*" onChange={handleFileChange('front')} />
+                      <small>{frontFile ? frontFile.name : '머리부터 골반까지 보이는 사진을 권장합니다.'}</small>
+                    </label>
+                    <label className="photo-upload-field">
+                      <span>측면 사진</span>
+                      <input type="file" accept="image/*" onChange={handleFileChange('side')} />
+                      <small>{sideFile ? sideFile.name : '왼쪽 또는 오른쪽 측면 사진을 선택하세요.'}</small>
+                    </label>
+                    <label className="photo-upload-field compact">
+                      <span>측면 방향</span>
+                      <select value={sideView} onChange={(event) => setSideView(event.target.value as PhotoSideView)}>
+                        <option value="left">왼쪽 측면</option>
+                        <option value="right">오른쪽 측면</option>
+                      </select>
+                    </label>
+                  </div>
+                </section>
+                <div className="photo-action-row">
+                  <button className="photo-secondary-button" onClick={() => setActiveStep(1)}>
+                    이전
                   </button>
+                  <button
+                      className="primary-button"
+                      onClick={() => analyzePhotosMutation.mutate()}
+                      disabled={!frontFile || !sideFile || analyzePhotosMutation.isPending}
+                  >
+                    {analyzePhotosMutation.isPending ? '랜드마크 감지 중...' : '1. 랜드마크 감지'}
+                  </button>
+                </div>
+              </>
+          )}
+
+          {activeStep === 3 && (
+              <>
+                <section className="photo-editor-grid">
+                  <EditableLandmarkCanvas
+                      title="정면 사진"
+                      imageUrl={frontPreviewUrl}
+                      landmarks={frontLandmarks}
+                      panel="front"
+                      sideView={sideView}
+                      selectedLandmarkId={selectedFrontLandmarkId}
+                      onSelect={setSelectedFrontLandmarkId}
+                      onChange={setFrontLandmarks}
+                  />
+                  <EditableLandmarkCanvas
+                      title="측면 사진"
+                      imageUrl={sidePreviewUrl}
+                      landmarks={sideLandmarks}
+                      panel="side"
+                      sideView={sideView}
+                      selectedLandmarkId={selectedSideLandmarkId}
+                      onSelect={setSelectedSideLandmarkId}
+                      onChange={setSideLandmarks}
+                  />
+                </section>
+                <section className="photo-action-row">
+                  <button className="photo-secondary-button" onClick={() => setActiveStep(2)}>
+                    이전
+                  </button>
+                  <button
+                      className="primary-button"
+                      onClick={() => finalAnalyzeMutation.mutate()}
+                      disabled={frontLandmarks.length === 0 || sideLandmarks.length === 0 || finalAnalyzeMutation.isPending}
+                  >
+                    {finalAnalyzeMutation.isPending ? '최종 분석 중...' : '다음'}
+                  </button>
+                </section>
+              </>
+          )}
+
+          {activeStep === 4 && finalResult && (
+              <>
+                <ResultSummary
+                    title="최종 분석 결과"
+                    result={finalResult}
+                    assistantComment={assistantComment}
+                    assistantCommentError={assistantCommentError}
+                    isAssistantCommentPending={photoCommentMutation.isPending}
+                />
+                <div className="photo-save-actions">
+                  {savedMessage && <p className="photo-save-message">{savedMessage}</p>}
                   <button
                       className="photo-secondary-button"
                       onClick={() => {
                         setFinalResult(null)
                         setSavedMessage(null)
-                        setActiveStep(3)
+                        setActiveStep(1)
                       }}
                   >
-                    취소
+                    돌아가기
+                  </button>
+                  <button
+                      className="primary-button"
+                      onClick={() => saveMutation.mutate()}
+                      disabled={!finalResult.can_save || !finalResult.save_token || saveMutation.isPending}
+                  >
+                    {saveMutation.isPending ? '기록 중...' : '기록하기'}
                   </button>
                 </div>
-              </section>
-            </>
-        )}
-      </div>
+              </>
+          )}
+        </div>
+      </>
   )
 }
