@@ -26,6 +26,8 @@ export interface WebcamAnalyzeResponse {
   landmarks: Landmark[];
   frame_width: number;
   frame_height: number;
+  ai_context?: Record<string, unknown>;
+  judgement_signature?: string;
 }
 
 export const getPostureProfiles = async (): Promise<PostureProfile[]> => {
@@ -128,7 +130,7 @@ export interface WebcamHistoryResponse {
   total: number;
 }
 
-export type HistoryPeriod = 'day' | 'week' | 'month'
+export type HistoryPeriod = "day" | "week" | "month";
 
 export const getWebcamHistory = async (
   limit = 10,

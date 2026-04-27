@@ -56,6 +56,7 @@ export interface SavePhotoAnalysisResponse {
 export interface PhotoAnalysisHistoryItem {
   id?: number
   analysis_id?: number
+  status?: 'good' | 'warning' | 'bad'
   analyzed_at?: string
   saved_at?: string
   created_at?: string
