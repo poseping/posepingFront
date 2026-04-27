@@ -6,6 +6,7 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
+import { GoogleOAuthProvider } from '@react-oauth/google'
 import ProtectedRoute from './components/ProtectedRoute'
 import AppLayout from './components/AppLayout'
 import ScrollToTop from './components/ScrollToTop'
@@ -20,18 +21,21 @@ const MyPage = lazy(() => import('./pages/MyPage'))
 const SettingsPage = lazy(() => import('./pages/SettingsPage'))
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage'))
 const AdminMembersPage = lazy(() => import('./pages/AdminMembersPage'))
+const KakaoCallbackPage = lazy(() => import('./pages/KakaoCallbackPage'))
 
 function App() {
   const user = useSelector((state: RootState) => state.auth.user)
   const isAdmin = user?.role?.toLowerCase() === 'admin'
 
   return (
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
     <Router>
       <ScrollToTop />
       <div className="app-frame">
       <Suspense fallback={null}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/auth/kakao/callback" element={<KakaoCallbackPage />} />
 
           {/* 로그인 후 공통 레이아웃 (하단 메뉴바 포함) */}
           <Route
@@ -57,6 +61,7 @@ function App() {
       </Suspense>
       </div>
     </Router>
+    </GoogleOAuthProvider>
   )
 }
 
