@@ -3,41 +3,37 @@
   max-width: 1080px;
   margin: 0 auto;
   padding: 2rem;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
 }
 
-.home-hero {
-  width: 100%;
-  padding: 8rem 4rem 4rem;
-  background: linear-gradient(135deg, #0667bb 0%, #08aaab 100%);
-  color: #fff;
+.home-greeting {
+  width: min(1080px, 100%);
+  margin: 0 auto;
+  padding: 3rem 2rem 0;
 }
 
-.home-hero__eyebrow {
-  margin: 0 0 10px;
-  color: rgba(255, 255, 255, 0.78);
-  font-size: 0.78rem;
-  font-weight: 800;
-  text-transform: uppercase;
+.home-greeting p {
+  margin: 0 0 0.25rem;
+  color: var(--muted-foreground);
+  font-size: 0.95rem;
+  font-weight: 700;
 }
 
-.home-hero h2 {
-  max-width: 720px;
+.home-greeting h2 {
+  color: #10213d;
   font-size: 1.8rem;
   font-weight: 900;
 }
 
-.home-hero p:last-child {
-  margin: 10px 0 0;
-  max-width: 680px;
-  color: rgba(255, 255, 255, 0.86);
-  font-size: 1rem;
-  line-height: 1.55;
-}
-
 .home-action-card {
+  --home-card-accent: var(--primary);
+  --home-card-bg-start: #f8fafc;
+  --home-card-bg-end: #ffffff;
+  --home-card-border: rgba(19, 42, 76, 0.08);
+  --home-card-glow: rgba(8, 145, 178, 0.12);
+
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -45,11 +41,41 @@
   justify-content: center;
   gap: 18px;
   min-height: 230px;
-  transition: transform 0.15s ease;
+  border-color: var(--home-card-border);
+  background:
+    radial-gradient(circle at top left, var(--home-card-glow), transparent 36%),
+    linear-gradient(135deg, var(--home-card-bg-start) 0%, var(--home-card-bg-end) 100%);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
 
 .home-action-card:hover {
+  border-color: var(--home-card-accent);
+  box-shadow: 0 18px 45px var(--home-card-glow);
   transform: translateY(-1px);
+}
+
+.home-action-card:nth-child(1) {
+  --home-card-accent: var(--warning);
+  --home-card-bg-start: var(--choice-onboarding-bg-start);
+  --home-card-bg-end: var(--choice-onboarding-bg-end);
+  --home-card-border: var(--choice-onboarding-border);
+  --home-card-glow: var(--choice-onboarding-glow);
+}
+
+.home-action-card:nth-child(2) {
+  --home-card-accent: var(--primary);
+  --home-card-bg-start: var(--choice-live-bg-start);
+  --home-card-bg-end: var(--choice-live-bg-end);
+  --home-card-border: var(--choice-live-border);
+  --home-card-glow: var(--choice-live-glow);
+}
+
+.home-action-card:nth-child(3) {
+  --home-card-accent: var(--success);
+  --home-card-bg-start: var(--choice-photo-bg-start);
+  --home-card-bg-end: var(--choice-photo-bg-end);
+  --home-card-border: var(--choice-photo-border);
+  --home-card-glow: var(--choice-photo-glow);
 }
 
 .home-action-card__content {
@@ -63,7 +89,7 @@
 }
 
 .home-action-card__icon {
-  color: #0667bb;
+  color: var(--home-card-accent);
   flex: 0 0 58px;
   width: 58px;
   height: 58px;
@@ -72,7 +98,6 @@
   justify-content: center;
   border-radius: 50%;
   background: #ffffff;
-  border: 1px solid rgba(8, 145, 178, 0.18);
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
   font-size: 1.65rem;
 }
@@ -90,21 +115,36 @@
 
 .home-action-card__button {
   flex: 0 0 auto;
-  min-width: 148px;
+  min-width: 142px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #10213d;
+  box-shadow:
+    0 14px 30px rgba(15, 23, 42, 0.1);
   text-align: center;
   text-decoration: none;
+  backdrop-filter: blur(10px);
+}
+
+.home-action-card__button:hover {
+  background: #ffffff;
+  color: var(--home-card-accent);
+  box-shadow:
+    0 18px 34px rgba(15, 23, 42, 0.14);
 }
 
 @media (max-width: 767px) {
   .home-page {
     padding: 1.4rem;
+    grid-template-columns: 1fr;
   }
 
-  .home-hero {
-    padding: 40px 44px;
+  .home-greeting {
+    padding: 2rem 1.4rem 0;
   }
 
-  .home-hero h2 {
+  .home-greeting h2 {
     font-size: 1.45rem;
   }
 
@@ -115,6 +155,7 @@
   }
 
   .home-action-card__button {
-    width: 100%;
+    width: fit-content;
+    align-self: center;
   }
 }

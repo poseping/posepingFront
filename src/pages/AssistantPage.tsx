@@ -10,6 +10,8 @@ import {
   sendOnboardingChat,
 } from '../services/assistantApi'
 import '../styles/onboarding-chat.scss'
+import {useSelector} from "react-redux";
+import {RootState} from "../store/store.ts";
 
 const REDIRECT_DELAY_SECONDS = 3
 
@@ -21,8 +23,16 @@ export default function AssistantPage() {
   const [inputValue, setInputValue] = useState('')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [redirectCountdown, setRedirectCountdown] = useState<number | null>(null)
+  const [visibleInitialBubbleCount, setVisibleInitialBubbleCount] = useState(0)
   const latestMessageRef = useRef<HTMLElement | null>(null)
   const requestInFlightRef = useRef(false)
+  const user = useSelector((state: RootState) => state.auth.user)
+  const nickname = user?.nickname?.trim() || '사용자';
+  const initialMessages = [
+    `안녕하세요, ${nickname} 님!`,
+    '평소 생활 습관에 대해 몇 가지 물어볼게요😊',
+    '하루에 몇 시간 정도 앉아 계시나요?',
+  ]
 
   const setLatestMessageRef = (node: HTMLElement | null) => {
     latestMessageRef.current = node
@@ -48,6 +58,18 @@ export default function AssistantPage() {
 
     return () => window.clearTimeout(timerId)
   }, [navigate, redirectCountdown])
+
+  useEffect(() => {
+    const bubbleTimers = [100, 600, 1100].map((delay, index) =>
+      window.setTimeout(() => {
+        setVisibleInitialBubbleCount((count) => Math.max(count, Math.min(index + 1, initialMessages.length)))
+      }, delay),
+    )
+
+    return () => {
+      bubbleTimers.forEach((timerId) => window.clearTimeout(timerId))
+    }
+  }, [initialMessages.length])
 
   const onboardingMutation = useMutation({
     mutationFn: sendOnboardingChat,
@@ -115,12 +137,15 @@ export default function AssistantPage() {
       <main className="onboarding-chat-shell">
         <section className="onboarding-chat-card">
           <div className="onboarding-chat-messages">
-            <article
-              ref={chatHistory.length === 0 && !done ? setLatestMessageRef : undefined}
-              className="onboarding-chat-bubble onboarding-chat-bubble--assistant"
-            >
-              <p>안녕하세요! 저와 함께 평소 생활 습관에 대해 얘기해봐요. 하루에 몇 시간 정도 앉아 계시나요?</p>
-            </article>
+            {initialMessages.slice(0, visibleInitialBubbleCount).map((message, index) => (
+              <article
+                key={message}
+                ref={index === visibleInitialBubbleCount - 1 && chatHistory.length === 0 && !done ? setLatestMessageRef : undefined}
+                className="onboarding-chat-bubble onboarding-chat-bubble--assistant"
+              >
+                <p>{message}</p>
+              </article>
+            ))}
 
             {chatHistory.map((message, index) => (
               <article
