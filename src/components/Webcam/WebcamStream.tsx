@@ -85,9 +85,10 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
   const prevStatusRef = useRef<string | null>(null)
   const prevIssuesRef = useRef<Set<string>>(new Set())
 
-  const { data: profiles = [] } = useQuery({
+  const { data: profiles = [], isLoading: profilesLoading } = useQuery({
     queryKey: ['postureProfiles'],
     queryFn: getPostureProfiles,
+    staleTime: 1000 * 60,
   })
   const { data: alertTypes = [] } = useQuery({
     queryKey: ['alertTypes'],
@@ -148,13 +149,19 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
   const { mutateAsync: runUpdate } = useMutation({
     mutationFn: ({ profileId, data }: { profileId: number; data: Parameters<typeof updatePostureProfile>[1] }) =>
       updatePostureProfile(profileId, data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['postureProfiles'] }),
+    onSuccess: (updatedProfile) => {
+      queryClient.setQueryData(['postureProfiles'], (old: PostureProfile[] = []) =>
+        old.map((p) => (p.profile_id === updatedProfile.profile_id ? updatedProfile : p))
+      )
+    },
   })
 
   const { mutateAsync: runDelete } = useMutation({
     mutationFn: (profileId: number) => deletePostureProfile(profileId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['postureProfiles'] })
+    onSuccess: (_, profileId) => {
+      queryClient.setQueryData(['postureProfiles'], (old: PostureProfile[] = []) =>
+        old.filter((p) => p.profile_id !== profileId)
+      )
       setSelectedProfile(null)
     },
   })
@@ -324,7 +331,16 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
         <div className="card">
           <p className="wcam-kicker">기준 자세</p>
 
-          {!hasProfile ? (
+          {profilesLoading ? (
+            /* 로딩 중 스켈레톤 */
+            <div className="wcam-profile-loading">
+              <div className="wcam-profile-skeleton-header" />
+              <div className="wcam-profile-scroll">
+                <div className="wcam-profile-skeleton-item" />
+                <div className="wcam-profile-skeleton-item" />
+              </div>
+            </div>
+          ) : !hasProfile ? (
             /* 기준 자세 없음 — 빈 상태 */
             <div className="wcam-empty-state">
               <div className="wcam-empty-icon"><FontAwesomeIcon icon={faClipboardList} /></div>
