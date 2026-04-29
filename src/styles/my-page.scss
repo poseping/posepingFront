@@ -85,21 +85,6 @@ $_btn:     #f1f5f9;
   outline: none;
 }
 
-.mp-icon-btn {
-  flex-shrink: 0;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.3rem;
-  border-radius: 8px;
-  color: var(--muted-foreground);
-  font-size: 0.82rem;
-  line-height: 1;
-  transition: background 0.15s, color 0.15s;
-
-  &:hover        { background: $_surface; color: $_heading; }
-  &:disabled     { opacity: 0.5; cursor: not-allowed; }
-}
 
 .mp-provider-badge {
   display: inline-block;
@@ -122,50 +107,6 @@ $_btn:     #f1f5f9;
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
-}
-
-.mp-action-btn {
-  border: none;
-  border-radius: 12px;
-  padding: 0.6rem 1rem;
-  font-size: 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  transition: opacity 0.15s, background 0.15s;
-
-  &:disabled { opacity: 0.55; cursor: not-allowed; }
-}
-
-.mp-logout-btn {
-  background: $_btn;
-  color: #334155;
-
-  &:hover { background: #e2e8f0; }
-}
-
-.mp-delete-btn {
-  background: #fff5f5;
-  color: var(--destructive);
-  border: 1px solid #fecaca;
-
-  &:hover { background: #fee2e2; }
-}
-
-.mp-cancel-btn {
-  background: $_btn;
-  color: #475569;
-
-  &:hover { background: #e2e8f0; }
-}
-
-.mp-delete-confirm-btn {
-  background: var(--destructive);
-  color: #fff;
-
-  &:hover:not(:disabled) { opacity: 0.88; }
 }
 
 .mp-delete-confirm {
@@ -366,22 +307,6 @@ $_btn:     #f1f5f9;
   margin-top: 0.25rem;
 }
 
-.mp-habit-cta {
-  border: none;
-  border-radius: 10px;
-  padding: 0.55rem 1rem;
-  font-size: 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-  background: var(--secondary);
-  color: var(--primary);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  transition: opacity 0.15s;
-
-  &:hover { opacity: 0.75; }
-}
 
 // ─── Causes ───────────────────────────────────────────────────────────────
 .mp-causes { margin-top: 1rem; }

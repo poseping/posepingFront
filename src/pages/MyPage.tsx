@@ -178,13 +178,13 @@ export default function MyPage() {
                     }}
                   />
                   <button
-                    className="mp-icon-btn"
+                    className="btn-icon"
                     onClick={handleNicknameSave}
                     disabled={nicknameMutation.isPending}
                   >
                     <FontAwesomeIcon icon={faCheck} />
                   </button>
-                  <button className="mp-icon-btn" onClick={handleNicknameCancel}>
+                  <button className="btn-icon" onClick={handleNicknameCancel}>
                     <FontAwesomeIcon icon={faXmark} />
                   </button>
                 </div>
@@ -192,7 +192,7 @@ export default function MyPage() {
                 <div className="mp-nickname-row">
                   <h2 className="mp-nickname">{user?.nickname ?? '사용자'}</h2>
                   <button
-                    className="mp-icon-btn"
+                    className="btn-icon"
                     onClick={() => {
                       setNicknameInput(user?.nickname ?? '')
                       setEditingNickname(true)
@@ -210,12 +210,12 @@ export default function MyPage() {
           </div>
 
           <div className="mp-profile-actions">
-            <button className="mp-action-btn mp-logout-btn" onClick={handleLogout}>
+            <button className="btn--secondary" onClick={handleLogout}>
               <FontAwesomeIcon icon={faRightFromBracket} />
               로그아웃
             </button>
             <button
-              className="mp-action-btn mp-delete-btn"
+              className="btn--danger-outline"
               onClick={() => setShowDeleteConfirm(true)}
             >
               <FontAwesomeIcon icon={faTrash} />
@@ -228,13 +228,13 @@ export default function MyPage() {
               <p>정말로 탈퇴하시겠어요? 모든 데이터가 삭제됩니다.</p>
               <div className="mp-confirm-row">
                 <button
-                  className="mp-action-btn mp-cancel-btn"
+                  className="btn--secondary"
                   onClick={() => setShowDeleteConfirm(false)}
                 >
                   취소
                 </button>
                 <button
-                  className="mp-action-btn mp-delete-confirm-btn"
+                  className="btn--danger"
                   onClick={() => deleteMutation.mutate()}
                   disabled={deleteMutation.isPending}
                 >
@@ -256,7 +256,7 @@ export default function MyPage() {
             <>
               <div className="mp-stats-empty">아직 생활 습관 정보가 없어요.</div>
               <div className="mp-habit-footer">
-                <button className="mp-habit-cta" onClick={() => navigate('/assistant')}>
+                <button className="btn--tonal" onClick={() => navigate('/assistant')}>
                   분석 시작하기 <FontAwesomeIcon icon={faArrowRight} />
                 </button>
               </div>
@@ -283,7 +283,7 @@ export default function MyPage() {
                 </div>
               </div>
               <div className="mp-habit-footer">
-                <button className="mp-habit-cta" onClick={() => navigate('/onboarding')}>
+                <button className="btn--tonal" onClick={() => navigate('/onboarding')}>
                   다시 답변하기 <FontAwesomeIcon icon={faArrowRight} />
                 </button>
               </div>
