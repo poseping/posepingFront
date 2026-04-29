@@ -7,16 +7,6 @@ $_heading: #10213d;
 $_surface: #f8fafc;
 $_btn:     #f1f5f9;
 
-.my-page {
-  width: min(1180px, 100%);
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  padding: 2rem;
-
-  @media (max-width: 768px) { padding: 1rem; }
-}
-
 // ─── Kicker ───────────────────────────────────────────────────────────────
 .mp-kicker {
   margin: 0 0 0.35rem;

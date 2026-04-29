@@ -24,17 +24,6 @@ $_danger-fg:  #b91c1c;
 }
 
 
-// ─── Page Layout ──────────────────────────────────────────────────────────
-.main-page-content {
-  width: min(1180px, 100%);
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  padding: 2rem;
-
-  @media (max-width: 768px) { padding: 1rem; }
-}
-
 
 // ─── Layout ───────────────────────────────────────────────────────────────
 .webcam-page {

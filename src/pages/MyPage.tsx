@@ -141,7 +141,7 @@ export default function MyPage() {
   return (
     <>
       <PageHeader title="마이페이지" description="내 프로필과 활동 기록을 확인하세요" />
-      <main className="my-page">
+      <main className="page-content">
 
         {/* ── 회원 정보 카드 ── */}
         <section className="card">
