@@ -7,15 +7,13 @@ function MainPage() {
   const [isActive, setIsActive] = useState(false)
 
   return (
-    <div className="app">
+    <>
       <PageHeader title="실시간 분석" />
-      <main>
-        <div className="main-page-content">
-          <WebcamStream isActive={isActive} onToggle={() => setIsActive(!isActive)} />
-          <WebcamHistoryStats />
-        </div>
+      <main className="page-content">
+        <WebcamStream isActive={isActive} onToggle={() => setIsActive(!isActive)} />
+        <WebcamHistoryStats />
       </main>
-    </div>
+    </>
   )
 }
 
