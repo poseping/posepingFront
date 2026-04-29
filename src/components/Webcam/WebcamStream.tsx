@@ -85,9 +85,10 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
   const prevStatusRef = useRef<string | null>(null)
   const prevIssuesRef = useRef<Set<string>>(new Set())
 
-  const { data: profiles = [] } = useQuery({
+  const { data: profiles = [], isLoading: profilesLoading } = useQuery({
     queryKey: ['postureProfiles'],
     queryFn: getPostureProfiles,
+    staleTime: 1000 * 60,
   })
   const { data: alertTypes = [] } = useQuery({
     queryKey: ['alertTypes'],
@@ -148,13 +149,19 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
   const { mutateAsync: runUpdate } = useMutation({
     mutationFn: ({ profileId, data }: { profileId: number; data: Parameters<typeof updatePostureProfile>[1] }) =>
       updatePostureProfile(profileId, data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['postureProfiles'] }),
+    onSuccess: (updatedProfile) => {
+      queryClient.setQueryData(['postureProfiles'], (old: PostureProfile[] = []) =>
+        old.map((p) => (p.profile_id === updatedProfile.profile_id ? updatedProfile : p))
+      )
+    },
   })
 
   const { mutateAsync: runDelete } = useMutation({
     mutationFn: (profileId: number) => deletePostureProfile(profileId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['postureProfiles'] })
+    onSuccess: (_, profileId) => {
+      queryClient.setQueryData(['postureProfiles'], (old: PostureProfile[] = []) =>
+        old.filter((p) => p.profile_id !== profileId)
+      )
       setSelectedProfile(null)
     },
   })
@@ -324,14 +331,23 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
         <div className="card">
           <p className="wcam-kicker">기준 자세</p>
 
-          {!hasProfile ? (
+          {profilesLoading ? (
+            /* 로딩 중 스켈레톤 */
+            <div className="wcam-profile-loading">
+              <div className="wcam-profile-skeleton-header" />
+              <div className="wcam-profile-scroll">
+                <div className="wcam-profile-skeleton-item" />
+                <div className="wcam-profile-skeleton-item" />
+              </div>
+            </div>
+          ) : !hasProfile ? (
             /* 기준 자세 없음 — 빈 상태 */
             <div className="wcam-empty-state">
               <div className="wcam-empty-icon"><FontAwesomeIcon icon={faClipboardList} /></div>
               <h4>등록된 기준 자세가 없습니다</h4>
               <p>카메라 앞에 바르게 앉은 후 기준 자세를 등록하면 실시간 분석을 시작할 수 있습니다.</p>
               <button
-                className="primary-button"
+                className="btn--primary btn--lg btn--full"
                 onClick={openGuide}
               >
                 <FontAwesomeIcon icon={faCamera} />
@@ -365,7 +381,7 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
                   </div>
                 ))}
                 <button
-                  className="wcam-add-btn"
+                  className="btn--ghost btn--full wcam-add-btn"
                   onClick={openGuide}
                   disabled={!canAddMore}
                   title={!canAddMore ? '활성 기준 자세는 최대 3개까지 등록할 수 있습니다' : undefined}
@@ -382,7 +398,7 @@ export default function WebcamStream({ isActive, onToggle }: WebcamStreamProps) 
         {hasProfile && (
           <button
             onClick={onToggle}
-            className={isActive ? 'wcam-stop-btn' : 'primary-button'}
+            className={isActive ? 'btn--danger-outline btn--lg btn--full' : 'btn--primary btn--lg btn--full'}
           >
             <FontAwesomeIcon icon={isActive ? faPause : faPlay} />
             {isActive ? '분석 중지' : '분석 시작'}

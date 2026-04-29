@@ -691,7 +691,7 @@ export default function PhotoAnalysisStudio() {
                 </p>
               </div>
               <div className="photo-action-row">
-                <button className="primary-button" onClick={() => setActiveStep(2)}>
+                <button className="btn--primary btn--lg" onClick={() => setActiveStep(2)}>
                   내 자세 확인하기
                 </button>
               </div>
@@ -727,11 +727,11 @@ export default function PhotoAnalysisStudio() {
                   </div>
                 </section>
                 <div className="photo-action-row">
-                  <button className="photo-secondary-button" onClick={() => setActiveStep(1)}>
+                  <button className="btn--secondary btn--lg" onClick={() => setActiveStep(1)}>
                     이전
                   </button>
                   <button
-                      className="primary-button"
+                      className="btn--primary btn--lg"
                       onClick={() => analyzePhotosMutation.mutate()}
                       disabled={!frontFile || !sideFile || analyzePhotosMutation.isPending}
                   >
@@ -766,11 +766,11 @@ export default function PhotoAnalysisStudio() {
                   />
                 </section>
                 <section className="photo-action-row">
-                  <button className="photo-secondary-button" onClick={() => setActiveStep(2)}>
+                  <button className="btn--secondary btn--lg" onClick={() => setActiveStep(2)}>
                     이전
                   </button>
                   <button
-                      className="primary-button"
+                      className="btn--primary btn--lg"
                       onClick={() => finalAnalyzeMutation.mutate()}
                       disabled={frontLandmarks.length === 0 || sideLandmarks.length === 0 || finalAnalyzeMutation.isPending}
                   >
@@ -792,7 +792,7 @@ export default function PhotoAnalysisStudio() {
                 <div className="photo-save-actions">
                   {savedMessage && <p className="photo-save-message">{savedMessage}</p>}
                   <button
-                      className="photo-secondary-button"
+                      className="btn--secondary btn--lg"
                       onClick={() => {
                         setFinalResult(null)
                         setSavedMessage(null)
@@ -802,7 +802,7 @@ export default function PhotoAnalysisStudio() {
                     돌아가기
                   </button>
                   <button
-                      className="primary-button"
+                      className="btn--primary btn--lg"
                       onClick={() => saveMutation.mutate()}
                       disabled={!finalResult.can_save || !finalResult.save_token || saveMutation.isPending}
                   >

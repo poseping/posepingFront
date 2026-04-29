@@ -175,6 +175,40 @@ $_danger-fg:  #b91c1c;
 .wcam-comment-error { color: #b91c1c; }
 
 
+// ─── Profile Loading Skeleton ─────────────────────────────────────────────
+@keyframes wcam-shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position:  200% 0; }
+}
+
+%wcam-skeleton {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: wcam-shimmer 1.4s ease-in-out infinite;
+}
+
+.wcam-profile-loading {
+  padding: 0.25rem 0;
+}
+
+.wcam-profile-skeleton-header {
+  height: 18px;
+  width: 100px;
+  border-radius: 8px;
+  margin-bottom: 0.85rem;
+  @extend %wcam-skeleton;
+}
+
+.wcam-profile-skeleton-item {
+  flex: 0 0 calc((100% - 1.5rem) / 3);
+  min-width: 0;
+  height: 76px;
+  border-radius: 18px;
+  scroll-snap-align: start;
+  @extend %wcam-skeleton;
+}
+
+
 // ─── Profile List ─────────────────────────────────────────────────────────
 .wcam-profile-list-header {
   display: flex;
@@ -293,84 +327,26 @@ $_danger-fg:  #b91c1c;
 }
 
 
-// ─── Buttons ──────────────────────────────────────────────────────────────
-// Primary gradient — guide next / guide register
-.guide-btn-next,
-.guide-btn-register {
-  border: none;
-  font-weight: 800;
-  cursor: pointer;
-  background: linear-gradient(135deg, #0667bb 0%, #08aaab 100%);
-  color: #fff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
-}
-
-.webcam-right > .primary-button,
-.wcam-empty-state .primary-button {
-  width: 100%;
-}
-
-.wcam-stop-btn {
-  width: 100%;
-  border: none;
-  border-radius: 14px;
-  padding: 0.95rem 1.35rem;
-  font-size: 0.95rem;
-  font-weight: 800;
-  cursor: pointer;
-  background: $_danger-bg;
-  color: $_danger-fg;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-
-  &:hover { transform: translateY(-1px); background: #fecaca; }
-}
-
+// ─── Add Button (layout override only — variant handled by btn--ghost) ────
 .wcam-add-btn {
-  padding: 0.9rem;
-  border-radius: 18px;
-  background: transparent;
-  border: 2px dashed #cbd5e1;
-  color: var(--muted-foreground);
-  font-size: 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   gap: 0.3rem;
-  transition: border-color 0.2s ease, color 0.2s ease;
-
-  &:hover    { border-color: var(--primary); color: var(--primary); }
-  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  border-radius: 18px;
+  padding: 0.9rem;
 
   .wcam-add-btn-icon { font-size: 1.3rem; line-height: 1; }
 }
 
-// FontAwesome — standalone icon buttons use brand color, gradient buttons inherit
+// FontAwesome — non-button icon contexts use brand color; primary buttons inherit
 .wcam-empty-icon,
 .wcam-add-btn-icon,
-.wcam-modal-icon-btn,
-.wcam-modal-close-btn,
-.guide-close,
 .guide-step-icon,
-.guide-step-tip,
-.guide-btn-back {
+.guide-step-tip {
   .svg-inline--fa { color: #0667bb; }
 }
 
-.primary-button,
-.guide-countdown-badge,
-.guide-btn-next,
-.guide-btn-register {
+.btn--primary,
+.guide-countdown-badge {
   .svg-inline--fa { color: inherit; }
 }
 
@@ -425,38 +401,6 @@ $_danger-fg:  #b91c1c;
   white-space: nowrap;
 }
 
-.wcam-modal-icon-btn {
-  flex-shrink: 0;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 0.88rem;
-  padding: 0.25rem;
-  border-radius: 8px;
-  line-height: 1;
-  transition: background 0.15s;
-
-  &:hover { background: $_btn; }
-}
-
-.wcam-modal-close-btn {
-  flex-shrink: 0;
-  background: $_btn;
-  border: none;
-  cursor: pointer;
-  font-size: 0.82rem;
-  color: var(--muted-foreground);
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  transition: background 0.15s, color 0.15s;
-
-  &:hover { background: var(--border); color: #1e293b; }
-}
 
 .wcam-modal-name-input {
   flex: 1;
@@ -546,36 +490,6 @@ $_danger-fg:  #b91c1c;
 
 .wcam-modal-error { font-size: 0.78rem; color: var(--destructive); margin-top: 0.4rem; }
 
-.wcam-modal-action-btn {
-  border: none;
-  border-radius: 10px;
-  padding: 0.4rem 0.85rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: opacity 0.15s;
-
-  &.save           { background: var(--primary); color: #fff; }
-  &.cancel         { background: $_btn; color: #475569; }
-  &.delete-confirm { background: var(--destructive); color: #fff; }
-  &:disabled       { opacity: 0.55; cursor: not-allowed; }
-}
-
-.wcam-modal-delete-btn {
-  width: 100%;
-  border: 1.5px solid #fecaca;
-  background: #fff5f5;
-  color: #dc2626;
-  border-radius: 12px;
-  padding: 0.7rem;
-  font-size: 0.9rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-
-  &:hover { background: $_danger-bg; border-color: #fca5a5; }
-}
 
 .wcam-modal-confirm-text { margin: 0 0 0.75rem; font-size: 0.88rem; color: #dc2626; font-weight: 600; }
 .wcam-modal-confirm-row  { display: flex; gap: 0.5rem; justify-content: flex-end; }
@@ -632,25 +546,6 @@ $_danger-fg:  #b91c1c;
   &.active          { transform: scale(1.25); }
 }
 
-.guide-close {
-  background: $_btn;
-  border: none;
-  cursor: pointer;
-  font-size: 0.82rem;
-  color: var(--muted-foreground);
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  flex-shrink: 0;
-  transition: background 0.15s, color 0.15s;
-
-  &:hover:not(:disabled) { background: var(--border); color: #1e293b; }
-  &:disabled             { opacity: 0.4; cursor: not-allowed; }
-}
 
 .guide-body {
   display: grid;
@@ -745,35 +640,6 @@ $_danger-fg:  #b91c1c;
 
 .guide-footer-right { margin-left: auto; }
 
-.guide-btn-back {
-  background: $_btn;
-  border: none;
-  border-radius: 12px;
-  padding: 0.75rem 1.1rem;
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #475569;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  transition: background 0.15s;
-
-  &:hover { background: var(--border); }
-}
-
-.guide-btn-next,
-.guide-btn-register {
-  border-radius: 12px;
-  padding: 0.75rem 1.4rem;
-  font-size: 0.9rem;
-  box-shadow: 0 8px 20px rgba(8, 145, 178, 0.2);
-  white-space: nowrap;
-
-  &:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 12px 24px rgba(8, 145, 178, 0.3); }
-}
-
-.guide-btn-register:disabled { opacity: 0.65; cursor: not-allowed; transform: none; box-shadow: none; }
 
 
 // ─── Stretch Reminder Bar ─────────────────────────────────────────────────

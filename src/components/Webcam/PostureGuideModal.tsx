@@ -127,7 +127,7 @@ export default function PostureGuideModal({ videoRef, onClose, onComplete }: Pos
               <div key={i} className={`guide-dot ${i < step ? 'done' : i === step ? 'active' : ''}`} />
             ))}
           </div>
-          <button className="guide-close" onClick={onClose} disabled={isBusy}>
+          <button className="btn-icon btn-icon--circle" onClick={onClose} disabled={isBusy}>
             <FontAwesomeIcon icon={faXmark} />
           </button>
         </div>
@@ -167,7 +167,7 @@ export default function PostureGuideModal({ videoRef, onClose, onComplete }: Pos
         {/* 푸터 */}
         <div className="guide-footer">
           {step > 0 && !isBusy && status !== 'error' && (
-            <button className="guide-btn-back" onClick={() => setStep((s) => s - 1)}>
+            <button className="btn--secondary" onClick={() => setStep((s) => s - 1)}>
               <FontAwesomeIcon icon={faArrowLeft} />
               이전
             </button>
@@ -175,30 +175,30 @@ export default function PostureGuideModal({ videoRef, onClose, onComplete }: Pos
 
           <div className="guide-footer-right">
             {!isLastStep && (
-              <button className="guide-btn-next" onClick={() => setStep((s) => s + 1)}>
+              <button className="btn--primary" onClick={() => setStep((s) => s + 1)}>
                 다음
                 <FontAwesomeIcon icon={faArrowRight} />
               </button>
             )}
             {isLastStep && status === 'idle' && !isCountingDown && (
-              <button className="guide-btn-register" onClick={() => setCountdown(3)}>
+              <button className="btn--primary" onClick={() => setCountdown(3)}>
                 <FontAwesomeIcon icon={faCamera} />
                 지금 등록하기
               </button>
             )}
             {isLastStep && isCountingDown && (
-              <button className="guide-btn-register" disabled>
+              <button className="btn--primary" disabled>
                 {countdown}초 후 자동 등록...
               </button>
             )}
             {isLastStep && status === 'capturing' && (
-              <button className="guide-btn-register" disabled>
+              <button className="btn--primary" disabled>
                 등록 중...
               </button>
             )}
             {status === 'error' && (
               <button
-                className="guide-btn-register"
+                className="btn--primary"
                 onClick={() => { setStatus('idle'); setErrorMsg(null); setCountdown(null) }}
               >
                 다시 시도

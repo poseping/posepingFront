@@ -24,7 +24,7 @@ export default function HomePage() {
               <h2>AI 생활습관 진단</h2>
               <p>AI와 대화하며 앉는 습관, 운동 패턴, 수면 환경을 점검하고 자세 개선에 필요한 생활습관을 찾아보세요.</p>
             </div>
-            <Link className="primary-button home-action-card__button" to="/onboarding">
+            <Link className="btn--primary home-action-card__button" to="/onboarding">
               AI와 대화하기
             </Link>
           </section>
@@ -35,7 +35,7 @@ export default function HomePage() {
               <h2>자세 분석</h2>
               <p>사진이나 카메라로 현재 자세를 분석하고 목, 어깨, 척추 정렬 상태를 확인하세요.</p>
             </div>
-            <Link className="primary-button home-action-card__button" to="/main">
+            <Link className="btn--primary home-action-card__button" to="/main">
               분석하러 가기
             </Link>
           </section>
@@ -46,7 +46,7 @@ export default function HomePage() {
               <h2>기록 확인</h2>
               <p>누적된 분석 기록을 살펴보고 자세 변화와 개선 흐름을 한눈에 확인하세요.</p>
             </div>
-            <Link className="primary-button home-action-card__button" to="/history">
+            <Link className="btn--primary home-action-card__button" to="/history">
               기록 보러 가기
             </Link>
           </section>

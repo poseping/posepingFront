@@ -127,11 +127,10 @@
   backdrop-filter: blur(10px);
 }
 
-.home-action-card__button:hover {
+.home-action-card .home-action-card__button:hover {
   background: #ffffff;
   color: var(--home-card-accent);
-  box-shadow:
-    0 18px 34px rgba(15, 23, 42, 0.14);
+  box-shadow: 0 18px 34px rgba(15, 23, 42, 0.14);
 }
 
 @media (max-width: 767px) {

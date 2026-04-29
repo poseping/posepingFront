@@ -1,68 +1,83 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { useMutation } from '@tanstack/react-query'
-import { getAssistantErrorMessage, getWebcamComment } from '../services/assistantApi'
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import {
+  getAssistantErrorMessage,
+  getWebcamComment,
+} from "../services/assistantApi";
+
+const BAD_POSTURE_THRESHOLD_MS = 10_000;
 
 export interface WebcamAssistantAnalyzeInput {
-  status: string
-  deviation_score: number
-  issues: string[]
-  profile_name: string
-  ai_context?: Record<string, unknown>
-  judgement_signature?: string
+  status: string;
+  deviation_score: number;
+  issues: string[];
+  profile_name: string;
+  ai_context?: Record<string, unknown>;
+  judgement_signature?: string;
 }
 
 export function useWebcamAssistantComment(isSessionActive: boolean) {
-  const previousJudgementSignatureRef = useRef<string | null>(null)
-  const pendingJudgementSignatureRef = useRef<string | null>(null)
-  const [assistantComment, setAssistantComment] = useState<string | null>(null)
-  const [assistantError, setAssistantError] = useState<string | null>(null)
+  const badPostureStartRef = useRef<number | null>(null);
+  const [assistantComment, setAssistantComment] = useState<string | null>(null);
+  const [assistantError, setAssistantError] = useState<string | null>(null);
 
-  const { mutate: requestWebcamComment, isPending: isAssistantCommentPending } = useMutation({
-    mutationFn: getWebcamComment,
-    onSuccess: (data, variables) => {
-      pendingJudgementSignatureRef.current = null
-      previousJudgementSignatureRef.current = data.judgement_signature || variables.judgement_signature
-      if (data.requested && data.comment) {
-        setAssistantComment(data.comment)
-      }
-      setAssistantError(null)
-    },
-    onError: (error) => {
-      pendingJudgementSignatureRef.current = null
-      setAssistantError(getAssistantErrorMessage(error, '웹캠 코멘트를 불러오지 못했습니다.'))
-    },
-  })
+  const { mutate: requestWebcamComment, isPending: isAssistantCommentPending } =
+    useMutation({
+      mutationFn: getWebcamComment,
+      onSuccess: (data) => {
+        if (data.requested && data.comment) {
+          setAssistantComment(data.comment);
+        }
+        setAssistantError(null);
+      },
+      onError: (error) => {
+        setAssistantError(
+          getAssistantErrorMessage(error, "웹캠 코멘트를 불러오지 못했습니다."),
+        );
+      },
+    });
 
   useEffect(() => {
     if (!isSessionActive) {
-      previousJudgementSignatureRef.current = null
-      pendingJudgementSignatureRef.current = null
+      badPostureStartRef.current = null;
     }
-  }, [isSessionActive])
+  }, [isSessionActive]);
 
   const handleAnalyzeResult = (result: WebcamAssistantAnalyzeInput) => {
-    if (!result.judgement_signature) return
-    if (result.judgement_signature === previousJudgementSignatureRef.current) return
-    if (result.judgement_signature === pendingJudgementSignatureRef.current) return
+    const isBadPosture = result.status === "warning" || result.status === "bad";
 
-    pendingJudgementSignatureRef.current = result.judgement_signature
+    if (!isBadPosture) {
+      badPostureStartRef.current = null;
+      return;
+    }
+
+    if (badPostureStartRef.current === null) {
+      badPostureStartRef.current = Date.now();
+      return;
+    }
+
+    const elapsed = Date.now() - badPostureStartRef.current;
+    if (elapsed < BAD_POSTURE_THRESHOLD_MS) return;
+    if (isAssistantCommentPending) return;
+
+    badPostureStartRef.current = null;
+
     requestWebcamComment({
       status: result.status,
       deviation_score: result.deviation_score,
       issues: result.issues,
       profile_name: result.profile_name,
       ai_context: result.ai_context,
-      judgement_signature: result.judgement_signature,
-      previous_judgement_signature: previousJudgementSignatureRef.current,
-    })
-  }
+      judgement_signature: String(Date.now()),
+      previous_judgement_signature: null,
+    });
+  };
 
   const resetAssistantComment = useCallback(() => {
-    previousJudgementSignatureRef.current = null
-    pendingJudgementSignatureRef.current = null
-    setAssistantComment(null)
-    setAssistantError(null)
-  }, [])
+    badPostureStartRef.current = null;
+    setAssistantComment(null);
+    setAssistantError(null);
+  }, []);
 
   return {
     assistantComment,
@@ -70,5 +85,5 @@ export function useWebcamAssistantComment(isSessionActive: boolean) {
     isAssistantCommentPending,
     handleAnalyzeResult,
     resetAssistantComment,
-  }
+  };
 }

@@ -137,11 +137,11 @@ export default function PostureProfileModal({ profile, onClose, onUpdate, onDele
                 onKeyDown={(e) => e.key === 'Enter' && handleSaveName()}
                 autoFocus
               />
-              <button className="wcam-modal-action-btn save" onClick={handleSaveName} disabled={saving}>
+              <button className="btn--primary btn--sm" onClick={handleSaveName} disabled={saving}>
                 {saving ? '저장 중' : '저장'}
               </button>
               <button
-                className="wcam-modal-action-btn cancel"
+                className="btn--secondary btn--sm"
                 onClick={() => { setEditingName(false); setNameValue(profile.profile_name) }}
               >
                 취소
@@ -150,12 +150,12 @@ export default function PostureProfileModal({ profile, onClose, onUpdate, onDele
           ) : (
             <div className="wcam-modal-name-row">
               <h2 className="wcam-modal-title">{nameValue}</h2>
-              <button className="wcam-modal-icon-btn" onClick={() => setEditingName(true)} title="이름 수정">
+              <button className="btn-icon" onClick={() => setEditingName(true)} title="이름 수정">
                 <FontAwesomeIcon icon={faPen} />
               </button>
             </div>
           )}
-          <button className="wcam-modal-close-btn" onClick={onClose}>
+          <button className="btn-icon btn-icon--circle" onClick={onClose}>
             <FontAwesomeIcon icon={faXmark} />
           </button>
         </div>
@@ -194,16 +194,16 @@ export default function PostureProfileModal({ profile, onClose, onUpdate, onDele
           <div className="wcam-modal-confirm">
             <p className="wcam-modal-confirm-text">이 기준 자세를 삭제할까요? 되돌릴 수 없습니다.</p>
             <div className="wcam-modal-confirm-row">
-              <button className="wcam-modal-action-btn cancel" onClick={() => setConfirmDelete(false)}>
+              <button className="btn--secondary btn--sm" onClick={() => setConfirmDelete(false)}>
                 취소
               </button>
-              <button className="wcam-modal-action-btn delete-confirm" onClick={handleDelete} disabled={deleting}>
+              <button className="btn--danger btn--sm" onClick={handleDelete} disabled={deleting}>
                 {deleting ? '삭제 중...' : '삭제'}
               </button>
             </div>
           </div>
         ) : (
-          <button className="wcam-modal-delete-btn" onClick={handleDelete}>
+          <button className="btn--danger-outline btn--full" onClick={handleDelete}>
             삭제하기
           </button>
         )}

@@ -43,33 +43,120 @@
   padding: 1.5rem;
 }
 
-.primary-button {
+// ── Button System ─────────────────────────────────────────────────────────
+// 사용법: variant 클래스 하나만 쓰거나, 필요 시 size/width modifier 조합
+//   <button className="btn--primary btn--lg btn--full">
+//   <button className="btn-icon btn-icon--circle">
+
+// 공통 베이스 — 직접 사용 금지, variant 클래스들이 @extend로 가져감
+%btn-base {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
   border: none;
-  border-radius: 14px;
-  padding: 0.95rem 1.35rem;
+  border-radius: 12px;
+  padding: 0.7rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease, background 0.15s ease;
+
+  &:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+}
+
+// 주요 동작 CTA (분석 시작, 저장, 다음 등 핵심 액션)
+.btn--primary {
+  @extend %btn-base;
   background: linear-gradient(135deg, #0667bb 0%, #08aaab 100%);
   color: #fff;
-  box-shadow: 0 14px 28px rgba(8, 145, 178, 0.22);
+  box-shadow: 0 8px 20px rgba(8, 145, 178, 0.22);
+  &:hover:not(:disabled) { box-shadow: 0 12px 28px rgba(8, 145, 178, 0.32); transform: translateY(-1px); }
+}
+
+// 보조 액션 (이전, 취소, 로그아웃 등 primary 옆에 쌍으로 쓰이는 버튼)
+.btn--secondary {
+  @extend %btn-base;
+  background: #f1f5f9;
+  color: #334155;
+  &:hover:not(:disabled) { background: #e2e8f0; }
+}
+
+// 부드러운 강조 (primary 색상이지만 배경이 연한 경우, 예: 마이페이지 재답변 버튼)
+.btn--tonal {
+  @extend %btn-base;
+  background: var(--secondary);
+  color: var(--primary);
+  &:hover:not(:disabled) { opacity: 0.75; }
+}
+
+// 파괴적 확정 액션 (회원 탈퇴 확인, 삭제 확인 등 되돌릴 수 없는 동작)
+.btn--danger {
+  @extend %btn-base;
+  background: var(--destructive);
+  color: #fff;
+  &:hover:not(:disabled) { opacity: 0.88; }
+}
+
+// 파괴적 예고 버튼 (삭제하기, 분석 중지 등 위험하지만 확정 전 단계)
+.btn--danger-outline {
+  @extend %btn-base;
+  background: #fff5f5;
+  color: var(--destructive);
+  border: 1px solid #fecaca;
+  &:hover:not(:disabled) { background: #fee2e2; border-color: #fca5a5; }
+}
+
+// 항목 추가 버튼 (점선 테두리, 예: 기준 자세 추가)
+.btn--ghost {
+  @extend %btn-base;
+  background: transparent;
+  color: var(--muted-foreground);
+  border: 2px dashed #cbd5e1;
+  &:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+  &:disabled { opacity: 0.5; }
+}
+
+// 사이즈 modifier — variant 클래스와 함께 사용
+// btn--sm: 모달 내 작은 액션 버튼 / btn--lg: 페이지 레벨 큰 CTA
+.btn--sm  { padding: 0.4rem 0.85rem;  font-size: 0.82rem; border-radius: 10px; }
+.btn--lg  { padding: 0.95rem 1.35rem; font-size: 0.95rem; font-weight: 800; border-radius: 14px; }
+// 너비를 부모에 꽉 채울 때
+.btn--full { width: 100%; }
+
+// 아이콘 전용 버튼 베이스 — 텍스트 없이 아이콘만 들어가는 버튼
+%btn-icon-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
   cursor: pointer;
-  font-size: 0.95rem;
-  font-weight: 800;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  border-radius: 8px;
+  padding: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+  line-height: 1;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+  &:hover   { background: #f1f5f9; color: #1e293b; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
-.primary-button:hover {
-  box-shadow: 0 18px 32px rgba(8, 145, 178, 0.32);
-  transform: translateY(-1px);
-}
+// 아이콘 버튼 — 사각형 (수정 연필, 이름 편집 등 인라인 아이콘 버튼)
+.btn-icon { @extend %btn-icon-base; }
 
-.primary-button:disabled {
-  box-shadow: none;
-  cursor: not-allowed;
-  opacity: 0.55;
-  transform: none;
+// 아이콘 버튼 — 원형 (모달 닫기 X 버튼)
+// btn-icon 과 함께 사용: className="btn-icon btn-icon--circle"
+.btn-icon--circle {
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 0.82rem;
+  background: #f1f5f9;
+  &:hover { background: var(--border); }
 }
 
 .page-content {

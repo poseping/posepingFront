@@ -10,11 +10,15 @@ import {
   faXmark,
   faRightFromBracket,
   faTrash,
+  faChair,
+  faDumbbell,
+  faHeartPulse,
+  faArrowRight,
 } from '@fortawesome/free-solid-svg-icons'
 import PageHeader from '../components/PageHeader'
 import { logout, loginSuccess } from '../store/authSlice'
 import { clearAuth, saveUserInfo } from '../services/authService'
-import { updateNickname, deleteAccount } from '../services/memberApi'
+import { updateNickname, deleteAccount, getLifestyleHabits } from '../services/memberApi'
 import { getWebcamHistoryByPeriod, type HistoryPeriod } from '../services/webcamApi'
 import { getPhotoAnalysisHistory } from '../services/photoAnalysisApi'
 import type { RootState } from '../store/store'
@@ -42,6 +46,12 @@ export default function MyPage() {
   const [editingNickname, setEditingNickname] = useState(false)
   const [nicknameInput, setNicknameInput] = useState(user?.nickname ?? '')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
+  const { data: habitData, isLoading: habitLoading } = useQuery({
+    queryKey: ['lifestyle-habit'],
+    queryFn: getLifestyleHabits,
+    staleTime: 5 * 60 * 1000,
+  })
 
   const { data: historyData, isLoading: historyLoading } = useQuery({
     queryKey: ['webcam-history-mypage', period],
@@ -168,13 +178,13 @@ export default function MyPage() {
                     }}
                   />
                   <button
-                    className="mp-icon-btn"
+                    className="btn-icon"
                     onClick={handleNicknameSave}
                     disabled={nicknameMutation.isPending}
                   >
                     <FontAwesomeIcon icon={faCheck} />
                   </button>
-                  <button className="mp-icon-btn" onClick={handleNicknameCancel}>
+                  <button className="btn-icon" onClick={handleNicknameCancel}>
                     <FontAwesomeIcon icon={faXmark} />
                   </button>
                 </div>
@@ -182,7 +192,7 @@ export default function MyPage() {
                 <div className="mp-nickname-row">
                   <h2 className="mp-nickname">{user?.nickname ?? '사용자'}</h2>
                   <button
-                    className="mp-icon-btn"
+                    className="btn-icon"
                     onClick={() => {
                       setNicknameInput(user?.nickname ?? '')
                       setEditingNickname(true)
@@ -200,12 +210,12 @@ export default function MyPage() {
           </div>
 
           <div className="mp-profile-actions">
-            <button className="mp-action-btn mp-logout-btn" onClick={handleLogout}>
+            <button className="btn--secondary" onClick={handleLogout}>
               <FontAwesomeIcon icon={faRightFromBracket} />
               로그아웃
             </button>
             <button
-              className="mp-action-btn mp-delete-btn"
+              className="btn--danger-outline"
               onClick={() => setShowDeleteConfirm(true)}
             >
               <FontAwesomeIcon icon={faTrash} />
@@ -218,13 +228,13 @@ export default function MyPage() {
               <p>정말로 탈퇴하시겠어요? 모든 데이터가 삭제됩니다.</p>
               <div className="mp-confirm-row">
                 <button
-                  className="mp-action-btn mp-cancel-btn"
+                  className="btn--secondary"
                   onClick={() => setShowDeleteConfirm(false)}
                 >
                   취소
                 </button>
                 <button
-                  className="mp-action-btn mp-delete-confirm-btn"
+                  className="btn--danger"
                   onClick={() => deleteMutation.mutate()}
                   disabled={deleteMutation.isPending}
                 >
@@ -232,6 +242,52 @@ export default function MyPage() {
                 </button>
               </div>
             </div>
+          )}
+        </section>
+
+        {/* ── 생활 습관 ── */}
+        <section className="card">
+          <p className="mp-kicker">My Habits</p>
+          <h3 className="mp-stats-title" style={{ marginBottom: '1.25rem' }}>생활 습관 정보</h3>
+
+          {habitLoading && <div className="mp-stats-empty">불러오는 중...</div>}
+
+          {!habitLoading && !habitData && (
+            <>
+              <div className="mp-stats-empty">아직 생활 습관 정보가 없어요.</div>
+              <div className="mp-habit-footer">
+                <button className="btn--tonal" onClick={() => navigate('/assistant')}>
+                  분석 시작하기 <FontAwesomeIcon icon={faArrowRight} />
+                </button>
+              </div>
+            </>
+          )}
+
+          {!habitLoading && habitData && (
+            <>
+              <div className="mp-habit-list">
+                <div className="mp-habit-row">
+                  <div className="mp-habit-icon"><FontAwesomeIcon icon={faChair} /></div>
+                  <span className="mp-habit-label">하루 앉는 시간</span>
+                  <span className="mp-habit-value">{habitData.sitting_hours_per_day ?? '-'}</span>
+                </div>
+                <div className="mp-habit-row">
+                  <div className="mp-habit-icon"><FontAwesomeIcon icon={faDumbbell} /></div>
+                  <span className="mp-habit-label">주간 운동 횟수</span>
+                  <span className="mp-habit-value">{habitData.exercise_days_per_week ?? '-'}</span>
+                </div>
+                <div className="mp-habit-row">
+                  <div className="mp-habit-icon"><FontAwesomeIcon icon={faHeartPulse} /></div>
+                  <span className="mp-habit-label">불편한 부위</span>
+                  <span className="mp-habit-value">{habitData.pain_areas ?? '-'}</span>
+                </div>
+              </div>
+              <div className="mp-habit-footer">
+                <button className="btn--tonal" onClick={() => navigate('/onboarding')}>
+                  다시 답변하기 <FontAwesomeIcon icon={faArrowRight} />
+                </button>
+              </div>
+            </>
           )}
         </section>
 
