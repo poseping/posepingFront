@@ -19,21 +19,21 @@ const choices: Array<{
   {
     to: '/onboarding',
     icon: faComments,
-    title: 'AI와 생활 습관 분석',
-    description: '앉는 시간, 운동 빈도, 불편한 부위를 대화로 정리합니다.',
+    title: 'AI와 내 생활 습관 분석',
+    description: '자세를 분석하기 전 먼저 생활 습관을 파악해요.',
     primary: true,
   },
   {
     to: '/main',
     icon: faCamera,
-    title: '실시간 분석으로 이동',
-    description: '웹캠으로 현재 자세를 바로 확인합니다.',
+    title: '실시간 자세 분석',
+    description: '웹캠으로 실시간 자세를 분석하고 피드백을 받아요.',
   },
   {
     to: '/history',
     icon: faImage,
     title: '사진 분석으로 이동',
-    description: '정면과 측면 사진으로 자세를 분석합니다.',
+    description: '사진을 업로드해서 내 자세를 분석하고 기록을 남겨봐요.',
   },
 ]
 
@@ -55,7 +55,6 @@ export default function FirstLoginChoicePage() {
       <PageHeader title="처음 시작하기" description="원하는 분석 방법을 선택하세요." />
       <main className="first-login-choice">
         <section className="first-login-choice__intro">
-          <p className="first-login-choice__eyebrow">Welcome</p>
           <h1>척추PING을 어떻게 시작할까요?</h1>
           <p>생활 습관 분석을 먼저 진행하거나, 건너뛰고 바로 자세 분석을 시작할 수 있습니다.</p>
         </section>

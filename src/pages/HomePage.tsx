@@ -1,17 +1,21 @@
 import { Link } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCamera, faChartColumn, faComments } from '@fortawesome/free-solid-svg-icons'
 import PageHeader from '../components/PageHeader'
+import { RootState } from '../store/store'
 
 export default function HomePage() {
+  const user = useSelector((state: RootState) => state.auth.user)
+  const nickname = user?.nickname?.trim() || '사용자'
+
   return (
     <>
       <PageHeader title="" description="" />
       <main>
-        <section className="home-hero">
-          <p className="home-hero__eyebrow">Posture care starts here</p>
-          <h2>오늘의 자세 관리, 무엇부터 시작할까요?</h2>
-          <p>생활습관 점검부터 자세 분석, 기록 확인까지 척추PING에서 이어서 관리하세요.</p>
+        <section className="home-greeting">
+          <p>안녕하세요</p>
+          <h2>{nickname}님!</h2>
         </section>
         <div className="home-page">
           <section className="card home-action-card">

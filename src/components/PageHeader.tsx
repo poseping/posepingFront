@@ -43,6 +43,7 @@ export default function PageHeader({ title, description }: PageHeaderProps) {
   const isAdmin = user?.role?.toLowerCase() === 'admin'
   const isAdminArea = location.pathname === '/admin' || location.pathname.startsWith('/admin/')
   const isHome = location.pathname === '/home'
+  const isFirstLogin = location.pathname === '/first-login'
   const visibleNavItems = isAdminArea ? adminNavItems : isAdmin ? [...navItems, adminNavItem] : navItems
 
   useEffect(() => {
@@ -59,6 +60,10 @@ export default function PageHeader({ title, description }: PageHeaderProps) {
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [isHome])
+
+  if (isFirstLogin) {
+    return null
+  }
 
   return (
     <header className={`page-header${isHome ? ' home-header' : ''}${isHome && isScrolled ? ' home-header--scrolled' : ''}`}>
