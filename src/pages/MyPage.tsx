@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faUser,
   faPen,
+  faRandom,
   faCheck,
   faXmark,
   faRightFromBracket,
@@ -18,7 +19,7 @@ import {
 import PageHeader from '../components/PageHeader'
 import { logout, loginSuccess } from '../store/authSlice'
 import { clearAuth, saveUserInfo } from '../services/authService'
-import { updateNickname, deleteAccount, getLifestyleHabits } from '../services/memberApi'
+import { getRandomNickname, updateNickname, deleteAccount, getLifestyleHabits } from '../services/memberApi'
 import { getWebcamHistoryByPeriod, type HistoryPeriod } from '../services/webcamApi'
 import { getPhotoAnalysisHistory } from '../services/photoAnalysisApi'
 import type { RootState } from '../store/store'
@@ -102,6 +103,13 @@ export default function MyPage() {
     return { total: analyses.length, loaded: analyses.length, good, warning, bad, neckRate, lastDate }
   }, [photoData])
 
+  const randomNicknameMutation = useMutation({
+    mutationFn: getRandomNickname,
+    onSuccess: (data) => {
+      setNicknameInput(data.nickname)
+    },
+  })
+
   const nicknameMutation = useMutation({
     mutationFn: (nickname: string) => updateNickname(nickname),
     onSuccess: (updatedUser) => {
@@ -124,6 +132,10 @@ export default function MyPage() {
     dispatch(logout())
     clearAuth()
     navigate('/login')
+  }
+
+  const handleNicknameRandomChange = () => {
+    randomNicknameMutation.mutate()
   }
 
   const handleNicknameSave = () => {
@@ -193,6 +205,13 @@ export default function MyPage() {
                       if (e.key === 'Escape') handleNicknameCancel()
                     }}
                   />
+                  <button
+                    className="btn-icon"
+                    onClick={handleNicknameRandomChange}
+                    disabled={randomNicknameMutation.isPending}
+                  >
+                    <FontAwesomeIcon icon={faRandom} />
+                  </button>
                   <button
                     className="btn-icon"
                     onClick={handleNicknameSave}
