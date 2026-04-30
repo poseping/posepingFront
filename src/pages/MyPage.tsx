@@ -153,9 +153,25 @@ export default function MyPage() {
       <PageHeader title="마이페이지" description="내 프로필과 활동 기록을 확인하세요" />
       <main className="page-content">
 
-        {/* ── 회원 정보 카드 ── */}
+        {/* ── 회원 정보 + 생활 습관 통합 카드 ── */}
         <section className="card">
-          <p className="mp-kicker">My Profile</p>
+          <div className="mp-profile-topbar">
+            <p className="mp-kicker">My Profile</p>
+            <div className="mp-profile-actions">
+              <button className="btn--secondary btn--sm" onClick={handleLogout}>
+                <FontAwesomeIcon icon={faRightFromBracket} />
+                로그아웃
+              </button>
+              <button
+                className="btn--danger-outline btn--sm"
+                onClick={() => setShowDeleteConfirm(true)}
+              >
+                <FontAwesomeIcon icon={faTrash} />
+                회원 탈퇴
+              </button>
+            </div>
+          </div>
+
           <div className="mp-profile-body">
             <div className="mp-avatar">
               {user?.profile_image_url
@@ -209,19 +225,49 @@ export default function MyPage() {
             </div>
           </div>
 
-          <div className="mp-profile-actions">
-            <button className="btn--secondary" onClick={handleLogout}>
-              <FontAwesomeIcon icon={faRightFromBracket} />
-              로그아웃
-            </button>
-            <button
-              className="btn--danger-outline"
-              onClick={() => setShowDeleteConfirm(true)}
-            >
-              <FontAwesomeIcon icon={faTrash} />
-              회원 탈퇴
-            </button>
+          <hr className="mp-section-divider" />
+
+          <div className="mp-habit-compact-header">
+            <p className="mp-kicker" style={{ margin: 0 }}>My Habits</p>
+            {!habitLoading && habitData && (
+              <button className="btn--tonal btn--sm" onClick={() => navigate('/onboarding')}>
+                다시 답변하기 <FontAwesomeIcon icon={faArrowRight} />
+              </button>
+            )}
           </div>
+
+          {habitLoading && (
+            <p className="mp-habit-loading">불러오는 중...</p>
+          )}
+
+          {!habitLoading && !habitData && (
+            <div className="mp-habit-empty-inline">
+              <span>아직 생활 습관 정보가 없어요.</span>
+              <button className="btn--tonal btn--sm" onClick={() => navigate('/onboarding')}>
+                분석 시작하기 <FontAwesomeIcon icon={faArrowRight} />
+              </button>
+            </div>
+          )}
+
+          {!habitLoading && habitData && (
+            <div className="mp-habit-chips">
+              <div className="mp-habit-chip">
+                <FontAwesomeIcon icon={faChair} />
+                <span className="mp-habit-chip-label">하루 앉는 시간</span>
+                <strong>{habitData.sitting_hours_per_day ?? '-'}</strong>
+              </div>
+              <div className="mp-habit-chip">
+                <FontAwesomeIcon icon={faDumbbell} />
+                <span className="mp-habit-chip-label">주간 운동</span>
+                <strong>{habitData.exercise_days_per_week ?? '-'}</strong>
+              </div>
+              <div className="mp-habit-chip">
+                <FontAwesomeIcon icon={faHeartPulse} />
+                <span className="mp-habit-chip-label">불편 부위</span>
+                <strong>{habitData.pain_areas ?? '-'}</strong>
+              </div>
+            </div>
+          )}
 
           {showDeleteConfirm && (
             <div className="mp-delete-confirm">
@@ -242,52 +288,6 @@ export default function MyPage() {
                 </button>
               </div>
             </div>
-          )}
-        </section>
-
-        {/* ── 생활 습관 ── */}
-        <section className="card">
-          <p className="mp-kicker">My Habits</p>
-          <h3 className="mp-stats-title" style={{ marginBottom: '1.25rem' }}>생활 습관 정보</h3>
-
-          {habitLoading && <div className="mp-stats-empty">불러오는 중...</div>}
-
-          {!habitLoading && !habitData && (
-            <>
-              <div className="mp-stats-empty">아직 생활 습관 정보가 없어요.</div>
-              <div className="mp-habit-footer">
-                <button className="btn--tonal" onClick={() => navigate('/assistant')}>
-                  분석 시작하기 <FontAwesomeIcon icon={faArrowRight} />
-                </button>
-              </div>
-            </>
-          )}
-
-          {!habitLoading && habitData && (
-            <>
-              <div className="mp-habit-list">
-                <div className="mp-habit-row">
-                  <div className="mp-habit-icon"><FontAwesomeIcon icon={faChair} /></div>
-                  <span className="mp-habit-label">하루 앉는 시간</span>
-                  <span className="mp-habit-value">{habitData.sitting_hours_per_day ?? '-'}</span>
-                </div>
-                <div className="mp-habit-row">
-                  <div className="mp-habit-icon"><FontAwesomeIcon icon={faDumbbell} /></div>
-                  <span className="mp-habit-label">주간 운동 횟수</span>
-                  <span className="mp-habit-value">{habitData.exercise_days_per_week ?? '-'}</span>
-                </div>
-                <div className="mp-habit-row">
-                  <div className="mp-habit-icon"><FontAwesomeIcon icon={faHeartPulse} /></div>
-                  <span className="mp-habit-label">불편한 부위</span>
-                  <span className="mp-habit-value">{habitData.pain_areas ?? '-'}</span>
-                </div>
-              </div>
-              <div className="mp-habit-footer">
-                <button className="btn--tonal" onClick={() => navigate('/onboarding')}>
-                  다시 답변하기 <FontAwesomeIcon icon={faArrowRight} />
-                </button>
-              </div>
-            </>
           )}
         </section>
 
