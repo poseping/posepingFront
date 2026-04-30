@@ -2,30 +2,30 @@ import { NavLink, useLocation } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
+  faAddressBook,
   faCamera,
-  faChartColumn,
-  faClipboardList,
-  faGear,
+  faChartBar,
+  faCircleUser,
+  faClipboard,
   faHouse,
-  faShieldHalved,
-  faUser,
-  faUsers,
-} from '@fortawesome/free-solid-svg-icons'
+  faIdCard,
+  faSun,
+} from '@fortawesome/free-regular-svg-icons'
 import { RootState } from '../store/store'
 
 const navItems = [
   { to: '/home', label: '홈', icon: faHouse },
   { to: '/main', label: '분석', icon: faCamera },
-  { to: '/history', label: '기록', icon: faChartColumn },
-  { to: '/mypage', label: '마이', icon: faUser },
-  { to: '/settings', label: '설정', icon: faGear },
+  { to: '/history', label: '기록', icon: faChartBar },
+  { to: '/mypage', label: '마이', icon: faCircleUser },
+  { to: '/settings', label: '설정', icon: faSun },
 ]
 
-const adminNavItem = { to: '/admin', label: '관리자', icon: faShieldHalved }
+const adminNavItem = { to: '/admin', label: '관리자', icon: faIdCard }
 
 const adminNavItems = [
-  { to: '/admin', label: '대시보드', icon: faClipboardList },
-  { to: '/admin/members', label: '회원', icon: faUsers },
+  { to: '/admin', label: '대시보드', icon: faClipboard },
+  { to: '/admin/members', label: '회원', icon: faAddressBook },
   { to: '/home', label: '포즈PING', icon: faHouse },
 ]
 

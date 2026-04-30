@@ -2,26 +2,16 @@
 .page-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: 0 1.25rem;
   height: 56px;
-  background: var(--primary);
   border-bottom: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
   position: sticky;
   top: 0;
   z-index: 40;
-}
-
-.home-header {
-  width: 100%;
-  background: rgba(0, 0, 0, 0.4);
-  position: fixed;
-  transition: background 0.3s;
-}
-
-.home-header--scrolled {
-  background: var(--primary);
+  backdrop-filter: blur(12px);
+  background-color: rgb(255 255 255 / 50%);
 }
 
 .page-header__left {
@@ -80,26 +70,56 @@
   }
 
   .page-header__nav-item {
+    position: relative;
+    isolation: isolate;
     display: flex;
     align-items: center;
     gap: 0.4rem;
     padding: 0.5rem 0.85rem;
     border-radius: 999px;
     text-decoration: none;
-    color: rgba(255, 255, 255, 0.75);
+    color: var(--foreground);
     font-size: 0.88rem;
     font-weight: 600;
-    transition: background 0.15s, color 0.15s;
+    transition: color 0.4s;
   }
 
-  .page-header__nav-item:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: #fff;
+  .page-header__nav-item::before {
+    content: '';
+    position: absolute;
+    inset: -0.55rem -0.7rem;
+    z-index: -1;
+    border-radius: 58% 42% 63% 37% / 46% 61% 39% 54%;
+    opacity: 0;
+    background:
+      radial-gradient(ellipse 42% 64% at 22% 44%, rgba(16, 185, 129, 0.76) 0%, rgba(16, 185, 129, 0.42) 42%, transparent 73%),
+      radial-gradient(ellipse 46% 58% at 54% 33%, rgba(8, 145, 178, 0.62) 0%, rgba(8, 145, 178, 0.32) 38%, transparent 68%),
+      radial-gradient(ellipse 34% 48% at 79% 61%, rgba(20, 184, 166, 0.56) 0%, rgba(20, 184, 166, 0.26) 44%, transparent 76%),
+      radial-gradient(ellipse 24% 32% at 42% 78%, rgba(15, 23, 42, 0.22) 0%, transparent 70%);
+    filter: blur(7px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    transform: translateX(4px) rotate(-2deg) scale(0.88);
   }
 
+  .page-header__nav-item:hover::before {
+    opacity: 1;
+    transform: translateX(4px) rotate(-2deg) scale(1);
+  }
+
+  .page-header__nav-item:hover,
   .page-header__nav-item--active {
-    background: rgba(255, 255, 255, 0.2);
     color: #fff;
+  }
+
+  .page-header__nav-item--active::before {
+    opacity: 1;
+    border-radius: 46% 54% 39% 61% / 57% 43% 58% 42%;
+    background:
+      radial-gradient(ellipse 46% 62% at 27% 43%, rgba(8, 145, 178, 0.88) 0%, rgba(8, 145, 178, 0.56) 42%, transparent 74%),
+      radial-gradient(ellipse 36% 54% at 69% 55%, rgba(147, 51, 234, 0.58) 0%, rgba(147, 51, 234, 0.34) 40%, transparent 72%),
+      radial-gradient(ellipse 31% 43% at 48% 74%, rgba(20, 184, 166, 0.54) 0%, rgba(20, 184, 166, 0.28) 45%, transparent 76%),
+      radial-gradient(ellipse 56% 70% at 53% 48%, rgba(15, 23, 42, 0.32) 0%, transparent 68%);
+    transform: translateX(4px) rotate(1.5deg) scale(1);
   }
 
   .page-header__nav-icon {
