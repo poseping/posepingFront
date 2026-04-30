@@ -245,6 +245,8 @@ body,
   min-height: 100vh;
   background: var(--background);
   position: relative;
+}
+.app-frame:has(.bottom-nav){
   padding-bottom: 64px
 }
 

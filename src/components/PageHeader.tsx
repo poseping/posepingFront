@@ -4,30 +4,30 @@ import { useSelector } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faCamera,
-  faChartColumn,
-  faClipboardList,
-  faGear,
+  faChartBar,
+  faClipboard,
   faHouse,
-  faShieldHalved,
-  faUser,
-  faUsers,
-} from '@fortawesome/free-solid-svg-icons'
+  faIdCard,
+  faAddressBook,
+  faCircleUser,
+  faSun,
+} from '@fortawesome/free-regular-svg-icons'
 import { RootState } from '../store/store'
 import '../styles/page-header.scss'
 
 const navItems = [
   { to: '/home', label: '홈', icon: faHouse },
   { to: '/main', label: '분석', icon: faCamera },
-  { to: '/history', label: '기록', icon: faChartColumn },
-  { to: '/mypage', label: '마이페이지', icon: faUser },
-  { to: '/settings', label: '설정', icon: faGear },
+  { to: '/history', label: '기록', icon: faChartBar },
+  { to: '/mypage', label: '마이페이지', icon: faCircleUser },
+  { to: '/settings', label: '설정', icon: faSun },
 ]
 
-const adminNavItem = { to: '/admin', label: '관리자', icon: faShieldHalved }
+const adminNavItem = { to: '/admin', label: '관리자', icon: faIdCard }
 
 const adminNavItems = [
-  { to: '/admin', label: '대시보드', icon: faClipboardList },
-  { to: '/admin/members', label: '회원', icon: faUsers },
+  { to: '/admin', label: '대시보드', icon: faClipboard },
+  { to: '/admin/members', label: '회원', icon: faAddressBook },
   { to: '/home', label: '포즈PING', icon: faHouse },
 ]
 
@@ -36,7 +36,7 @@ interface PageHeaderProps {
   description?: string
 }
 
-export default function PageHeader({ title, description }: PageHeaderProps) {
+export default function PageHeader({}: PageHeaderProps) {
   const user = useSelector((state: RootState) => state.auth.user)
   const location = useLocation()
   const [isScrolled, setIsScrolled] = useState(false)
@@ -67,10 +67,10 @@ export default function PageHeader({ title, description }: PageHeaderProps) {
 
   return (
     <header className={`page-header${isHome ? ' home-header' : ''}${isHome && isScrolled ? ' home-header--scrolled' : ''}`}>
-      <div className="page-header__left">
-        <h1 className="page-header__title">{title}</h1>
-        {description && <p className="page-header__desc">{description}</p>}
-      </div>
+      {/*<div className="page-header__left">*/}
+      {/*  <h1 className="page-header__title">{title}</h1>*/}
+      {/*  {description && <p className="page-header__desc">{description}</p>}*/}
+      {/*</div>*/}
 
       <nav className="page-header__nav">
         {visibleNavItems.map(({ to, label, icon }) => (
@@ -90,3 +90,4 @@ export default function PageHeader({ title, description }: PageHeaderProps) {
     </header>
   )
 }
+
