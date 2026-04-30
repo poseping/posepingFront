@@ -50,7 +50,7 @@ export function usePostureNotification() {
         .filter(Boolean)
         .join(", ") || FALLBACK_BODY[status];
 
-    new Notification("척추PIng", { body, icon: "/favicon.ico" });
+    new Notification("포즈PING", { body, icon: "/favicon.ico" });
     lastNotifiedAt.current[status] = now;
   }
 

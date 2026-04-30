@@ -18,17 +18,9 @@
 }
 
 .login-logo {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
-  background: var(--primary);
-  color: #fff;
-  font-size: 22px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 180px;
   margin-bottom: 4px;
+  object-fit: contain;
 }
 
 .login-title {
