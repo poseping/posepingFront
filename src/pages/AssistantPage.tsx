@@ -14,6 +14,7 @@ import {useSelector} from "react-redux";
 import {RootState} from "../store/store.ts";
 
 const REDIRECT_DELAY_SECONDS = 3
+const ASSISTANT_AVATAR_SRC = '/assets/logo/android-icon-48x48.png'
 
 export default function AssistantPage() {
   const navigate = useNavigate()
@@ -138,24 +139,56 @@ export default function AssistantPage() {
         <section className="onboarding-chat-card">
           <div className="onboarding-chat-messages">
             {initialMessages.slice(0, visibleInitialBubbleCount).map((message, index) => (
-              <article
+              <div
                 key={message}
                 ref={index === visibleInitialBubbleCount - 1 && chatHistory.length === 0 && !done ? setLatestMessageRef : undefined}
-                className="onboarding-chat-bubble onboarding-chat-bubble--assistant"
+                className="onboarding-chat-message-row onboarding-chat-message-row--assistant"
               >
-                <p>{message}</p>
-              </article>
+                <img
+                  className="onboarding-chat-avatar"
+                  src={ASSISTANT_AVATAR_SRC}
+                  alt=""
+                  aria-hidden="true"
+                />
+                <article className="onboarding-chat-bubble onboarding-chat-bubble--assistant">
+                  <p>{message}</p>
+                </article>
+              </div>
             ))}
 
-            {chatHistory.map((message, index) => (
-              <article
-                ref={index === chatHistory.length - 1 && !done ? setLatestMessageRef : undefined}
-                key={`${message.role}-${index}-${message.content.slice(0, 24)}`}
-                className={`onboarding-chat-bubble onboarding-chat-bubble--${message.role}`}
-              >
-                <p>{message.content}</p>
-              </article>
-            ))}
+            {chatHistory.map((message, index) => {
+              const isAssistant = message.role === 'assistant'
+
+              if (isAssistant) {
+                return (
+                  <div
+                    ref={index === chatHistory.length - 1 && !done ? setLatestMessageRef : undefined}
+                    key={`${message.role}-${index}-${message.content.slice(0, 24)}`}
+                    className="onboarding-chat-message-row onboarding-chat-message-row--assistant"
+                  >
+                    <img
+                      className="onboarding-chat-avatar"
+                      src={ASSISTANT_AVATAR_SRC}
+                      alt=""
+                      aria-hidden="true"
+                    />
+                    <article className="onboarding-chat-bubble onboarding-chat-bubble--assistant">
+                      <p>{message.content}</p>
+                    </article>
+                  </div>
+                )
+              }
+
+              return (
+                <article
+                  ref={index === chatHistory.length - 1 && !done ? setLatestMessageRef : undefined}
+                  key={`${message.role}-${index}-${message.content.slice(0, 24)}`}
+                  className={`onboarding-chat-bubble onboarding-chat-bubble--${message.role}`}
+                >
+                  <p>{message.content}</p>
+                </article>
+              )
+            })}
 
             {done && (
               <div

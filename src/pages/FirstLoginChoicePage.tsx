@@ -9,6 +9,8 @@ import '../styles/first-login-choice.scss'
 
 type ChoiceDestination = '/onboarding' | '/main' | '/history'
 
+const BRAND_LOGO_SRC = '/assets/logo/android-icon-192x192.png'
+
 const choices: Array<{
   to: ChoiceDestination
   icon: typeof faComments
@@ -55,7 +57,8 @@ export default function FirstLoginChoicePage() {
       <PageHeader title="처음 시작하기" description="원하는 분석 방법을 선택하세요." />
       <main className="first-login-choice">
         <section className="first-login-choice__intro">
-          <h1>척추PING을 어떻게 시작할까요?</h1>
+          <img className="first-login-choice__logo" src={BRAND_LOGO_SRC} alt="PosePing" />
+          <h1>포즈PING을 어떻게 시작할까요?</h1>
           <p>생활 습관 분석을 먼저 진행하거나, 건너뛰고 바로 자세 분석을 시작할 수 있습니다.</p>
         </section>
 
