@@ -86,7 +86,7 @@ export function getAssistantErrorMessage(error: unknown, fallbackMessage: string
   }
 
   if (status === 422 || status === 503) {
-    return '척추PING이 잠시 바쁜 것 같아요. 다시 물어봐주세요!'
+    return '포즈PING이 잠시 바쁜 것 같아요. 다시 물어봐주세요!'
   }
 
   if (error instanceof AssistantRequestTimeoutError) {
@@ -139,7 +139,7 @@ export const sendOnboardingChat = async (
     }
   }
 
-  throw new AssistantRequestTimeoutError('척추PING이 잠시 바쁜 것 같아요. 다시 물어봐주세요!')
+  throw new AssistantRequestTimeoutError('포즈PING이 잠시 바쁜 것 같아요. 다시 물어봐주세요!')
 }
 
 async function sendOnboardingChatAttempt(
@@ -178,7 +178,7 @@ async function sendOnboardingChatAttempt(
         timeoutMs: ONBOARDING_CHAT_TIMEOUT_MS,
       })
 
-      throw new AssistantRequestTimeoutError('척추PING이 잠시 바쁜 것 같아요. 다시 물어봐주세요!')
+      throw new AssistantRequestTimeoutError('포즈PING이 잠시 바쁜 것 같아요. 다시 물어봐주세요!')
     }
 
     throw error

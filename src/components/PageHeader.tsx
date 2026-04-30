@@ -28,7 +28,7 @@ const adminNavItem = { to: '/admin', label: '관리자', icon: faShieldHalved }
 const adminNavItems = [
   { to: '/admin', label: '대시보드', icon: faClipboardList },
   { to: '/admin/members', label: '회원', icon: faUsers },
-  { to: '/home', label: '척추PING', icon: faHouse },
+  { to: '/home', label: '포즈PING', icon: faHouse },
 ]
 
 interface PageHeaderProps {

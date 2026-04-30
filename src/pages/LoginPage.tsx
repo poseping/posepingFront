@@ -12,6 +12,8 @@ import { getPostLoginPath, saveToken, saveUserInfo } from '../services/authServi
 import apiClient from '../services/api'
 import '../styles/login.scss'
 
+const BRAND_LOGO_SRC = '/assets/logo/poseping_fill.png'
+
 declare global {
   interface Window {
     Kakao: any
@@ -179,8 +181,8 @@ export default function LoginPage() {
     <div className="login-page">
       {/* 로고 영역 */}
       <div className="login-hero">
-        <div className="login-logo">척</div>
-        <h1 className="login-title">척추Ping</h1>
+        <img className="login-logo" src={BRAND_LOGO_SRC} alt="PosePing" />
+        <h1 className="login-title">포즈PING</h1>
         <p className="login-desc">바른 자세 습관을 만들어드려요</p>
       </div>
 

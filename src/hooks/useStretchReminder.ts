@@ -82,7 +82,7 @@ export function useStretchReminder() {
 
     function fireNotification() {
       if (Notification.permission === "granted") {
-        new Notification("척추PIng — 스트레칭 시간", {
+        new Notification("포즈PING — 스트레칭 시간", {
           body: "자리에 앉은 지 오래됐어요. 잠깐 일어나 스트레칭해보세요!",
           icon: "/favicon.ico",
         });
