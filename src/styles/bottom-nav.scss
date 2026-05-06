@@ -3,7 +3,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 64px;
+  height: var(--bottom-nav-height);
   background-color: rgb(255 255 255 / 73%);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);

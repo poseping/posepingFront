@@ -1,7 +1,7 @@
 .first-login-choice {
   width: min(1080px, 100%);
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 2rem 4rem;
   min-height: calc(100svh - 2rem);
   display: flex;
   flex-direction: column;
@@ -130,7 +130,7 @@
 
 @media (max-width: 768px) {
   .first-login-choice {
-    padding: 1rem;
+    padding: 0 1rem 3rem;
   }
 
   .first-login-choice__grid {

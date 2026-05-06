@@ -26,6 +26,7 @@ export default function AssistantPage() {
   const [redirectCountdown, setRedirectCountdown] = useState<number | null>(null)
   const [visibleInitialBubbleCount, setVisibleInitialBubbleCount] = useState(0)
   const latestMessageRef = useRef<HTMLElement | null>(null)
+  const messagesEndRef = useRef<HTMLDivElement | null>(null)
   const requestInFlightRef = useRef(false)
   const user = useSelector((state: RootState) => state.auth.user)
   const nickname = user?.nickname?.trim() || '사용자';
@@ -39,10 +40,18 @@ export default function AssistantPage() {
     latestMessageRef.current = node
   }
 
-  const scrollToLatestMessage = () => {
+  const scrollToChatBottom = (behavior: ScrollBehavior = 'smooth') => {
     window.requestAnimationFrame(() => {
-      latestMessageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+      messagesEndRef.current?.scrollIntoView({ behavior, block: 'end' })
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior,
+      })
     })
+  }
+
+  const scrollToLatestMessage = () => {
+    scrollToChatBottom()
   }
 
   useEffect(() => {
@@ -101,6 +110,13 @@ export default function AssistantPage() {
       requestInFlightRef.current = false
     },
   })
+
+  useEffect(() => {
+    scrollToChatBottom()
+    const timerId = window.setTimeout(() => scrollToChatBottom('auto'), 120)
+
+    return () => window.clearTimeout(timerId)
+  }, [chatHistory.length, visibleInitialBubbleCount, onboardingMutation.isPending, done, errorMessage])
 
   const canSubmit = inputValue.trim().length > 0 && !onboardingMutation.isPending && !done
   const submitPrompt = (prompt: string) => {
@@ -202,34 +218,38 @@ export default function AssistantPage() {
               </div>
             )}
 
+            <div ref={messagesEndRef} aria-hidden="true" />
           </div>
 
           <div className={"onboarding-chat-wrap"}>
-            {onboardingMutation.isPending ? (
-            <div className="onboarding-chat-typing" aria-live="polite">
+            <div className={"onboarding-chat-inner"}>
+              {onboardingMutation.isPending ? (
+                  <div className="onboarding-chat-typing" aria-live="polite">
                 <span className="onboarding-chat-typing-dots" aria-hidden="true">
                   <span />
                   <span />
                   <span />
                 </span>
-              <span>입력 중</span>
+                    <span>입력 중</span>
+                  </div>
+              ) : "" }
+              {errorMessage ? (
+                  <p className="onboarding-chat-error">{errorMessage}</p>
+              ) : ""}
+              <form className="onboarding-chat-form" onSubmit={handleSubmit}>
+                <input
+                    type="text"
+                    value={inputValue}
+                    onChange={(event) => setInputValue(event.target.value)}
+                    placeholder="질문에 답변해 보세요."
+                    disabled={done}
+                />
+                <button type="submit" className="onboarding-chat-submit" disabled={!canSubmit} aria-label="메시지 보내기">
+                  <FontAwesomeIcon icon={faPaperPlane} />
+                </button>
+              </form>
             </div>
-                ) : "" }
-            {errorMessage ? (
-                <p className="onboarding-chat-error">{errorMessage}</p>
-            ) : ""}
-            <form className="onboarding-chat-form" onSubmit={handleSubmit}>
-              <input
-                  type="text"
-                  value={inputValue}
-                  onChange={(event) => setInputValue(event.target.value)}
-                  placeholder="질문에 답변해 보세요."
-                  disabled={done}
-              />
-              <button type="submit" className="onboarding-chat-submit" disabled={!canSubmit} aria-label="메시지 보내기">
-                <FontAwesomeIcon icon={faPaperPlane} />
-              </button>
-            </form>
+
           </div>
 
         </section>
