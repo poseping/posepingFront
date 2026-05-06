@@ -18,6 +18,7 @@ const HomePage = lazy(() => import('./pages/HomePage'))
 const FirstLoginChoicePage = lazy(() => import('./pages/FirstLoginChoicePage'))
 const OnboardingChatPage = lazy(() => import('./pages/AssistantPage.tsx'))
 const HistoryPage = lazy(() => import('./pages/HistoryPage'))
+const PhotoHistoryStatsPage = lazy(() => import('./pages/PhotoHistoryStatsPage'))
 const MyPage = lazy(() => import('./pages/MyPage'))
 const SettingsPage = lazy(() => import('./pages/SettingsPage'))
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage'))
@@ -58,6 +59,7 @@ function App() {
             <Route path="/onboarding" element={<OnboardingChatPage />} />
             <Route path="/main"     element={<MainPage />} />
             <Route path="/history"  element={<HistoryPage />} />
+            <Route path="/history/photo-stats" element={<PhotoHistoryStatsPage />} />
             <Route path="/mypage"   element={<MyPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/admin" element={isAdmin ? <AdminDashboardPage /> : <Navigate to="/main" replace />} />

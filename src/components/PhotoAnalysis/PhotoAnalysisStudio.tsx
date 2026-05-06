@@ -1,27 +1,17 @@
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
 import {
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts'
-import {
-  PhotoAnalysisHistoryItem,
   ManualLandmarkInput,
   PhotoAnalysisResponse,
   PhotoSideView,
   analyzeManualPhotoLandmarks,
   analyzePhotoFiles,
-  getPhotoAnalysisHistory,
   savePhotoAnalysis,
 } from '../../services/photoAnalysisApi'
 import { buildPhotoCommentPayload, getAssistantErrorMessage, getPhotoComment } from '../../services/assistantApi'
+import HistorySummaryCards from '../History/HistorySummaryCards'
 import '../../styles/photo-analysis.scss'
 
 interface DragState {
@@ -57,6 +47,13 @@ const LANDMARK_LABELS: Record<number, string> = {
   12: '오른쪽 어깨',
   23: '왼쪽 골반',
   24: '오른쪽 골반',
+}
+
+const PHOTO_NORMAL_RANGES = {
+  neckForwardAngle: '정상 15° 이하',
+  shoulderSlope: '정상 10° 이하',
+  hipSlope: '정상 7° 이하',
+  asymmetryScore: '정상 5% 이하',
 }
 
 function normalizeManualLandmarks(landmarks: ManualLandmarkInput[]) {
@@ -130,111 +127,6 @@ function formatMetric(value: number | null, suffix = '') {
   }
 
   return `${value.toFixed(1)}${suffix}`
-}
-
-function getNumericMetric(value: unknown) {
-  return typeof value === 'number' && Number.isFinite(value) ? value : null
-}
-
-function getHistoryDate(item: PhotoAnalysisHistoryItem) {
-  return item.saved_at ?? item.analyzed_at ?? item.created_at ?? ''
-}
-
-function buildHistoryTrendData(items: PhotoAnalysisHistoryItem[]) {
-  return items
-      .map((item, index) => {
-        const dateValue = getHistoryDate(item)
-        const date = dateValue ? new Date(dateValue) : null
-        const neckForwardAngle = getNumericMetric(item.side?.neck_forward_angle ?? item.neck_forward_angle)
-        const spineAlignment = getNumericMetric(item.front?.spine_alignment ?? item.spine_alignment)
-
-        if (neckForwardAngle === null && spineAlignment === null) {
-          return null
-        }
-
-        return {
-          label: date && !Number.isNaN(date.getTime()) ? `${date.getMonth() + 1}/${date.getDate()}` : `${index + 1}`,
-          sortTime: date && !Number.isNaN(date.getTime()) ? date.getTime() : index,
-          neckForwardAngle,
-          spineAlignment,
-        }
-      })
-      .filter((item): item is {
-        label: string
-        sortTime: number
-        neckForwardAngle: number | null
-        spineAlignment: number | null
-      } => item !== null)
-      .sort((a, b) => a.sortTime - b.sortTime)
-      .slice(-10)
-}
-
-function PhotoHistoryStats() {
-  const { data = [], isLoading, isError } = useQuery({
-    queryKey: ['photo-analysis-history'],
-    queryFn: getPhotoAnalysisHistory,
-  })
-
-  const trendData = useMemo(() => buildHistoryTrendData(data), [data])
-  const latest = trendData[trendData.length - 1]
-
-  return (
-      <section className="card">
-        <div className="photo-stats-header">
-          <div>
-            <p className="photo-kicker">Saved History</p>
-            <h3>저장된 기록 통계</h3>
-          </div>
-          <div className="photo-stats-metrics">
-            <div>
-              <span>거북목</span>
-              <strong>{formatMetric(latest?.neckForwardAngle ?? null, '°')}</strong>
-            </div>
-            <div>
-              <span>척추정렬도</span>
-              <strong>{formatMetric(latest?.spineAlignment ?? null)}</strong>
-            </div>
-          </div>
-        </div>
-
-        {isLoading && <div className="photo-stats-empty">통계를 불러오는 중입니다.</div>}
-        {isError && <div className="photo-stats-empty">저장된 기록 통계를 불러오지 못했습니다.</div>}
-        {!isLoading && !isError && trendData.length === 0 && (
-            <div className="photo-stats-empty">저장된 사진 분석 기록이 없습니다.</div>
-        )}
-        {!isLoading && !isError && trendData.length > 0 && (
-            <div className="photo-stats-chart">
-              <ResponsiveContainer width="100%" height={240}>
-                <LineChart data={trendData} margin={{ top: 12, right: 18, bottom: 4, left: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(100, 116, 139, 0.22)" />
-                  <XAxis dataKey="label" tickLine={false} axisLine={false} />
-                  <YAxis tickLine={false} axisLine={false} width={36} />
-                  <Tooltip />
-                  <Legend />
-                  <Line
-                      type="monotone"
-                      dataKey="neckForwardAngle"
-                      name="거북목"
-                      stroke="#155eef"
-                      strokeWidth={2.5}
-                      dot={{ r: 3 }}
-                      connectNulls
-                  />
-                  <Line
-                      type="monotone"
-                      dataKey="spineAlignment"
-                      name="척추정렬도"
-                      stroke="#0b7a75"
-                      strokeWidth={2.5}
-                      dot={{ r: 3 }}
-                      connectNulls
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-        )}
-      </section>
-  )
 }
 
 function EditableLandmarkCanvas({
@@ -469,7 +361,7 @@ function ResultSummary({
         <div className="photo-summary-grid">
           <div>
             <span>분석 모드</span>
-            <strong>{result.analysis_mode}</strong>
+            <strong>{result.analysis_mode == 'full'?'전신':'반신'}</strong>
           </div>
           <div>
             <span>전체 신뢰도</span>
@@ -478,18 +370,22 @@ function ResultSummary({
           <div>
             <span>목 각도</span>
             <strong>{formatMetric(result.side.neck_forward_angle, '°')}</strong>
+            <small className="photo-summary-range">{PHOTO_NORMAL_RANGES.neckForwardAngle}</small>
           </div>
           <div>
             <span>어깨 기울기</span>
             <strong>{formatMetric(result.front.shoulder_slope, '°')}</strong>
+            <small className="photo-summary-range">{PHOTO_NORMAL_RANGES.shoulderSlope}</small>
           </div>
           <div>
             <span>골반 기울기</span>
             <strong>{formatMetric(result.front.hip_slope, '°')}</strong>
+            <small className="photo-summary-range">{PHOTO_NORMAL_RANGES.hipSlope}</small>
           </div>
           <div>
             <span>좌우 비대칭</span>
             <strong>{formatMetric(result.front.asymmetry_score, '%')}</strong>
+            <small className="photo-summary-range">{PHOTO_NORMAL_RANGES.asymmetryScore}</small>
           </div>
         </div>
         {result.alerts.length > 0 && (
@@ -540,6 +436,7 @@ function ResultSummary({
 
 export default function PhotoAnalysisStudio() {
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
   const [activeStep, setActiveStep] = useState(1)
   const [frontFile, setFrontFile] = useState<File | null>(null)
   const [sideFile, setSideFile] = useState<File | null>(null)
@@ -636,6 +533,7 @@ export default function PhotoAnalysisStudio() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['photo-analysis-history'] })
       setSavedMessage(`오늘의 자세를 기록했습니다!`)
+      navigate('/history')
     },
     onError: (error) => {
       console.error('분석 저장 실패:', error)
@@ -700,7 +598,7 @@ export default function PhotoAnalysisStudio() {
 
         <div className="photo-analysis-page">
           {activeStep === 1 && (
-              <PhotoHistoryStats />
+              <HistorySummaryCards />
           )}
 
           {activeStep === 2 && (
