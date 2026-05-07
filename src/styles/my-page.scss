@@ -5,7 +5,6 @@
 $_dark:    #0f172a;
 $_heading: #10213d;
 $_surface: #f8fafc;
-$_btn:     #f1f5f9;
 
 // ─── Kicker ───────────────────────────────────────────────────────────────
 .mp-kicker {
@@ -192,8 +191,8 @@ $_btn:     #f1f5f9;
   border-radius: 14px;
   background: $_surface;
 
-  span     { display: block; font-size: 0.78rem; font-weight: 700; color: var(--muted-foreground); margin-bottom: 0.35rem; }
-  strong   { font-size: 1.05rem; color: $_dark; }
+  span   { display: block; font-size: 0.78rem; font-weight: 700; color: var(--muted-foreground); margin-bottom: 0.35rem; }
+  strong { font-size: 1.05rem; color: $_dark; }
 }
 
 .mp-score {
@@ -255,6 +254,29 @@ $_btn:     #f1f5f9;
   &.bad::before     { background: var(--destructive); }
 }
 
+// ─── Causes ───────────────────────────────────────────────────────────────
+.mp-causes { margin-top: 1rem; }
+
+.mp-cause-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.mp-cause-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  background: $_surface;
+  color: var(--muted-foreground);
+  font-size: 0.82rem;
+  font-weight: 600;
+
+  strong { color: $_dark; }
+}
+
 // ─── Lifestyle Habits Card ────────────────────────────────────────────────
 .mp-habit-list {
   display: flex;
@@ -307,26 +329,3 @@ $_btn:     #f1f5f9;
   margin-top: 0.25rem;
 }
 
-
-// ─── Causes ───────────────────────────────────────────────────────────────
-.mp-causes { margin-top: 1rem; }
-
-.mp-cause-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.mp-cause-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.3rem 0.75rem;
-  border-radius: 999px;
-  background: $_surface;
-  color: var(--muted-foreground);
-  font-size: 0.82rem;
-  font-weight: 600;
-
-  strong { color: $_dark; }
-}

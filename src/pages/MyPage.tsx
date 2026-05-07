@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faUser,
   faPen,
+  faRandom,
   faCheck,
   faXmark,
   faRightFromBracket,
@@ -18,7 +19,7 @@ import {
 import PageHeader from '../components/PageHeader'
 import { logout, loginSuccess } from '../store/authSlice'
 import { clearAuth, saveUserInfo } from '../services/authService'
-import { updateNickname, deleteAccount, getLifestyleHabits } from '../services/memberApi'
+import { getRandomNickname, updateNickname, deleteAccount, getLifestyleHabits } from '../services/memberApi'
 import type { RootState } from '../store/store'
 import '../styles/my-page.scss'
 
@@ -39,6 +40,12 @@ export default function MyPage() {
     staleTime: 5 * 60 * 1000,
   })
 
+  const randomNicknameMutation = useMutation({
+    mutationFn: getRandomNickname,
+    onSuccess: (data) => {
+      setNicknameInput(data.nickname)
+    },
+  })
 
   const nicknameMutation = useMutation({
     mutationFn: (nickname: string) => updateNickname(nickname),
@@ -62,6 +69,10 @@ export default function MyPage() {
     dispatch(logout())
     clearAuth()
     navigate('/login')
+  }
+
+  const handleNicknameRandomChange = () => {
+    randomNicknameMutation.mutate()
   }
 
   const handleNicknameSave = () => {
@@ -111,6 +122,13 @@ export default function MyPage() {
                       if (e.key === 'Escape') handleNicknameCancel()
                     }}
                   />
+                  <button
+                    className="btn-icon"
+                    onClick={handleNicknameRandomChange}
+                    disabled={randomNicknameMutation.isPending}
+                  >
+                    <FontAwesomeIcon icon={faRandom} />
+                  </button>
                   <button
                     className="btn-icon"
                     onClick={handleNicknameSave}
