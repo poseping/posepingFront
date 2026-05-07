@@ -5,7 +5,6 @@
 $_dark:    #0f172a;
 $_heading: #10213d;
 $_surface: #f8fafc;
-$_btn:     #f1f5f9;
 
 // ─── Kicker ───────────────────────────────────────────────────────────────
 .mp-kicker {
@@ -18,19 +17,11 @@ $_btn:     #f1f5f9;
 }
 
 // ─── Profile Card ─────────────────────────────────────────────────────────
-.mp-profile-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
 .mp-profile-body {
   display: flex;
   align-items: center;
   gap: 1.25rem;
-  margin-bottom: 0;
+  margin-bottom: 1.25rem;
 }
 
 .mp-avatar {
@@ -113,8 +104,8 @@ $_btn:     #f1f5f9;
 // ─── Actions ──────────────────────────────────────────────────────────────
 .mp-profile-actions {
   display: flex;
-  gap: 0.5rem;
-  flex-shrink: 0;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .mp-delete-confirm {
@@ -200,8 +191,8 @@ $_btn:     #f1f5f9;
   border-radius: 14px;
   background: $_surface;
 
-  span     { display: block; font-size: 0.78rem; font-weight: 700; color: var(--muted-foreground); margin-bottom: 0.35rem; }
-  strong   { font-size: 1.05rem; color: $_dark; }
+  span   { display: block; font-size: 0.78rem; font-weight: 700; color: var(--muted-foreground); margin-bottom: 0.35rem; }
+  strong { font-size: 1.05rem; color: $_dark; }
 }
 
 .mp-score {
@@ -263,75 +254,6 @@ $_btn:     #f1f5f9;
   &.bad::before     { background: var(--destructive); }
 }
 
-// ─── Habits (merged into profile card) ────────────────────────────────────
-.mp-section-divider {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 1.25rem 0;
-}
-
-.mp-habit-compact-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-}
-
-.mp-habit-chips {
-  display: flex;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-}
-
-.mp-habit-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.55rem 0.9rem;
-  border-radius: 12px;
-  background: $_surface;
-
-  svg {
-    color: var(--primary);
-    font-size: 0.85rem;
-    flex-shrink: 0;
-  }
-
-  .mp-habit-chip-label {
-    font-size: 0.78rem;
-    font-weight: 700;
-    color: var(--muted-foreground);
-  }
-
-  strong {
-    font-size: 0.88rem;
-    font-weight: 700;
-    color: $_dark;
-  }
-}
-
-.mp-habit-empty-inline {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.5rem 0;
-
-  span {
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: var(--muted-foreground);
-  }
-}
-
-.mp-habit-loading {
-  font-size: 0.88rem;
-  color: var(--muted-foreground);
-  margin: 0;
-}
-
-
 // ─── Causes ───────────────────────────────────────────────────────────────
 .mp-causes { margin-top: 1rem; }
 
@@ -354,3 +276,56 @@ $_btn:     #f1f5f9;
 
   strong { color: $_dark; }
 }
+
+// ─── Lifestyle Habits Card ────────────────────────────────────────────────
+.mp-habit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+
+.mp-habit-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  background: $_surface;
+}
+
+.mp-habit-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  font-size: 0.9rem;
+}
+
+.mp-habit-label {
+  flex: 1;
+  font-size: 0.83rem;
+  font-weight: 700;
+  color: var(--muted-foreground);
+}
+
+.mp-habit-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: $_dark;
+  text-align: right;
+  max-width: 55%;
+  word-break: keep-all;
+}
+
+.mp-habit-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.25rem;
+}
+
