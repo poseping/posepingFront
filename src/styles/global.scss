@@ -44,6 +44,38 @@
   padding: 1.5rem;
 }
 
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.42);
+}
+
+.modal__card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding: 1rem;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
+}
+
+.modal--xs { max-width: 320px; }
+.modal--sm { max-width: 480px; }
+.modal--md { max-width: 540px; }
+.modal--lg { max-width: 720px; }
+.modal--xl { max-width: 1200px; }
+
 // ── Button System ─────────────────────────────────────────────────────────
 // 사용법: variant 클래스 하나만 쓰거나, 필요 시 size/width modifier 조합
 //   <button className="btn--primary btn--lg btn--full">
@@ -176,6 +208,10 @@
 }
 
 @media (max-width: 768px) {
+  .modal__card {
+    max-width: none;
+  }
+
   .card {
     border-radius: 20px;
     padding: 1.15rem;

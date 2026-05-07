@@ -120,6 +120,10 @@ export const savePhotoAnalysis = async (
   return response.data
 }
 
+export const deletePhotoAnalysis = async (analysisId: number | string): Promise<void> => {
+  await apiClient.delete(`/photo/analyses/${analysisId}`)
+}
+
 export const getPhotoAnalysisHistory = async (): Promise<PhotoAnalysisHistoryItem[]> => {
   const response = await apiClient.get<
     PhotoAnalysisHistoryItem[] | {

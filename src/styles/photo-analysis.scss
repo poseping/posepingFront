@@ -8,6 +8,10 @@
   padding: 2rem;
 }
 
+.photo-analysis-page--narrow {
+  max-width: 540px;
+}
+
 .photo-hero-card {
   width: 100%;
   padding: 3rem max(2rem, calc((100vw - 1080px) / 2 + 2rem));
@@ -43,7 +47,7 @@
 
 .photo-upload-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 1rem;
 }
 
@@ -107,6 +111,37 @@
   scroll-margin-top: 1rem;
 }
 
+.photo-history-delete-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.25rem;
+}
+
+.photo-history-delete-button {
+  width: 100%;
+}
+
+.photo-history-delete-modal {
+  text-align: center;
+}
+
+.photo-history-delete-modal h3 {
+  margin-bottom: 0.85rem;
+  color: #13223f;
+  font-size: 1rem;
+}
+
+.photo-history-delete-modal__actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.photo-history-delete-modal__actions button {
+  width: 100%;
+}
+
 .photo-stats-empty {
   display: grid;
   min-height: 180px;
@@ -145,11 +180,24 @@
   justify-content: flex-end;
 }
 
+.photo-step-description {
+  margin-bottom: 1rem;
+  color: #526277;
+  font-weight: 700;
+  line-height: 1.65;
+  word-break: keep-all;
+}
+
+.card > .photo-step-description:only-child {
+  margin-bottom: 0;
+}
+
 .photo-action-row,
 .photo-save-actions {
   display: flex;
   gap: 0.85rem;
   align-items: center;
+  justify-content: center;
   margin-top: 1.2rem;
 }
 
@@ -158,6 +206,10 @@
 .photo-save-actions .btn--primary,
 .photo-save-actions .btn--secondary {
   flex: 1;
+}
+
+.photo-action-row .btn--primary,
+.photo-action-row .btn--secondary {
 }
 
 .photo-editor-grid {
@@ -173,6 +225,14 @@
   gap: 1rem;
   align-items: center;
   margin-bottom: 1rem;
+}
+
+.photo-summary-header-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .photo-editor-header h3,
@@ -262,12 +322,6 @@
   font-weight: 700;
 }
 
-.photo-editor-help {
-  margin-top: 1rem;
-  color: #64748b;
-  line-height: 1.55;
-}
-
 .photo-editor-empty {
   min-height: 320px;
   display: grid;
@@ -346,13 +400,29 @@
   background: #f8fafc;
 }
 
-.photo-message-block.issues {
-  background: #fff7ed;
+.photo-message-block--warning {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #fef3c7;
 }
 
 .photo-message-block h4 {
   margin-bottom: 0.55rem;
   color: #1e293b;
+}
+
+.photo-message-block--warning h4 {
+  margin: 0;
+  color: #b45309;
+  line-height: 1;
+}
+
+.photo-message-block--warning span {
+  color: #92400e;
+  font-weight: 400;
+  line-height: 1.65;
+  word-break: keep-all;
 }
 
 .photo-message-block ul {
@@ -367,6 +437,36 @@
   line-height: 1.7;
   word-break: keep-all;
 }
+
+.photo-issue-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.photo-issue-tags--header {
+  justify-content: flex-end;
+}
+
+.photo-issue-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 0.85rem;
+  border: none;
+  border-radius: 50px;
+  color: #1e293b;
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1.3;
+  word-break: keep-all;
+}
+
+.photo-issue-tag:nth-child(5n + 1) { background: #fde68a; }
+.photo-issue-tag:nth-child(5n + 2) { background: #bfdbfe; }
+.photo-issue-tag:nth-child(5n + 3) { background: #bbf7d0; }
+.photo-issue-tag:nth-child(5n + 4) { background: #fecdd3; }
+.photo-issue-tag:nth-child(5n + 5) { background: #ddd6fe; }
 
 .photo-message-block--assistant {
   background: linear-gradient(135deg, #eef7ff 0%, #f8fafc 100%);
@@ -388,12 +488,6 @@
   align-items: center;
 }
 
-.photo-save-message {
-  margin-top: 0.8rem;
-  color: #166534;
-  font-weight: 700;
-}
-
 @media (max-width: 1024px) {
   .photo-upload-grid,
   .photo-editor-grid {
@@ -402,6 +496,17 @@
 
   .photo-summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 769px) {
+  .photo-history-delete-button {
+    max-width: 200px;
+  }
+
+  .photo-action-row .btn--primary,
+  .photo-action-row .btn--secondary {
+    max-width: 200px;
   }
 }
 
@@ -425,8 +530,14 @@
     align-items: flex-start;
   }
 
-  .btn--primary,
-  .btn--secondary {
+  .photo-action-panel button,
+  .photo-save-panel button,
+  .photo-action-row button,
+  .photo-save-actions button,
+  .photo-stats-header button,
+  .photo-editor-header button,
+  .photo-summary-header button {
+    max-width: none;
     width: 100%;
   }
 
