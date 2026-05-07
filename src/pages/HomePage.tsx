@@ -18,18 +18,7 @@ export default function HomePage() {
           <h2>{nickname}님!</h2>
         </section>
         <div className="home-page">
-          <section className="card home-action-card">
-            <div className="home-action-card__content">
-              <span className="home-action-card__icon"><FontAwesomeIcon icon={faComments} /></span>
-              <h2>AI 생활습관 진단</h2>
-              <p>AI와 대화하며 앉는 습관, 운동 패턴, 수면 환경을 점검하고 자세 개선에 필요한 생활습관을 찾아보세요.</p>
-            </div>
-            <Link className="btn--primary home-action-card__button" to="/onboarding">
-              AI와 대화하기
-            </Link>
-          </section>
-
-          <section className="card home-action-card">
+          <section className="card home-action-card home-action-card--posture">
             <div className="home-action-card__content">
               <span className="home-action-card__icon"><FontAwesomeIcon icon={faCamera} /></span>
               <h2>자세 분석</h2>
@@ -40,7 +29,7 @@ export default function HomePage() {
             </Link>
           </section>
 
-          <section className="card home-action-card">
+          <section className="card home-action-card home-action-card--history">
             <div className="home-action-card__content">
               <span className="home-action-card__icon"><FontAwesomeIcon icon={faChartColumn} /></span>
               <h2>기록 확인</h2>
@@ -48,6 +37,17 @@ export default function HomePage() {
             </div>
             <Link className="btn--primary home-action-card__button" to="/history">
               기록 보러 가기
+            </Link>
+          </section>
+
+          <section className="card home-action-card home-action-card--ai">
+            <div className="home-action-card__content">
+              <span className="home-action-card__icon"><FontAwesomeIcon icon={faComments} /></span>
+              <h2>AI 생활습관 진단</h2>
+              <p>AI와 대화하며 앉는 습관, 운동 패턴, 수면 환경을 점검하고 자세 개선에 필요한 생활습관을 찾아보세요.</p>
+            </div>
+            <Link className="btn--primary home-action-card__button" to="/onboarding">
+              AI와 대화하기
             </Link>
           </section>
         </div>

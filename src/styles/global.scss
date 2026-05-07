@@ -10,7 +10,7 @@
   --card:                 #ffffff;
   --muted:                #f5f5f5;
   --muted-foreground:     #6b7280;
-  --border:               #e5e7eb;
+  --border: rgba(0, 0, 0, 0.11);
   --success:              #10b981;
   --warning:              #f59e0b;
   --destructive:          #ef4444;
@@ -27,6 +27,7 @@
   --choice-photo-bg-end: #c3f5f7;
   --choice-photo-border: rgba(16, 185, 129, 0.26);
   --choice-photo-glow: rgb(132 219 112 / 18%);
+  --bottom-nav-height: 60px;
 }
 
 * {
@@ -247,7 +248,7 @@ body,
   position: relative;
 }
 .app-frame:has(.bottom-nav){
-  padding-bottom: 64px
+  padding-bottom: var(--bottom-nav-height);
 }
 
 @media screen and (min-width: 768px) {

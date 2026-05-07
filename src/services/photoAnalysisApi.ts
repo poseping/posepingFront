@@ -57,11 +57,19 @@ export interface PhotoAnalysisHistoryItem {
   id?: number
   analysis_id?: number
   status?: 'good' | 'warning' | 'bad'
+  analysis_mode?: PhotoAnalysisMode
+  confidence?: number
   analyzed_at?: string
   saved_at?: string
   created_at?: string
+  alerts?: string[]
+  issues?: string[]
+  missing_landmarks?: string[]
   front?: Partial<PhotoMetrics>
   side?: Partial<PhotoSideMetrics>
+  shoulder_slope?: number | null
+  hip_slope?: number | null
+  asymmetry_score?: number | null
   spine_alignment?: number | null
   neck_forward_angle?: number | null
 }
