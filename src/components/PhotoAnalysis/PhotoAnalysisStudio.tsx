@@ -528,7 +528,7 @@ export default function PhotoAnalysisStudio() {
         throw new Error('저장 가능한 분석 결과가 없습니다.')
       }
 
-      return savePhotoAnalysis(finalResult.save_token)
+      return savePhotoAnalysis(finalResult.save_token, assistantComment)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['photo-analysis-history'] })

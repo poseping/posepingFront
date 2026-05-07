@@ -182,6 +182,7 @@ function HistoryRecordSummary({ item }: { item: PhotoAnalysisHistoryItem }) {
   const alerts = item.alerts ?? []
   const issues = item.issues ?? []
   const missingLandmarks = item.missing_landmarks ?? []
+  const aiMessage = item.ai_message?.trim()
 
   return (
     <section className="card photo-history-selected-record">
@@ -250,6 +251,12 @@ function HistoryRecordSummary({ item }: { item: PhotoAnalysisHistoryItem }) {
               <li key={landmark}>{landmark}</li>
             ))}
           </ul>
+        </div>
+      )}
+      {aiMessage && (
+        <div className="photo-message-block photo-message-block--assistant">
+          <h4>AI 코멘트</h4>
+          <p>{aiMessage}</p>
         </div>
       )}
     </section>
