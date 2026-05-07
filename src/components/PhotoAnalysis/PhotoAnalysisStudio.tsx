@@ -2,6 +2,8 @@ import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons'
 import {
   ManualLandmarkInput,
   PhotoAnalysisResponse,
@@ -226,7 +228,6 @@ function EditableLandmarkCanvas({
     }
   }, [imageUrl])
 
-  const selectedLandmark = landmarks.find((landmark) => landmark.id === selectedLandmarkId) ?? null
   const overlayUnit = Math.min(imageSize.width, imageSize.height) / 100
   const svgUnitsPerScreenPixel = frameSize.width > 0 ? imageSize.width / frameSize.width : 1
   const lineWidth = 0.35 * overlayUnit
@@ -240,11 +241,6 @@ function EditableLandmarkCanvas({
       <section className="card">
         <div className="photo-editor-header">
           <h3>{title}</h3>
-          {selectedLandmark && (
-              <p>
-                선택된 포인트: <strong>{LANDMARK_LABELS[selectedLandmark.id] || selectedLandmark.name || `landmark_${selectedLandmark.id}`}</strong>
-              </p>
-          )}
         </div>
         <div className="photo-editor-stage">
           {imageUrl ? (
@@ -325,12 +321,6 @@ function EditableLandmarkCanvas({
               <div className="photo-editor-empty">이미지를 업로드하면 랜드마크 편집 화면이 표시됩니다.</div>
           )}
         </div>
-        <p className="photo-editor-help">
-          {panel === 'front'
-              ? '정면 사진에서는 머리, 양쪽 어깨, 양쪽 골반만 수정합니다.'
-              : '측면 사진에서는 머리, 어깨, 골반만 수정합니다.'}
-          {' '}나머지 랜드마크는 초기 감지값을 그대로 유지한 채 최종 분석에 사용됩니다.
-        </p>
       </section>
   )
 }
@@ -356,7 +346,16 @@ function ResultSummary({
       <section className="card">
         <div className="photo-summary-header">
           <h3>{title}</h3>
-          <span className={`photo-status-chip ${result.status}`}>{result.status}</span>
+          <div className="photo-summary-header-meta">
+            <span className={`photo-status-chip ${result.status}`}>{result.status}</span>
+            {result.issues.length > 0 && (
+              <div className="photo-issue-tags photo-issue-tags--header">
+                {result.issues.map((issue) => (
+                  <span key={issue} className="photo-issue-tag">{issue}</span>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
         <div className="photo-summary-grid">
           <div>
@@ -388,26 +387,12 @@ function ResultSummary({
             <small className="photo-summary-range">{PHOTO_NORMAL_RANGES.asymmetryScore}</small>
           </div>
         </div>
-        {result.alerts.length > 0 && (
-            <div className="photo-message-block">
-              <h4>알림</h4>
-              <ul>
-                {result.alerts.map((alert) => (
-                    <li key={alert}>{alert}</li>
-                ))}
-              </ul>
-            </div>
-        )}
-        {result.issues.length > 0 && (
-            <div className="photo-message-block issues">
-              <h4>감지된 항목</h4>
-              <ul>
-                {result.issues.map((issue) => (
-                    <li key={issue}>{issue}</li>
-                ))}
-              </ul>
-            </div>
-        )}
+        <div className="photo-message-block photo-message-block--warning">
+          <h4>
+            <FontAwesomeIcon icon={faTriangleExclamation} />
+          </h4>
+          <span>골반이 찍히지 않은 사진으로는 목과 어깨까지만 분석 가능해요.</span>
+        </div>
         {result.missing_landmarks.length > 0 && (
             <div className="photo-message-block">
               <h4>보완이 필요한 랜드마크</h4>
@@ -448,7 +433,6 @@ export default function PhotoAnalysisStudio() {
   const [sideLandmarks, setSideLandmarks] = useState<ManualLandmarkInput[]>([])
   const [selectedFrontLandmarkId, setSelectedFrontLandmarkId] = useState<number | null>(null)
   const [selectedSideLandmarkId, setSelectedSideLandmarkId] = useState<number | null>(null)
-  const [savedMessage, setSavedMessage] = useState<string | null>(null)
   const [assistantComment, setAssistantComment] = useState<string | null>(null)
   const [assistantCommentError, setAssistantCommentError] = useState<string | null>(null)
 
@@ -482,7 +466,6 @@ export default function PhotoAnalysisStudio() {
     },
     onSuccess: (data) => {
       setFinalResult(null)
-      setSavedMessage(null)
       setFrontLandmarks(data.front_landmarks)
       setSideLandmarks(data.side_landmarks)
       setSelectedFrontLandmarkId(data.front_landmarks.find((landmark) => FRONT_EDIT_IDS.includes(landmark.id))?.id ?? null)
@@ -511,7 +494,6 @@ export default function PhotoAnalysisStudio() {
         ),
     onSuccess: (data) => {
       setFinalResult(data)
-      setSavedMessage(null)
       setAssistantComment(null)
       setAssistantCommentError(null)
       setActiveStep(4)
@@ -528,12 +510,22 @@ export default function PhotoAnalysisStudio() {
         throw new Error('저장 가능한 분석 결과가 없습니다.')
       }
 
-      return savePhotoAnalysis(finalResult.save_token)
+      return savePhotoAnalysis(finalResult.save_token, assistantComment)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['photo-analysis-history'] })
-      setSavedMessage(`오늘의 자세를 기록했습니다!`)
-      navigate('/history')
+      queryClient.invalidateQueries({ queryKey: ['photo-analysis-history-summary'] })
+      setFrontFile(null)
+      setSideFile(null)
+      setFinalResult(null)
+      setFrontLandmarks([])
+      setSideLandmarks([])
+      setSelectedFrontLandmarkId(null)
+      setSelectedSideLandmarkId(null)
+      setAssistantComment(null)
+      setAssistantCommentError(null)
+      setActiveStep(1)
+      navigate('/history', { replace: true })
     },
     onError: (error) => {
       console.error('분석 저장 실패:', error)
@@ -568,7 +560,6 @@ export default function PhotoAnalysisStudio() {
         }
 
         setFinalResult(null)
-        setSavedMessage(null)
         setAssistantComment(null)
         setAssistantCommentError(null)
         setFrontLandmarks([])
@@ -596,7 +587,7 @@ export default function PhotoAnalysisStudio() {
             </section>
         )}
 
-        <div className="photo-analysis-page">
+        <div className={`photo-analysis-page ${activeStep === 2 || activeStep === 3 ? 'photo-analysis-page--narrow' : ''}`}>
           {activeStep === 1 && (
               <HistorySummaryCards />
           )}
@@ -604,6 +595,9 @@ export default function PhotoAnalysisStudio() {
           {activeStep === 2 && (
               <>
                 <section className="card">
+                  <p className="photo-step-description">
+                    똑바로 서서 찍은 정면 사진과 측면 사진을 준비해주세요! 머리부터 골반까지 모두 나오면 좋아요.
+                  </p>
                   <div className="photo-upload-grid">
                     <label className="photo-upload-field">
                       <span>정면 사진</span>
@@ -633,7 +627,7 @@ export default function PhotoAnalysisStudio() {
                       onClick={() => analyzePhotosMutation.mutate()}
                       disabled={!frontFile || !sideFile || analyzePhotosMutation.isPending}
                   >
-                    {analyzePhotosMutation.isPending ? '랜드마크 감지 중...' : '1. 랜드마크 감지'}
+                    {analyzePhotosMutation.isPending ? '랜드마크 감지 중...' : '다음'}
                   </button>
                 </div>
               </>
@@ -641,6 +635,11 @@ export default function PhotoAnalysisStudio() {
 
           {activeStep === 3 && (
               <>
+                <section className="card">
+                  <p className="photo-step-description">
+                    감지된 자세를 확인하고 수정이 필요하면 꼭짓점을 드래그해서 올바른 위치로 옮겨주세요.
+                  </p>
+                </section>
                 <section className="photo-editor-grid">
                   <EditableLandmarkCanvas
                       title="정면 사진"
@@ -688,12 +687,10 @@ export default function PhotoAnalysisStudio() {
                     isAssistantCommentPending={photoCommentMutation.isPending}
                 />
                 <div className="photo-save-actions">
-                  {savedMessage && <p className="photo-save-message">{savedMessage}</p>}
                   <button
                       className="btn--secondary btn--lg"
                       onClick={() => {
                         setFinalResult(null)
-                        setSavedMessage(null)
                         setActiveStep(1)
                       }}
                   >

@@ -1,5 +1,5 @@
 import { type KeyboardEvent, useMemo, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   CartesianGrid,
   Legend,
@@ -10,7 +10,11 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { getPhotoAnalysisHistory, type PhotoAnalysisHistoryItem } from '../../services/photoAnalysisApi'
+import {
+  deletePhotoAnalysis,
+  getPhotoAnalysisHistory,
+  type PhotoAnalysisHistoryItem,
+} from '../../services/photoAnalysisApi'
 
 const PHOTO_NORMAL_RANGES = {
   neckForwardAngle: '정상 15° 이하',
@@ -61,6 +65,10 @@ function getHistoryDate(item: PhotoAnalysisHistoryItem) {
 
 function getHistoryKey(item: PhotoAnalysisHistoryItem, index: number) {
   return String(item.analysis_id ?? item.id ?? `${getHistoryDate(item)}-${index}`)
+}
+
+function getHistoryRecordId(item: PhotoAnalysisHistoryItem) {
+  return item.analysis_id ?? item.id ?? null
 }
 
 function formatHistoryDate(item: PhotoAnalysisHistoryItem) {
@@ -173,7 +181,21 @@ function buildHistoryTrendData(items: PhotoAnalysisHistoryItem[]) {
     .slice(-10)
 }
 
-function HistoryRecordSummary({ item }: { item: PhotoAnalysisHistoryItem }) {
+function HistoryRecordSummary({
+  item,
+  isDeleting,
+  isConfirmingDelete,
+  onRequestDelete,
+  onCancelDelete,
+  onDelete,
+}: {
+  item: PhotoAnalysisHistoryItem
+  isDeleting: boolean
+  isConfirmingDelete: boolean
+  onRequestDelete: () => void
+  onCancelDelete: () => void
+  onDelete: (item: PhotoAnalysisHistoryItem) => void
+}) {
   const confidence = getNumericMetric(item.confidence)
   const neckForwardAngle = getNumericMetric(item.side?.neck_forward_angle ?? item.neck_forward_angle)
   const shoulderSlope = getMetric(item, 'shoulder_slope', 'shoulder_slope')
@@ -182,6 +204,7 @@ function HistoryRecordSummary({ item }: { item: PhotoAnalysisHistoryItem }) {
   const alerts = item.alerts ?? []
   const issues = item.issues ?? []
   const missingLandmarks = item.missing_landmarks ?? []
+  const aiMessage = item.ai_message?.trim()
 
   return (
     <section className="card photo-history-selected-record">
@@ -190,7 +213,16 @@ function HistoryRecordSummary({ item }: { item: PhotoAnalysisHistoryItem }) {
           <p className="photo-kicker">Selected Record</p>
           <h3>{formatHistoryDate(item)} 기록</h3>
         </div>
-        {item.status && <span className={`photo-status-chip ${item.status}`}>{item.status}</span>}
+        <div className="photo-summary-header-meta">
+          {item.status && <span className={`photo-status-chip ${item.status}`}>{item.status}</span>}
+          {issues.length > 0 && (
+            <div className="photo-issue-tags photo-issue-tags--header">
+              {issues.map((issue) => (
+                <span key={issue} className="photo-issue-tag">{issue}</span>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
       <div className="photo-summary-grid">
         <div>
@@ -232,16 +264,6 @@ function HistoryRecordSummary({ item }: { item: PhotoAnalysisHistoryItem }) {
           </ul>
         </div>
       )}
-      {issues.length > 0 && (
-        <div className="photo-message-block issues">
-          <h4>감지된 항목</h4>
-          <ul>
-            {issues.map((issue) => (
-              <li key={issue}>{issue}</li>
-            ))}
-          </ul>
-        </div>
-      )}
       {missingLandmarks.length > 0 && (
         <div className="photo-message-block">
           <h4>보완이 필요한 랜드마크</h4>
@@ -252,15 +274,83 @@ function HistoryRecordSummary({ item }: { item: PhotoAnalysisHistoryItem }) {
           </ul>
         </div>
       )}
+      {aiMessage && (
+        <div className="photo-message-block photo-message-block--assistant">
+          <h4>AI 코멘트</h4>
+          <p>{aiMessage}</p>
+        </div>
+      )}
+      <div className="photo-history-delete-actions">
+        <button
+          className="btn--danger-outline photo-history-delete-button"
+          type="button"
+          onClick={onRequestDelete}
+        >
+          삭제하기
+        </button>
+      </div>
+      {isConfirmingDelete && (
+        <div className="modal" role="dialog" aria-modal="true" aria-labelledby="photo-delete-title">
+          <div className="modal__backdrop" onClick={onCancelDelete} />
+          <div className="modal__card modal--xs photo-history-delete-modal">
+            <h3 id="photo-delete-title">해당 기록을 삭제하시겠습니까?</h3>
+            <div className="photo-history-delete-modal__actions">
+              <button
+                className="btn--secondary"
+                type="button"
+                onClick={onCancelDelete}
+                disabled={isDeleting}
+              >
+                취소
+              </button>
+              <button
+                className="btn--danger"
+                type="button"
+                onClick={() => onDelete(item)}
+                disabled={isDeleting}
+              >
+                {isDeleting ? '삭제 중...' : '삭제'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }
 
 export default function PhotoHistoryStats() {
+  const queryClient = useQueryClient()
   const [selectedHistoryKey, setSelectedHistoryKey] = useState<string | null>(null)
+  const [confirmingDeleteHistoryKey, setConfirmingDeleteHistoryKey] = useState<string | null>(null)
   const { data = [], isLoading, isError } = useQuery({
     queryKey: ['photo-analysis-history'],
     queryFn: getPhotoAnalysisHistory,
+  })
+  const deleteMutation = useMutation({
+    mutationFn: (item: PhotoAnalysisHistoryItem) => {
+      const recordId = getHistoryRecordId(item)
+      if (recordId === null) {
+        throw new Error('삭제할 기록 ID가 없습니다.')
+      }
+
+      return deletePhotoAnalysis(recordId)
+    },
+    onSuccess: (_data, deletedItem) => {
+      const deletedRecordId = getHistoryRecordId(deletedItem)
+
+      queryClient.setQueryData<PhotoAnalysisHistoryItem[]>(['photo-analysis-history'], (previous) =>
+        previous?.filter((item) => getHistoryRecordId(item) !== deletedRecordId) ?? []
+      )
+      queryClient.invalidateQueries({ queryKey: ['photo-analysis-history'] })
+      queryClient.invalidateQueries({ queryKey: ['photo-analysis-history-summary'] })
+      setConfirmingDeleteHistoryKey(null)
+      setSelectedHistoryKey(null)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    },
+    onError: (error) => {
+      window.alert(error instanceof Error ? error.message : '기록 삭제에 실패했습니다.')
+    },
   })
 
   const trendData = useMemo(() => buildHistoryTrendData(data), [data])
@@ -346,7 +436,16 @@ export default function PhotoHistoryStats() {
         )}
       </section>
 
-      {!isLoading && !isError && selectedTrendPoint && <HistoryRecordSummary item={selectedTrendPoint.item} />}
+      {!isLoading && !isError && selectedTrendPoint && (
+        <HistoryRecordSummary
+          item={selectedTrendPoint.item}
+          isDeleting={deleteMutation.isPending}
+          isConfirmingDelete={confirmingDeleteHistoryKey === selectedTrendPoint.historyKey}
+          onRequestDelete={() => setConfirmingDeleteHistoryKey(selectedTrendPoint.historyKey)}
+          onCancelDelete={() => setConfirmingDeleteHistoryKey(null)}
+          onDelete={(item) => deleteMutation.mutate(item)}
+        />
+      )}
     </>
   )
 }

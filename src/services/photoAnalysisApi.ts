@@ -59,6 +59,7 @@ export interface PhotoAnalysisHistoryItem {
   status?: 'good' | 'warning' | 'bad'
   analysis_mode?: PhotoAnalysisMode
   confidence?: number
+  ai_message?: string | null
   analyzed_at?: string
   saved_at?: string
   created_at?: string
@@ -107,12 +108,20 @@ export const analyzeManualPhotoLandmarks = async (
   return response.data
 }
 
-export const savePhotoAnalysis = async (saveToken: string): Promise<SavePhotoAnalysisResponse> => {
+export const savePhotoAnalysis = async (
+  saveToken: string,
+  aiMessage?: string | null
+): Promise<SavePhotoAnalysisResponse> => {
   const response = await apiClient.post<SavePhotoAnalysisResponse>('/photo/analyses', {
     save_token: saveToken,
+    ai_message: aiMessage,
   })
 
   return response.data
+}
+
+export const deletePhotoAnalysis = async (analysisId: number | string): Promise<void> => {
+  await apiClient.delete(`/photo/analyses/${analysisId}`)
 }
 
 export const getPhotoAnalysisHistory = async (): Promise<PhotoAnalysisHistoryItem[]> => {
