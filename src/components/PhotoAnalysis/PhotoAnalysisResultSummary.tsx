@@ -1,21 +1,27 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons'
+import { faArrowsLeftRight, faPersonWalking } from '@fortawesome/free-solid-svg-icons'
 import { PhotoAnalysisResponse } from '../../services/photoAnalysisApi'
+import PhotoAnalysisSummaryCard from './PhotoAnalysisSummaryCard'
+import { formatMetric, PHOTO_NORMAL_RANGES } from './photoSummary'
 
-const PHOTO_NORMAL_RANGES = {
-  neckForwardAngle: '정상 15° 이하',
-  shoulderSlope: '정상 10° 이하',
-  hipSlope: '정상 7° 이하',
-  asymmetryScore: '정상 5% 이하',
-}
-
-function formatMetric(value: number | null, suffix = '') {
-  if (value === null || Number.isNaN(value)) {
-    return '-'
-  }
-
-  return `${value.toFixed(1)}${suffix}`
-}
+const RESULT_ISSUE_CARD_CONFIGS = [
+  {
+    key: 'neck',
+    label: '거북목',
+    valueLabel: 'CVA 추정값',
+    icon: faPersonWalking,
+    className: 'photo-result-issue-card--neck',
+    matches: (issue: string) => issue.includes('거북목'),
+  },
+  {
+    key: 'asymmetry',
+    label: '좌우비대칭',
+    valueLabel: '좌우 비대칭',
+    icon: faArrowsLeftRight,
+    className: 'photo-result-issue-card--asymmetry',
+    matches: (issue: string) => issue.includes('좌우') || issue.includes('비대칭'),
+  },
+] as const
 
 export default function PhotoAnalysisResultSummary({
   title,
@@ -30,79 +36,108 @@ export default function PhotoAnalysisResultSummary({
   assistantCommentError: string | null
   isAssistantCommentPending: boolean
 }) {
+  const craniovertebralAngle = result.side.craniovertebral_angle ?? null
+  const metrics = [
+    {
+      label: '분석 모드',
+      value: result.analysis_mode === 'full' ? '전신' : '반신',
+    },
+    {
+      label: '전체 신뢰도',
+      value: `${Math.round(result.confidence * 100)}%`,
+    },
+    {
+      label: 'CVA 추정값',
+      value: formatMetric(craniovertebralAngle, '°'),
+      range: PHOTO_NORMAL_RANGES.craniovertebralAngle,
+    },
+    {
+      label: '어깨 기울기',
+      value: formatMetric(result.front.shoulder_slope, '°'),
+      range: PHOTO_NORMAL_RANGES.shoulderSlope,
+    },
+    {
+      label: '골반 기울기',
+      value: formatMetric(result.front.hip_slope, '°'),
+      range: PHOTO_NORMAL_RANGES.hipSlope,
+    },
+    {
+      label: '어깨-골반 정렬',
+      value: formatMetric(result.front.spine_alignment),
+      range: PHOTO_NORMAL_RANGES.spineAlignment,
+    },
+  ]
+  const issueCards = RESULT_ISSUE_CARD_CONFIGS.map((config) => {
+    const matchedIssue = result.issues.find(config.matches)
+    const metricValue =
+      config.key === 'neck'
+        ? formatMetric(craniovertebralAngle, '°')
+        : formatMetric(result.front.asymmetry_score, '%')
+
+    return (
+      <div
+        key={config.key}
+        className={`photo-result-issue-card ${config.className}${matchedIssue ? ' is-active' : ''}`}
+      >
+        <div className="photo-result-issue-card__icon" aria-hidden="true">
+          <FontAwesomeIcon icon={config.icon} />
+        </div>
+        <strong>{config.label}</strong>
+        <div className="photo-result-issue-card__value">
+          <span>{config.valueLabel}</span>
+          <b>{metricValue}</b>
+        </div>
+        {matchedIssue && <span className="photo-result-issue-card__badge">이슈 감지</span>}
+      </div>
+    )
+  })
+  const fallbackIssues = result.issues.filter(
+    (issue) => !RESULT_ISSUE_CARD_CONFIGS.some((config) => config.matches(issue))
+  )
+
   return (
-    <section className="card">
-      <div className="photo-summary-header">
-        <h3>{title}</h3>
-        <div className="photo-summary-header-meta">
-          <span className={`photo-status-chip ${result.status}`}>{result.status}</span>
-          {result.issues.length > 0 && (
+    <PhotoAnalysisSummaryCard
+      className="photo-analysis-result-card"
+      header={<h3>{title}</h3>}
+      status={result.status}
+      issues={result.issues}
+      issueContent={
+        <>
+          {issueCards.length > 0 && (
+            <div className="photo-result-issue-cards">
+              {issueCards}
+            </div>
+          )}
+          {fallbackIssues.length > 0 && (
             <div className="photo-issue-tags photo-issue-tags--header">
-              {result.issues.map((issue) => (
+              {fallbackIssues.map((issue) => (
                 <span key={issue} className="photo-issue-tag">{issue}</span>
               ))}
             </div>
           )}
-        </div>
-      </div>
-      <div className="photo-summary-grid">
-        <div>
-          <span>분석 모드</span>
-          <strong>{result.analysis_mode === 'full' ? '전신' : '반신'}</strong>
-        </div>
-        <div>
-          <span>전체 신뢰도</span>
-          <strong>{Math.round(result.confidence * 100)}%</strong>
-        </div>
-        <div>
-          <span>목 각도</span>
-          <strong>{formatMetric(result.side.neck_forward_angle, '°')}</strong>
-          <small className="photo-summary-range">{PHOTO_NORMAL_RANGES.neckForwardAngle}</small>
-        </div>
-        <div>
-          <span>어깨 기울기</span>
-          <strong>{formatMetric(result.front.shoulder_slope, '°')}</strong>
-          <small className="photo-summary-range">{PHOTO_NORMAL_RANGES.shoulderSlope}</small>
-        </div>
-        <div>
-          <span>골반 기울기</span>
-          <strong>{formatMetric(result.front.hip_slope, '°')}</strong>
-          <small className="photo-summary-range">{PHOTO_NORMAL_RANGES.hipSlope}</small>
-        </div>
-        <div>
-          <span>좌우 비대칭</span>
-          <strong>{formatMetric(result.front.asymmetry_score, '%')}</strong>
-          <small className="photo-summary-range">{PHOTO_NORMAL_RANGES.asymmetryScore}</small>
-        </div>
-      </div>
-      <div className="photo-message-block photo-message-block--warning">
-        <h4>
-          <FontAwesomeIcon icon={faTriangleExclamation} />
-        </h4>
-        <span>골반이 찍히지 않은 사진으로는 목과 어깨까지만 분석 가능해요.</span>
-      </div>
-      {result.missing_landmarks.length > 0 && (
-        <div className="photo-message-block">
-          <h4>보완이 필요한 랜드마크</h4>
-          <ul>
-            {result.missing_landmarks.map((landmark) => (
-              <li key={landmark}>{landmark}</li>
-            ))}
-          </ul>
+        </>
+      }
+      metrics={metrics}
+      warningMessage={
+        result.analysis_mode === 'upper_body_only'
+          ? '골반이 찍히지 않은 사진으로는 목과 어깨까지만 분석 가능해요.'
+          : undefined
+      }
+      missingLandmarks={result.missing_landmarks}
+      assistantContent={(
+        <div className="photo-message-block photo-message-block--assistant">
+          <h4>AI 코멘트</h4>
+          {isAssistantCommentPending && !assistantComment ? (
+            <p className="photo-message-muted">코멘트를 작성하는 중입니다...</p>
+          ) : assistantCommentError ? (
+            <p className="photo-message-error">{assistantCommentError}</p>
+          ) : assistantComment ? (
+            <p>{assistantComment}</p>
+          ) : (
+            <p className="photo-message-muted">최종 분석이 완료되면 맞춤 코멘트를 보여드릴게요.</p>
+          )}
         </div>
       )}
-      <div className="photo-message-block photo-message-block--assistant">
-        <h4>AI 코멘트</h4>
-        {isAssistantCommentPending && !assistantComment ? (
-          <p className="photo-message-muted">코멘트를 작성하는 중입니다...</p>
-        ) : assistantCommentError ? (
-          <p className="photo-message-error">{assistantCommentError}</p>
-        ) : assistantComment ? (
-          <p>{assistantComment}</p>
-        ) : (
-          <p className="photo-message-muted">최종 분석이 완료되면 맞춤 코멘트를 보여드릴게요.</p>
-        )}
-      </div>
-    </section>
+    />
   )
 }

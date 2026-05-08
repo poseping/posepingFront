@@ -15,6 +15,7 @@ export interface PhotoMetrics {
 export interface PhotoSideMetrics {
   confidence: number
   neck_forward_angle: number | null
+  craniovertebral_angle?: number | null
   forward_head_detected: boolean | null
 }
 
@@ -73,6 +74,7 @@ export interface PhotoAnalysisHistoryItem {
   asymmetry_score?: number | null
   spine_alignment?: number | null
   neck_forward_angle?: number | null
+  craniovertebral_angle?: number | null
 }
 
 export const analyzePhotoFiles = async (
@@ -97,12 +99,22 @@ export const analyzePhotoFiles = async (
 export const analyzeManualPhotoLandmarks = async (
   sideView: PhotoSideView,
   frontLandmarks: ManualLandmarkInput[],
-  sideLandmarks: ManualLandmarkInput[]
+  sideLandmarks: ManualLandmarkInput[],
+  frameSize?: {
+    frontWidth?: number
+    frontHeight?: number
+    sideWidth?: number
+    sideHeight?: number
+  }
 ): Promise<PhotoAnalysisResponse> => {
   const response = await apiClient.post<PhotoAnalysisResponse>('/photo/analyze-manual-landmarks', {
     side_view: sideView,
     front_landmarks: frontLandmarks,
     side_landmarks: sideLandmarks,
+    front_frame_width: Math.round(frameSize?.frontWidth ?? 0),
+    front_frame_height: Math.round(frameSize?.frontHeight ?? 0),
+    side_frame_width: Math.round(frameSize?.sideWidth ?? 0),
+    side_frame_height: Math.round(frameSize?.sideHeight ?? 0),
   })
 
   return response.data
