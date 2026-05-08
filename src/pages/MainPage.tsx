@@ -8,7 +8,7 @@ function MainPage() {
 
   return (
     <>
-      <PageHeader title="실시간 분석" />
+      <PageHeader />
       <main className="page-content">
         <WebcamStream isActive={isActive} onToggle={() => setIsActive(!isActive)} />
         <WebcamHistoryStats />

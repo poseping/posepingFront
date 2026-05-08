@@ -5,9 +5,9 @@ import { useSelector } from 'react-redux'
 import PageHeader from '../components/PageHeader'
 import { RootState } from '../store/store'
 import { hasPendingFirstLoginChoice, markFirstLoginChoiceSeen } from '../services/authService'
-import '../styles/first-login-choice.scss'
+import '../styles/pages/first-login-choice.scss'
 
-type ChoiceDestination = '/onboarding' | '/main' | '/history'
+type ChoiceDestination = '/onboarding' | '/main' | '/photo'
 
 const BRAND_LOGO_SRC = '/assets/logo/android-icon-192x192.png'
 
@@ -32,7 +32,7 @@ const choices: Array<{
     description: '웹캠으로 실시간 자세를 분석하고 피드백을 받아요.',
   },
   {
-    to: '/history',
+    to: '/photo',
     icon: faImage,
     title: '사진 분석으로 이동',
     description: '사진을 업로드해서 내 자세를 분석하고 기록을 남겨봐요.',
@@ -54,7 +54,7 @@ export default function FirstLoginChoicePage() {
 
   return (
     <>
-      <PageHeader title="처음 시작하기" description="원하는 분석 방법을 선택하세요." />
+      <PageHeader />
       <main className="first-login-choice">
         <section className="first-login-choice__intro">
           <img className="first-login-choice__logo" src={BRAND_LOGO_SRC} alt="PosePing" />

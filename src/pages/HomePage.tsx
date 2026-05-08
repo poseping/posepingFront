@@ -11,7 +11,7 @@ export default function HomePage() {
 
   return (
     <>
-      <PageHeader title="" description="" />
+      <PageHeader />
       <main>
         <section className="home-greeting">
           <p>안녕하세요</p>
@@ -21,21 +21,21 @@ export default function HomePage() {
           <section className="card home-action-card home-action-card--posture">
             <div className="home-action-card__content">
               <span className="home-action-card__icon"><FontAwesomeIcon icon={faCamera} /></span>
-              <h2>자세 분석</h2>
-              <p>사진이나 카메라로 현재 자세를 분석하고 목, 어깨, 척추 정렬 상태를 확인하세요.</p>
+              <h2>실시간 자세 분석</h2>
+              <p>과제, 업무 도중 나도 모르게 굽어지는 허리!<br />카메라로 내 자세를 실시간 확인할 수 있어요.</p>
             </div>
             <Link className="btn--primary home-action-card__button" to="/main">
               분석하러 가기
             </Link>
           </section>
 
-          <section className="card home-action-card home-action-card--history">
+          <section className="card home-action-card home-action-card--photo">
             <div className="home-action-card__content">
               <span className="home-action-card__icon"><FontAwesomeIcon icon={faChartColumn} /></span>
-              <h2>기록 확인</h2>
-              <p>누적된 분석 기록을 살펴보고 자세 변화와 개선 흐름을 한눈에 확인하세요.</p>
+              <h2>사진 분석, 기록</h2>
+              <p>사진으로 내 자세 점수를 알아봐요!<br/>누적된 분석 기록을 살펴보고 자세 변화와 개선 흐름을 한눈에 확인하세요.</p>
             </div>
-            <Link className="btn--primary home-action-card__button" to="/history">
+            <Link className="btn--primary home-action-card__button" to="/photo">
               기록 보러 가기
             </Link>
           </section>

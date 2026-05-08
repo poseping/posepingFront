@@ -16,8 +16,8 @@ const LoginPage = lazy(() => import('./pages/LoginPage'))
 const MainPage = lazy(() => import('./pages/MainPage'))
 const HomePage = lazy(() => import('./pages/HomePage'))
 const FirstLoginChoicePage = lazy(() => import('./pages/FirstLoginChoicePage'))
-const OnboardingChatPage = lazy(() => import('./pages/AssistantPage.tsx'))
-const HistoryPage = lazy(() => import('./pages/HistoryPage'))
+const AssistantPage = lazy(() => import('./pages/AssistantPage'))
+const PhotoPage = lazy(() => import('./pages/PhotoPage'))
 const PhotoHistoryStatsPage = lazy(() => import('./pages/PhotoHistoryStatsPage'))
 const MyPage = lazy(() => import('./pages/MyPage'))
 const SettingsPage = lazy(() => import('./pages/SettingsPage'))
@@ -56,12 +56,12 @@ function App() {
             }
           >
             <Route path="/home"     element={<HomePage />} />
-            <Route path="/onboarding" element={<OnboardingChatPage />} />
+            <Route path="/onboarding" element={<AssistantPage />} />
             <Route path="/main"     element={<MainPage />} />
-            <Route path="/history"  element={<HistoryPage />} />
-            <Route path="/history/photo-stats" element={<PhotoHistoryStatsPage />} />
+            <Route path="/photo"    element={<PhotoPage />} />
+            <Route path="/photo/stats" element={<PhotoHistoryStatsPage />} />
             <Route path="/mypage"   element={<MyPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/mypage/settings" element={<SettingsPage />} />
             <Route path="/admin" element={isAdmin ? <AdminDashboardPage /> : <Navigate to="/main" replace />} />
             <Route path="/admin/members" element={isAdmin ? <AdminMembersPage /> : <Navigate to="/main" replace />} />
           </Route>

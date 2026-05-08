@@ -18,7 +18,7 @@ import { useStretchReminder, type StretchInterval } from '../../hooks/useStretch
 import { useWebcamAssistantComment, type WebcamAssistantAnalyzeInput } from '../../hooks/useWebcamAssistantComment'
 import PostureProfileModal from './PostureProfileModal'
 import PostureGuideModal from './PostureGuideModal'
-import '../../styles/webcam.scss'
+import '../../styles/features/webcam.scss'
 
 interface WebcamStreamProps {
   isActive: boolean

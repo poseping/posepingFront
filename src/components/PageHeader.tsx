@@ -9,18 +9,16 @@ import {
   faHouse,
   faIdCard,
   faAddressBook,
-  faCircleUser,
-  faSun,
+  faCircleUser,
 } from '@fortawesome/free-regular-svg-icons'
 import { RootState } from '../store/store'
-import '../styles/page-header.scss'
+import '../styles/layout/page-header.scss'
 
 const navItems = [
   { to: '/home', label: '홈', icon: faHouse },
   { to: '/main', label: '분석', icon: faCamera },
-  { to: '/history', label: '기록', icon: faChartBar },
-  { to: '/mypage', label: '마이페이지', icon: faCircleUser },
-  { to: '/settings', label: '설정', icon: faSun },
+  { to: '/photo', label: '사진', icon: faChartBar },
+  { to: '/mypage', label: '마이페이지', icon: faCircleUser },
 ]
 
 const adminNavItem = { to: '/admin', label: '관리자', icon: faIdCard }
@@ -31,12 +29,7 @@ const adminNavItems = [
   { to: '/home', label: '포즈PING', icon: faHouse },
 ]
 
-interface PageHeaderProps {
-  title: string
-  description?: string
-}
-
-export default function PageHeader({}: PageHeaderProps) {
+export default function PageHeader() {
   const user = useSelector((state: RootState) => state.auth.user)
   const location = useLocation()
   const [isScrolled, setIsScrolled] = useState(false)
@@ -67,11 +60,6 @@ export default function PageHeader({}: PageHeaderProps) {
 
   return (
     <header className={`page-header${isHome ? ' home-header' : ''}${isHome && isScrolled ? ' home-header--scrolled' : ''}`}>
-      {/*<div className="page-header__left">*/}
-      {/*  <h1 className="page-header__title">{title}</h1>*/}
-      {/*  {description && <p className="page-header__desc">{description}</p>}*/}
-      {/*</div>*/}
-
       <nav className="page-header__nav">
         {visibleNavItems.map(({ to, label, icon }) => (
           <NavLink
