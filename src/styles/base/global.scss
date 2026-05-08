@@ -44,6 +44,11 @@
   padding: 1.5rem;
 }
 
+.card>*:last-child{
+  // 맨 마지막 요소 margin bottom 없애기
+  margin-bottom: 0!important;
+}
+
 .modal {
   position: fixed;
   inset: 0;
@@ -178,7 +183,15 @@
 }
 
 // 아이콘 버튼 — 사각형 (수정 연필, 이름 편집 등 인라인 아이콘 버튼)
-.btn-icon { @extend %btn-icon-base; }
+.btn-icon {
+  @extend %btn-icon-base;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.btn--primary .svg-inline--fa {
+  color: inherit;
+}
 
 // 아이콘 버튼 — 원형 (모달 닫기 X 버튼)
 // btn-icon 과 함께 사용: className="btn-icon btn-icon--circle"

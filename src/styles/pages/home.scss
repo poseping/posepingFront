@@ -71,7 +71,7 @@
   grid-column: 1 / -1;
 }
 
-.home-action-card--history {
+.home-action-card--photo {
   --home-card-accent: var(--success);
   --home-card-bg-start: var(--choice-photo-bg-start);
   --home-card-bg-end: var(--choice-photo-bg-end);
@@ -140,7 +140,7 @@
     grid-template-columns: 1fr;
   }
 
-  .home-action-card--history {
+  .home-action-card--photo {
     order: 1;
   }
 

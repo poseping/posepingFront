@@ -9,7 +9,7 @@ import {
   getAssistantErrorMessage,
   sendOnboardingChat,
 } from '../services/assistantApi'
-import '../styles/onboarding-chat.scss'
+import '../styles/pages/onboarding-chat.scss'
 import {useSelector} from "react-redux";
 import {RootState} from "../store/store.ts";
 
@@ -147,10 +147,7 @@ export default function AssistantPage() {
 
   return (
     <div className="onboarding-chat-page">
-      <PageHeader
-        title="생활 습관 분석"
-        description="생활 습관을 AI가 분석합니다."
-      />
+      <PageHeader />
       <main className="onboarding-chat-shell">
         <section className="onboarding-chat-card">
           <div className="onboarding-chat-messages">

@@ -6,6 +6,18 @@ $_dark:    #0f172a;
 $_heading: #10213d;
 $_surface: #f8fafc;
 
+.mp-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.35rem;
+}
+
+.mp-settings-button {
+  flex-shrink: 0;
+}
+
 // ─── Kicker ───────────────────────────────────────────────────────────────
 .mp-kicker {
   margin: 0 0 0.35rem;
@@ -102,27 +114,6 @@ $_surface: #f8fafc;
 }
 
 // ─── Actions ──────────────────────────────────────────────────────────────
-.mp-profile-actions {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.mp-delete-confirm {
-  margin-top: 1rem;
-  padding: 1rem;
-  border-radius: 14px;
-  background: #fff5f5;
-  border: 1px solid #fecaca;
-
-  p { margin: 0 0 0.75rem; font-size: 0.88rem; color: var(--destructive); font-weight: 600; }
-}
-
-.mp-confirm-row {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: flex-end;
-}
 
 // ─── Stats Card ───────────────────────────────────────────────────────────
 .mp-stats-header {
@@ -167,6 +158,7 @@ $_surface: #f8fafc;
 }
 
 .mp-stats-empty {
+  margin-bottom: 1.25rem;
   padding: 2.5rem 1rem;
   text-align: center;
   color: var(--muted-foreground);
@@ -255,7 +247,7 @@ $_surface: #f8fafc;
 }
 
 // ─── Causes ───────────────────────────────────────────────────────────────
-.mp-causes { margin-top: 1rem; }
+.mp-causes { margin-bottom: 1.25rem; }
 
 .mp-cause-list {
   display: flex;
@@ -326,6 +318,5 @@ $_surface: #f8fafc;
 .mp-habit-footer {
   display: flex;
   justify-content: flex-end;
-  margin-top: 0.25rem;
 }
 

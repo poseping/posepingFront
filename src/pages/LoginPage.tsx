@@ -10,7 +10,7 @@ import { useGoogleLogin } from '@react-oauth/google'
 import { loginSuccess, loginFailure } from '../store/authSlice'
 import { getPostLoginPath, saveToken, saveUserInfo } from '../services/authService'
 import apiClient from '../services/api'
-import '../styles/login.scss'
+import '../styles/pages/login.scss'
 
 const BRAND_LOGO_SRC = '/assets/logo/poseping_fill.png'
 
