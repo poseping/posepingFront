@@ -18,7 +18,6 @@ import { registerPostureProfile } from '../../services/webcamApi'
 import { useSkeletonPreview } from '../../hooks/useSkeletonPreview'
 
 interface PostureGuideModalProps {
-  videoRef: React.RefObject<HTMLVideoElement>
   onClose: () => void
   onComplete: () => void
 }
@@ -52,7 +51,8 @@ const STEPS = [
 
 type Status = 'idle' | 'capturing' | 'done' | 'error'
 
-export default function PostureGuideModal({ videoRef, onClose, onComplete }: PostureGuideModalProps) {
+export default function PostureGuideModal({ onClose, onComplete }: PostureGuideModalProps) {
+  const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const captureCanvasRef = useRef<HTMLCanvasElement>(null)
   const queryClient = useQueryClient()
@@ -62,7 +62,29 @@ export default function PostureGuideModal({ videoRef, onClose, onComplete }: Pos
   const [status, setStatus] = useState<Status>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
-  // 실시간 스켈레톤 프리뷰
+  useEffect(() => {
+    let stopped = false
+    const startWebcam = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: { ideal: 1280 }, height: { ideal: 720 } },
+        })
+        if (!stopped && videoRef.current) videoRef.current.srcObject = stream
+        else stream.getTracks().forEach((t) => t.stop())
+      } catch (error) {
+        console.error('웹캠 접근 실패:', error)
+      }
+    }
+    startWebcam()
+    return () => {
+      stopped = true
+      if (videoRef.current?.srcObject) {
+        ;(videoRef.current.srcObject as MediaStream).getTracks().forEach((t) => t.stop())
+        videoRef.current.srcObject = null
+      }
+    }
+  }, [])
+
   useSkeletonPreview(videoRef, canvasRef)
 
   const captureFrame = useCallback((): string | null => {
@@ -75,7 +97,7 @@ export default function PostureGuideModal({ videoRef, onClose, onComplete }: Pos
     const dataUrl = canvas.toDataURL('image/jpeg', 0.7)
     if (!dataUrl || dataUrl === 'data:,') return null
     return dataUrl.split(',')[1]
-  }, [videoRef])
+  }, [])
 
   const doRegister = useCallback(async () => {
     setStatus('capturing')
@@ -95,11 +117,9 @@ export default function PostureGuideModal({ videoRef, onClose, onComplete }: Pos
     }
   }, [captureFrame, queryClient, onComplete])
 
-  // doRegister를 ref로 유지 — countdown effect가 doRegister 참조 변경에 반응하지 않도록
   const doRegisterRef = useRef(doRegister)
   useLayoutEffect(() => { doRegisterRef.current = doRegister }, [doRegister])
 
-  // 카운트다운 → 0 되면 자동 캡처 (deps에 doRegister 없음 → 참조 변경으로 재실행 방지)
   useEffect(() => {
     if (countdown === null) return
     if (countdown === 0) {
@@ -115,98 +135,102 @@ export default function PostureGuideModal({ videoRef, onClose, onComplete }: Pos
   const isCountingDown = countdown !== null && countdown > 0
   const isBusy = isCountingDown || status === 'capturing' || status === 'done'
 
-  return (
-    <div className="guide-overlay" onClick={(e) => { if (e.target === e.currentTarget && !isBusy) onClose() }}>
-      <div className="guide-modal">
-        <canvas ref={captureCanvasRef} style={{ display: 'none' }} />
+  const content = (
+    <div className="guide-modal">
+      <video ref={videoRef} autoPlay playsInline style={{ display: 'none' }} />
+      <canvas ref={captureCanvasRef} style={{ display: 'none' }} />
 
-        {/* 헤더 */}
-        <div className="guide-header">
-          <div className="guide-dots">
-            {STEPS.map((_, i) => (
-              <div key={i} className={`guide-dot ${i < step ? 'done' : i === step ? 'active' : ''}`} />
-            ))}
-          </div>
-          <button className="btn-icon btn-icon--circle" onClick={onClose} disabled={isBusy}>
-            <FontAwesomeIcon icon={faXmark} />
-          </button>
+      <div className="guide-header">
+        <div className="guide-dots">
+          {STEPS.map((_, i) => (
+            <div key={i} className={`guide-dot ${i < step ? 'done' : i === step ? 'active' : ''}`} />
+          ))}
         </div>
+        <button className="btn-icon btn-icon--circle" onClick={onClose} disabled={isBusy}>
+          <FontAwesomeIcon icon={faXmark} />
+        </button>
+      </div>
 
-        {/* 본문 */}
-        <div className="guide-body">
-          <div className="guide-preview-wrap">
-            <canvas ref={canvasRef} className="guide-preview-canvas" />
-            {isCountingDown && (
-              <div className="guide-countdown-badge">{countdown}</div>
-            )}
-            {status === 'capturing' && (
-              <div className="guide-countdown-badge"><FontAwesomeIcon icon={faCamera} /></div>
-            )}
-            {status === 'done' && (
-              <div className="guide-countdown-badge done"><FontAwesomeIcon icon={faCheck} /></div>
-            )}
-          </div>
-
-          <div className="guide-instruction">
-            <div className="guide-step-icon"><FontAwesomeIcon icon={current.icon} /></div>
-            <p className="guide-step-label">{step + 1} / {STEPS.length}</p>
-            <h3 className="guide-step-title">{current.title}</h3>
-            <p className="guide-step-desc">{current.instruction}</p>
-            {current.tip && (
-              <p className="guide-step-tip">
-                <FontAwesomeIcon icon={faLightbulb} />
-                {current.tip}
-              </p>
-            )}
-            {status === 'error' && (
-              <p className="guide-error-msg">{errorMsg}</p>
-            )}
-          </div>
-        </div>
-
-        {/* 푸터 */}
-        <div className="guide-footer">
-          {step > 0 && !isBusy && status !== 'error' && (
-            <button className="btn--secondary" onClick={() => setStep((s) => s - 1)}>
-              <FontAwesomeIcon icon={faArrowLeft} />
-              이전
-            </button>
+      <div className="guide-body">
+        <div className="guide-preview-wrap">
+          <canvas ref={canvasRef} className="guide-preview-canvas" />
+          {isCountingDown && (
+            <div className="guide-countdown-badge">{countdown}</div>
           )}
+          {status === 'capturing' && (
+            <div className="guide-countdown-badge"><FontAwesomeIcon icon={faCamera} /></div>
+          )}
+          {status === 'done' && (
+            <div className="guide-countdown-badge done"><FontAwesomeIcon icon={faCheck} /></div>
+          )}
+        </div>
 
-          <div className="guide-footer-right">
-            {!isLastStep && (
-              <button className="btn--primary" onClick={() => setStep((s) => s + 1)}>
-                다음
-                <FontAwesomeIcon icon={faArrowRight} />
-              </button>
-            )}
-            {isLastStep && status === 'idle' && !isCountingDown && (
-              <button className="btn--primary" onClick={() => setCountdown(3)}>
-                <FontAwesomeIcon icon={faCamera} />
-                지금 등록하기
-              </button>
-            )}
-            {isLastStep && isCountingDown && (
-              <button className="btn--primary" disabled>
-                {countdown}초 후 자동 등록...
-              </button>
-            )}
-            {isLastStep && status === 'capturing' && (
-              <button className="btn--primary" disabled>
-                등록 중...
-              </button>
-            )}
-            {status === 'error' && (
-              <button
-                className="btn--primary"
-                onClick={() => { setStatus('idle'); setErrorMsg(null); setCountdown(null) }}
-              >
-                다시 시도
-              </button>
-            )}
-          </div>
+        <div className="guide-instruction">
+          <div className="guide-step-icon"><FontAwesomeIcon icon={current.icon} /></div>
+          <p className="guide-step-label">{step + 1} / {STEPS.length}</p>
+          <h3 className="guide-step-title">{current.title}</h3>
+          <p className="guide-step-desc">{current.instruction}</p>
+          {current.tip && (
+            <p className="guide-step-tip">
+              <FontAwesomeIcon icon={faLightbulb} />
+              {current.tip}
+            </p>
+          )}
+          {status === 'error' && (
+            <p className="guide-error-msg">{errorMsg}</p>
+          )}
         </div>
       </div>
+
+      <div className="guide-footer">
+        {step > 0 && !isBusy && status !== 'error' && (
+          <button className="btn--secondary" onClick={() => setStep((s) => s - 1)}>
+            <FontAwesomeIcon icon={faArrowLeft} />
+            이전
+          </button>
+        )}
+        <div className="guide-footer-right">
+          {!isLastStep && (
+            <button className="btn--primary" onClick={() => setStep((s) => s + 1)}>
+              다음
+              <FontAwesomeIcon icon={faArrowRight} />
+            </button>
+          )}
+          {isLastStep && status === 'idle' && !isCountingDown && (
+            <button className="btn--primary" onClick={() => setCountdown(3)}>
+              <FontAwesomeIcon icon={faCamera} />
+              지금 등록하기
+            </button>
+          )}
+          {isLastStep && isCountingDown && (
+            <button className="btn--primary" disabled>
+              {countdown}초 후 자동 등록...
+            </button>
+          )}
+          {isLastStep && status === 'capturing' && (
+            <button className="btn--primary" disabled>
+              등록 중...
+            </button>
+          )}
+          {status === 'error' && (
+            <button
+              className="btn--primary"
+              onClick={() => { setStatus('idle'); setErrorMsg(null); setCountdown(null) }}
+            >
+              다시 시도
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+
+  return (
+    <div
+      className="guide-overlay"
+      onClick={(e) => { if (e.target === e.currentTarget && !isBusy) onClose() }}
+    >
+      {content}
     </div>
   )
 }

@@ -707,6 +707,215 @@ $_danger-fg:  #b91c1c;
 }
 
 
+// ─── Phase containers ─────────────────────────────────────────────────────
+.wcam-ready-phase,
+.wcam-summary-phase {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  max-width: 640px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+
+// ─── Analyzing layout ─────────────────────────────────────────────────────
+.wcam-analyzing-layout {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 1.5rem;
+  width: 100%;
+  align-items: start;
+
+  @media (max-width: 768px) { grid-template-columns: 1fr; gap: 1rem; }
+}
+
+.wcam-analyzing-left,
+.wcam-analyzing-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+
+// ─── Control bar ──────────────────────────────────────────────────────────
+.wcam-control-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 1rem;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid rgba(19, 42, 76, 0.08);
+  box-shadow: 0 4px 12px rgba(20, 38, 70, 0.06);
+}
+
+.wcam-ctrl-spacer { flex: 1; }
+
+.wcam-ctrl-icon {
+  position: relative;
+  color: #64748b;
+  transition: color 0.15s, background 0.15s;
+
+  &--active {
+    color: var(--primary);
+    background: rgba(8, 145, 178, 0.08);
+  }
+}
+
+.wcam-ctrl-stretch-wrap { position: relative; }
+
+.wcam-ctrl-stretch-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  font-size: 0.58rem;
+  font-weight: 800;
+  line-height: 1;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 6px;
+  padding: 2px 4px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.wcam-stretch-popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fff;
+  border: 1px solid rgba(19, 42, 76, 0.12);
+  border-radius: 12px;
+  padding: 0.65rem 0.85rem;
+  box-shadow: 0 8px 24px rgba(20, 38, 70, 0.12);
+  white-space: nowrap;
+  z-index: 100;
+}
+
+.wcam-ctrl-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  font-size: 0.88rem;
+  padding: 0.45rem 0.9rem;
+}
+
+.wcam-paused-banner {
+  padding: 0.55rem 1rem;
+  background: #fef3c7;
+  border: 1px solid #fbbf24;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #92400e;
+  text-align: center;
+}
+
+
+// ─── AI Chat bubble ───────────────────────────────────────────────────────
+.wcam-chat-area { margin-top: 0.85rem; }
+
+.wcam-chat-bubble {
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 16px 16px 16px 4px;
+  padding: 0.75rem 1rem;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: #0c4a6e;
+  word-break: keep-all;
+
+  &--typing {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0.75rem 1rem;
+
+    span {
+      display: block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #60a5fa;
+      animation: wcam-typing-dot 1.2s infinite ease-in-out;
+
+      &:nth-child(2) { animation-delay: 0.2s; }
+      &:nth-child(3) { animation-delay: 0.4s; }
+    }
+  }
+}
+
+@keyframes wcam-typing-dot {
+  0%, 80%, 100% { transform: scale(0.75); opacity: 0.4; }
+  40%            { transform: scale(1);    opacity: 1; }
+}
+
+
+// ─── Summary stats ────────────────────────────────────────────────────────
+.wcam-summary-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.wcam-summary-stat {
+  padding: 0.85rem 0.75rem;
+  border-radius: 14px;
+  text-align: center;
+
+  &__label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+
+  &__value {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 800;
+  }
+
+  &--good    { background: $_success-bg; color: $_success-fg; }
+  &--warning { background: #fef3c7;      color: #92400e; }
+  &--bad     { background: $_danger-bg;  color: $_danger-fg; }
+}
+
+.wcam-summary-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+
+// ─── Profile list modal (analyzing 중 조회) ───────────────────────────────
+.wcam-profile-list-modal {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(19, 42, 76, 0.08);
+  box-shadow: 0 24px 60px rgba(20, 38, 70, 0.18);
+  padding: 1.5rem;
+  width: min(460px, 100%);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.wcam-profile-list-notice {
+  flex: 1;
+  font-size: 0.75rem;
+  color: #64748b;
+  text-align: center;
+}
+
+
 // ─── History Stats ────────────────────────────────────────────────────────
 .wcam-history-stats { display: flex; flex-direction: column; }
 
