@@ -8,15 +8,15 @@ import {
   faCircleUser,
   faClipboard,
   faHouse,
-  faIdCard,
+  faIdCard,
 } from '@fortawesome/free-regular-svg-icons'
 import { RootState } from '../store/store'
 
 const navItems = [
   { to: '/home', label: '홈', icon: faHouse },
-  { to: '/main', label: '분석', icon: faCamera },
+  { to: '/webcam', label: '분석', icon: faCamera },
   { to: '/photo', label: '사진', icon: faChartBar },
-  { to: '/mypage', label: '마이', icon: faCircleUser },
+  { to: '/mypage', label: '마이', icon: faCircleUser },
 ]
 
 const adminNavItem = { to: '/admin', label: '관리자', icon: faIdCard }

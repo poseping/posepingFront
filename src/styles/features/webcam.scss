@@ -315,18 +315,6 @@ $_danger-fg:  #b91c1c;
   width: fit-content;
 }
 
-.wcam-register-msg {
-  margin-top: 0.85rem;
-  padding: 0.55rem 0.85rem;
-  border-radius: 12px;
-  font-size: 0.86rem;
-  font-weight: 600;
-
-  &.success { background: $_success-bg; color: $_success-fg; }
-  &.error   { background: $_danger-bg;  color: $_danger-fg; }
-}
-
-
 // ─── Add Button (layout override only — variant handled by btn--ghost) ────
 .wcam-add-btn {
   flex-direction: column;

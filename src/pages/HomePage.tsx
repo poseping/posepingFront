@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCamera, faChartColumn, faComments } from '@fortawesome/free-solid-svg-icons'
 import PageHeader from '../components/PageHeader'
 import { RootState } from '../store/store'
+import '../styles/pages/home.scss'
 
 export default function HomePage() {
   const user = useSelector((state: RootState) => state.auth.user)
@@ -24,7 +25,7 @@ export default function HomePage() {
               <h2>실시간 자세 분석</h2>
               <p>과제, 업무 도중 나도 모르게 굽어지는 허리!<br />카메라로 내 자세를 실시간 확인할 수 있어요.</p>
             </div>
-            <Link className="btn--primary home-action-card__button" to="/main">
+            <Link className="btn--primary home-action-card__button" to="/webcam">
               분석하러 가기
             </Link>
           </section>

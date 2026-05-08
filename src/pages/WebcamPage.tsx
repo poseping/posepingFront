@@ -3,7 +3,7 @@ import WebcamStream from '../components/Webcam/WebcamStream'
 import WebcamHistoryStats from '../components/Webcam/WebcamHistoryStats'
 import PageHeader from '../components/PageHeader'
 
-function MainPage() {
+function WebcamPage() {
   const [isActive, setIsActive] = useState(false)
 
   return (
@@ -17,4 +17,4 @@ function MainPage() {
   )
 }
 
-export default MainPage
+export default WebcamPage

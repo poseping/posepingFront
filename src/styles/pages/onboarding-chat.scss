@@ -12,13 +12,6 @@
   gap: 1.5rem;
 }
 
-.onboarding-chat-status-card {
-  background: #fff;
-  border-radius: 24px;
-  border: 1px solid rgba(19, 42, 76, 0.08);
-  box-shadow: 0 18px 45px rgba(20, 38, 70, 0.08);
-}
-
 .onboarding-chat-card {
   display: flex;
   flex-direction: column;
@@ -26,56 +19,6 @@
   gap: 1rem;
   min-height: 0;
   position:relative;
-}
-
-.onboarding-chat-status-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
-}
-
-.onboarding-chat-status-card {
-  padding: 1.25rem;
-}
-
-.onboarding-chat-status-card h3 {
-  margin: 0 0 0.8rem;
-  color: #10213d;
-}
-
-.onboarding-chat-status-card p {
-  margin: 0.35rem 0 0;
-  color: #526277;
-  line-height: 1.6;
-}
-
-.onboarding-chat-field-list,
-.onboarding-chat-missing-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-}
-
-.onboarding-chat-field-list li,
-.onboarding-chat-missing-list li {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.onboarding-chat-field-list strong,
-.onboarding-chat-missing-list strong {
-  color: #10213d;
-  font-size: 0.92rem;
-}
-
-.onboarding-chat-field-list span,
-.onboarding-chat-missing-list span {
-  color: #526277;
-  line-height: 1.55;
 }
 
 .onboarding-chat-messages {
@@ -337,15 +280,6 @@
 
   .onboarding-chat-wrap {
     bottom: var(--bottom-nav-height);
-  }
-
-  .onboarding-chat-status-card {
-    padding: 1rem;
-    border-radius: 20px;
-  }
-
-  .onboarding-chat-status-grid {
-    grid-template-columns: 1fr;
   }
 
   .onboarding-chat-messages {
