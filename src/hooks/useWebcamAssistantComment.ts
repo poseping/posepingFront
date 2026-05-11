@@ -5,6 +5,7 @@ import {
   getWebcamComment,
 } from "../services/assistantApi";
 
+// 테스트용 : 추후 최소 60_000 (1분)으로 변경 예정
 const BAD_POSTURE_THRESHOLD_MS = 10_000;
 
 export interface WebcamAssistantAnalyzeInput {

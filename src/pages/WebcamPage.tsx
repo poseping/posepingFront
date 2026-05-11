@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
@@ -17,12 +17,14 @@ import {
   deletePostureProfile,
   saveWebcamSession,
   getAlertTypes,
+  analyzeWebcam,
   type PostureProfile,
+  type WebcamAnalyzeResponse,
 } from '../services/webcamApi'
 import { usePostureNotification } from '../hooks/usePostureNotification'
 import { useStretchReminder, type StretchInterval } from '../hooks/useStretchReminder'
-import { useWebcamAssistantComment, type WebcamAssistantAnalyzeInput } from '../hooks/useWebcamAssistantComment'
-import WebcamStream, { type WebcamAnalysisResult } from '../components/Webcam/WebcamStream'
+import { useWebcamAssistantComment } from '../hooks/useWebcamAssistantComment'
+import WebcamStream, { type WebcamStreamRef } from '../components/Webcam/WebcamStream'
 import WebcamHistoryStats from '../components/Webcam/WebcamHistoryStats'
 import PostureProfileModal from '../components/Webcam/PostureProfileModal'
 import PostureGuideModal from '../components/Webcam/PostureGuideModal'
@@ -36,6 +38,12 @@ const STATUS_LABEL: Record<string, string> = {
   good: '좋은 자세',
   warning: '자세 주의',
   bad: '자세 불량',
+}
+
+const STATUS_COLOR: Record<string, string> = {
+  good: '#10b981',
+  warning: '#f59e0b',
+  bad: '#ef4444',
 }
 
 function formatDate(isoString: string) {
@@ -53,7 +61,7 @@ export default function WebcamPage() {
 
   const [phase, setPhase] = useState<WcamPhase>('ready')
   const [analysisState, setAnalysisState] = useState<AnalysisState>('active')
-  const [analyzeResult, setAnalyzeResult] = useState<WebcamAnalysisResult | null>(null)
+  const [analyzeResult, setAnalyzeResult] = useState<WebcamAnalyzeResponse | null>(null)
   const [isGuideOpen, setIsGuideOpen] = useState(false)
   const [selectedProfile, setSelectedProfile] = useState<PostureProfile | null>(null)
   const [isProfileListOpen, setIsProfileListOpen] = useState(false)
@@ -68,6 +76,9 @@ export default function WebcamPage() {
   })
   const prevStatusRef = useRef<string | null>(null)
   const prevIssuesRef = useRef<Set<string>>(new Set())
+  const webcamStreamRef = useRef<WebcamStreamRef>(null)
+  const requestInFlightRef = useRef(false)
+  const analysisTimerRef = useRef<number>()
 
   const { data: profiles = [], isLoading: profilesLoading } = useQuery({
     queryKey: ['postureProfiles'],
@@ -100,6 +111,10 @@ export default function WebcamPage() {
       setSelectedProfile(null)
     },
   })
+  const { mutateAsync: runAnalyze } = useMutation({
+    mutationFn: (imageBase64: string) => analyzeWebcam(imageBase64),
+    onError: (error) => { console.error('웹캠 분석 실패:', error) },
+  })
 
   const { notify, permission: notifPermission } = usePostureNotification()
   const stretchReminder = useStretchReminder()
@@ -115,7 +130,7 @@ export default function WebcamPage() {
   const canAddMore = profiles.filter((p) => p.is_active).length < 3
   const profileEditable = phase !== 'analyzing' || analysisState === 'paused'
 
-  const hasProfile = profiles.length > 0
+  const hasProfile = profiles.length > 0 && profiles.filter((p) => p.is_active).length > 0
 
   // ── 핸들러 ────────────────────────────────────────────────────────────────
 
@@ -159,9 +174,9 @@ export default function WebcamPage() {
     setPhase('summary')
   }
 
-  const handleResult = (data: WebcamAnalysisResult) => {
+  const handleResult = (data: WebcamAnalyzeResponse) => {
     setAnalyzeResult(data)
-    handleAnalyzeResult(data as WebcamAssistantAnalyzeInput)
+    handleAnalyzeResult(data)
     notify(data.status as 'good' | 'warning' | 'bad', data.issues ?? [])
 
     if (data.status !== prevStatusRef.current) {
@@ -178,6 +193,33 @@ export default function WebcamPage() {
     prevIssuesRef.current = newIssues
   }
 
+  useEffect(() => {
+    if (!isAnalyzing) return
+    let cancelled = false
+    const tick = async () => {
+      if (cancelled) return
+      if (!requestInFlightRef.current) {
+        const imageBase64 = webcamStreamRef.current?.captureFrame() ?? null
+        if (imageBase64) {
+          requestInFlightRef.current = true
+          try {
+            const data = await runAnalyze(imageBase64)
+            handleResult(data)
+          } finally {
+            requestInFlightRef.current = false
+          }
+        }
+      }
+      if (!cancelled) analysisTimerRef.current = window.setTimeout(tick, 300)
+    }
+    analysisTimerRef.current = window.setTimeout(tick, 0)
+    return () => {
+      cancelled = true
+      requestInFlightRef.current = false
+      clearTimeout(analysisTimerRef.current)
+    }
+  }, [isAnalyzing])
+
   // ── Ready phase ────────────────────────────────────────────────────────────
 
   const renderReadyPhase = () => (
@@ -192,7 +234,7 @@ export default function WebcamPage() {
               <div className="wcam-profile-skeleton-item" />
             </div>
           </div>
-        ) : !hasProfile ? (
+        ) : profiles.length === 0 ? (
           <div className="wcam-empty-state">
             <div className="wcam-empty-icon"><FontAwesomeIcon icon={faClipboardList} /></div>
             <h4>등록된 기준 자세가 없습니다</h4>
@@ -257,9 +299,12 @@ export default function WebcamPage() {
         <div className="wcam-stage-card">
           <div className="wcam-stage-inner">
             <WebcamStream
-              isAnalyzing={isAnalyzing}
+              ref={webcamStreamRef}
               webcamNeeded={phase === 'analyzing'}
-              onResult={handleResult}
+              landmarks={analyzeResult?.landmarks}
+              frameWidth={analyzeResult?.frame_width}
+              frameHeight={analyzeResult?.frame_height}
+              statusColor={analyzeResult ? STATUS_COLOR[analyzeResult.status] : undefined}
             />
           </div>
         </div>
@@ -302,7 +347,7 @@ export default function WebcamPage() {
                   </select>
                 )}
                 <button
-                  className={`wcam-stretch-btn ${stretchReminder.isEnabled ? 'on' : 'off'}`}
+                  className={stretchReminder.isEnabled ? 'btn--secondary btn--sm' : 'btn--primary btn--sm'}
                   onClick={() => { stretchReminder.toggle(); setIsStretchOpen(false) }}
                 >
                   {stretchReminder.isEnabled ? '끄기' : '켜기'}
@@ -319,7 +364,7 @@ export default function WebcamPage() {
               일시정지
             </button>
           ) : (
-            <button className="btn--primary wcam-ctrl-action-btn" onClick={handleResume}>
+            <button className="btn--primary wcam-ctrl-action-btn" onClick={handleResume} disabled={!hasProfile}>
               <FontAwesomeIcon icon={faPlay} />
               재개
             </button>
@@ -332,7 +377,9 @@ export default function WebcamPage() {
 
         {analysisState === 'paused' && (
           <div className="wcam-paused-banner">
-            ⏸ 일시정지 중 — 기준자세 수정/삭제가 가능합니다
+            {hasProfile
+              ? '⏸ 일시정지 중 — 기준자세 수정/삭제가 가능합니다'
+              : '⏸ 활성화된 기준 자세가 없습니다 — 기준 자세를 활성화한 뒤 재개해주세요'}
           </div>
         )}
       </div>

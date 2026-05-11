@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCamera, faChartColumn, faComments } from '@fortawesome/free-solid-svg-icons'
+import { faCamera, faObjectGroup, faComments } from '@fortawesome/free-solid-svg-icons'
 import PageHeader from '../components/PageHeader'
 import { RootState } from '../store/store'
 import '../styles/pages/home.scss'
@@ -21,7 +21,7 @@ export default function HomePage() {
         <div className="home-page">
           <section className="card home-action-card home-action-card--posture">
             <div className="home-action-card__content">
-              <span className="home-action-card__icon"><FontAwesomeIcon icon={faCamera} /></span>
+              <span className="home-action-card__icon"><FontAwesomeIcon icon={faObjectGroup} /></span>
               <h2>실시간 자세 분석</h2>
               <p>과제, 업무 도중 나도 모르게 굽어지는 허리!<br />카메라로 내 자세를 실시간 확인할 수 있어요.</p>
             </div>
@@ -32,7 +32,7 @@ export default function HomePage() {
 
           <section className="card home-action-card home-action-card--photo">
             <div className="home-action-card__content">
-              <span className="home-action-card__icon"><FontAwesomeIcon icon={faChartColumn} /></span>
+              <span className="home-action-card__icon"><FontAwesomeIcon icon={faCamera} /></span>
               <h2>사진 분석, 기록</h2>
               <p>사진으로 내 자세 점수를 알아봐요!<br/>누적된 분석 기록을 살펴보고 자세 변화와 개선 흐름을 한눈에 확인하세요.</p>
             </div>
