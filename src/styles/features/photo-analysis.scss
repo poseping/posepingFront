@@ -276,7 +276,7 @@
 
 .photo-editor-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 1rem;
 }
 
@@ -297,7 +297,15 @@
   gap: 0.75rem;
 }
 
-.photo-analysis-result-card .photo-summary-header-meta {
+.photo-summary-grid__label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+:is(.photo-analysis-result-card, .photo-history-selected-record) .photo-summary-header-meta {
   width: 100%;
   justify-content: flex-start;
   align-items: flex-start;
@@ -305,12 +313,12 @@
   flex-wrap: wrap;
 }
 
-.photo-analysis-result-card .photo-summary-header {
+:is(.photo-analysis-result-card, .photo-history-selected-record) .photo-summary-header {
   flex-direction: column;
   align-items: flex-start;
 }
 
-.photo-analysis-result-card .photo-status-chip {
+:is(.photo-analysis-result-card, .photo-history-selected-record) .photo-status-chip {
   min-width: 102px;
   padding: 0.55rem 0.85rem;
   font-size: 0.8rem;
@@ -325,6 +333,7 @@
 }
 
 .photo-result-issue-card {
+  position: relative;
   display: flex;
   flex: 1 1 180px;
   min-height: 136px;
@@ -336,21 +345,28 @@
   border-radius: 22px;
   color: #ffffff;
   text-align: center;
+  background: linear-gradient(135deg, #5d9dff 0%, #0056b1 100%);
   opacity: 0.72;
   box-shadow: 0 12px 22px rgba(15, 23, 42, 0.08);
 }
 
-.photo-result-issue-card--neck {
-  background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
-}
-
-.photo-result-issue-card--asymmetry {
-  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+.photo-result-issue-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .photo-result-issue-card.is-active {
   opacity: 1;
+  background: linear-gradient(135deg, #ffa637 0%, #e16000 100%);
   box-shadow: 0 16px 28px rgba(15, 23, 42, 0.12);
+}
+
+.photo-result-issue-card.is-active::after {
+  animation: photo-issue-card-pulse 1.2s ease-in-out infinite;
 }
 
 .photo-result-issue-card__icon {
@@ -358,10 +374,15 @@
   align-items: center;
   justify-content: center;
   width: 3.25rem;
-  height: 3.25rem;
   border-radius: 999px;
   color: #ffffff;
-  font-size: 1.45rem;
+  font-size: 6rem;
+}
+
+.photo-result-issue-card__icon-image {
+  display: block;
+  width: 8rem;
+  object-fit: contain;
 }
 
 .photo-result-issue-card strong {
@@ -390,25 +411,22 @@
   line-height: 1.1;
 }
 
-.photo-result-issue-card__badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.38rem 0.7rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.18);
-  color: #ffffff;
-  font-size: 0.76rem;
-  font-weight: 800;
-  letter-spacing: 0.02em;
+@keyframes photo-issue-card-pulse {
+  0% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(225, 96, 0, 0.56);
+  }
+  100% {
+    box-shadow: 0 0 0 24px rgba(225, 96, 0, 0);
+  }
 }
 
-.photo-analysis-result-card .photo-issue-tags--header {
+:is(.photo-analysis-result-card, .photo-history-selected-record) .photo-issue-tags--header {
   width: 100%;
   justify-content: flex-start;
 }
 
-.photo-analysis-result-card .photo-issue-tag {
+:is(.photo-analysis-result-card, .photo-history-selected-record) .photo-issue-tag {
   padding: 0.65rem 0.9rem;
   font-size: 0.86rem;
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
@@ -544,17 +562,72 @@
   gap: 0.9rem;
 }
 
-.photo-summary-grid div {
+.photo-summary-grid .photo-summary-grid-wrapper {
   padding: 1rem;
   border-radius: 16px;
   background: #f8fafc;
+  position: relative;
 }
 
-.photo-summary-grid span {
+.photo-summary-grid span.photo-summary-title {
   display: block;
-  margin-bottom: 0.35rem;
   color: #64748b;
   font-size: 0.82rem;
+  margin-bottom: 0.82rem;
+}
+
+.photo-summary-info {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  line-height: 0;
+}
+
+.photo-summary-info__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #155eef;
+  font-size: 0.76rem;
+  line-height: 1;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.photo-summary-info__button:focus-visible {
+  outline: 2px solid rgba(21, 94, 239, 0.28);
+  outline-offset: 2px;
+}
+
+.photo-summary-info__tooltip {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  z-index: 3;
+  width: min(260px, calc(100vw - 4rem));
+  padding: 0.8rem 0.9rem;
+  border-radius: 14px;
+  background: #f8fafc;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.22);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity 0.16s ease, transform 0.16s ease, visibility 0.16s ease;
+  word-break: keep-all;
+}
+
+.photo-summary-info:focus-within .photo-summary-info__tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }
 
 .photo-summary-grid strong {
@@ -573,7 +646,7 @@
 }
 
 .photo-message-block {
-  margin-top: 1rem;
+  margin-bottom: 1rem;
   padding: 1rem 1.1rem;
   border-radius: 16px;
   background: #f8fafc;
@@ -649,6 +722,58 @@
 
 .photo-message-block--assistant {
   background: linear-gradient(135deg, #eef7ff 0%, #f8fafc 100%);
+}
+
+.photo-message-block--score {
+  background: linear-gradient(135deg, #fff4e8 0%, #ffedd5 100%);
+}
+
+.photo-message-block--score.is-needs-improvement {
+  background: linear-gradient(135deg, #fff4e8 0%, #ffedd5 100%);
+}
+
+.photo-message-block--score.is-caution {
+  background: linear-gradient(135deg, #ecfdf5 0%, #dcfce7 100%);
+}
+
+.photo-message-block--score.is-stable {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+}
+
+.photo-score-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.35rem;
+}
+
+.photo-score-content strong {
+  font-size: 1.4rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.photo-score-content span {
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.photo-score-content.is-needs-improvement strong,
+.photo-score-content.is-needs-improvement span {
+  color: #93350d;
+}
+
+.photo-score-content.is-caution strong,
+.photo-score-content.is-caution span {
+  color: #1f6e3d;
+}
+
+.photo-score-content.is-stable strong,
+.photo-score-content.is-stable span {
+  color: #3057c5;
 }
 
 .photo-message-muted {

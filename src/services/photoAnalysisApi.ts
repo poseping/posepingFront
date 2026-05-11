@@ -44,6 +44,10 @@ export interface PhotoAnalysisResponse {
   front_landmarks: ManualLandmarkInput[]
   side_landmarks: ManualLandmarkInput[]
   issues: string[]
+  posture_score: number | null
+  score_grade: string | null
+  score_breakdown: Record<string, number>
+  score_version: number
   save_token: string | null
 }
 
@@ -60,6 +64,10 @@ export interface PhotoAnalysisHistoryItem {
   status?: 'good' | 'warning' | 'bad'
   analysis_mode?: PhotoAnalysisMode
   confidence?: number
+  posture_score?: number | null
+  score_grade?: string | null
+  score_breakdown?: Record<string, number> | null
+  score_version?: number | null
   ai_message?: string | null
   analyzed_at?: string
   saved_at?: string

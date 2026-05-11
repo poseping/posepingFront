@@ -1,27 +1,7 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowsLeftRight, faPersonWalking } from '@fortawesome/free-solid-svg-icons'
 import { PhotoAnalysisResponse } from '../../services/photoAnalysisApi'
 import PhotoAnalysisSummaryCard from './PhotoAnalysisSummaryCard'
-import { formatMetric, PHOTO_NORMAL_RANGES } from './photoSummary'
-
-const RESULT_ISSUE_CARD_CONFIGS = [
-  {
-    key: 'neck',
-    label: '거북목',
-    valueLabel: 'CVA 추정값',
-    icon: faPersonWalking,
-    className: 'photo-result-issue-card--neck',
-    matches: (issue: string) => issue.includes('거북목'),
-  },
-  {
-    key: 'asymmetry',
-    label: '좌우비대칭',
-    valueLabel: '좌우 비대칭',
-    icon: faArrowsLeftRight,
-    className: 'photo-result-issue-card--asymmetry',
-    matches: (issue: string) => issue.includes('좌우') || issue.includes('비대칭'),
-  },
-] as const
+import { formatMetric, formatScoreGrade, getScoreGradeClassName, PHOTO_NORMAL_RANGES } from './photoSummary'
+import PhotoIssueCards, { filterFallbackIssues } from './PhotoIssueCards'
 
 export default function PhotoAnalysisResultSummary({
   title,
@@ -50,6 +30,8 @@ export default function PhotoAnalysisResultSummary({
       label: 'CVA 추정값',
       value: formatMetric(craniovertebralAngle, '°'),
       range: PHOTO_NORMAL_RANGES.craniovertebralAngle,
+      infoText:
+        'CVA는 거북목을 판단하는 데에 사용하는 지표입니다. 경추와 귀의 이주(Tragus)를 그은 선이 경추를 기준으로 그은 수평선과 이루는 각도를 나타냅니다. 간이 분석에서는 실제 정확한 수평선을 판정하기 어렵기 때문에 추정값을 대신 표시합니다.',
     },
     {
       label: '어깨 기울기',
@@ -67,33 +49,7 @@ export default function PhotoAnalysisResultSummary({
       range: PHOTO_NORMAL_RANGES.spineAlignment,
     },
   ]
-  const issueCards = RESULT_ISSUE_CARD_CONFIGS.map((config) => {
-    const matchedIssue = result.issues.find(config.matches)
-    const metricValue =
-      config.key === 'neck'
-        ? formatMetric(craniovertebralAngle, '°')
-        : formatMetric(result.front.asymmetry_score, '%')
-
-    return (
-      <div
-        key={config.key}
-        className={`photo-result-issue-card ${config.className}${matchedIssue ? ' is-active' : ''}`}
-      >
-        <div className="photo-result-issue-card__icon" aria-hidden="true">
-          <FontAwesomeIcon icon={config.icon} />
-        </div>
-        <strong>{config.label}</strong>
-        <div className="photo-result-issue-card__value">
-          <span>{config.valueLabel}</span>
-          <b>{metricValue}</b>
-        </div>
-        {matchedIssue && <span className="photo-result-issue-card__badge">이슈 감지</span>}
-      </div>
-    )
-  })
-  const fallbackIssues = result.issues.filter(
-    (issue) => !RESULT_ISSUE_CARD_CONFIGS.some((config) => config.matches(issue))
-  )
+  const fallbackIssues = filterFallbackIssues(result.issues)
 
   return (
     <PhotoAnalysisSummaryCard
@@ -103,11 +59,11 @@ export default function PhotoAnalysisResultSummary({
       issues={result.issues}
       issueContent={
         <>
-          {issueCards.length > 0 && (
-            <div className="photo-result-issue-cards">
-              {issueCards}
-            </div>
-          )}
+          <PhotoIssueCards
+            issues={result.issues}
+            craniovertebralAngle={craniovertebralAngle}
+            asymmetryScore={result.front.asymmetry_score}
+          />
           {fallbackIssues.length > 0 && (
             <div className="photo-issue-tags photo-issue-tags--header">
               {fallbackIssues.map((issue) => (
@@ -117,6 +73,29 @@ export default function PhotoAnalysisResultSummary({
           )}
         </>
       }
+      preGridContent={
+        <>
+          <div className={`photo-message-block photo-message-block--score ${getScoreGradeClassName(result.score_grade)}`.trim()}>
+            <h4>신체 점수</h4>
+            <div className={`photo-score-content ${getScoreGradeClassName(result.score_grade)}`.trim()}>
+              <strong>{result.posture_score === null ? '-' : `${result.posture_score}점`}</strong>
+              {result.score_grade && <span>{formatScoreGrade(result.score_grade)}</span>}
+            </div>
+          </div>
+          <div className="photo-message-block photo-message-block--assistant">
+            <h4>AI 코멘트</h4>
+            {isAssistantCommentPending && !assistantComment ? (
+              <p className="photo-message-muted">코멘트를 작성하는 중입니다...</p>
+            ) : assistantCommentError ? (
+              <p className="photo-message-error">{assistantCommentError}</p>
+            ) : assistantComment ? (
+              <p>{assistantComment}</p>
+            ) : (
+              <p className="photo-message-muted">최종 분석이 완료되면 맞춤 코멘트를 보여드릴게요.</p>
+            )}
+          </div>
+        </>
+      }
       metrics={metrics}
       warningMessage={
         result.analysis_mode === 'upper_body_only'
@@ -124,20 +103,6 @@ export default function PhotoAnalysisResultSummary({
           : undefined
       }
       missingLandmarks={result.missing_landmarks}
-      assistantContent={(
-        <div className="photo-message-block photo-message-block--assistant">
-          <h4>AI 코멘트</h4>
-          {isAssistantCommentPending && !assistantComment ? (
-            <p className="photo-message-muted">코멘트를 작성하는 중입니다...</p>
-          ) : assistantCommentError ? (
-            <p className="photo-message-error">{assistantCommentError}</p>
-          ) : assistantComment ? (
-            <p>{assistantComment}</p>
-          ) : (
-            <p className="photo-message-muted">최종 분석이 완료되면 맞춤 코멘트를 보여드릴게요.</p>
-          )}
-        </div>
-      )}
     />
   )
 }

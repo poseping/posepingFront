@@ -20,6 +20,20 @@ export function formatMetric(value: number | null, suffix = '') {
   return `${value.toFixed(1)}${suffix}`
 }
 
+export function formatScoreGrade(grade: string | null | undefined) {
+  if (grade === 'stable') return '안정적'
+  if (grade === 'caution') return '주의'
+  if (grade === 'needs_improvement') return '개선 필요'
+  return '-'
+}
+
+export function getScoreGradeClassName(grade: string | null | undefined) {
+  if (grade === 'stable') return 'is-stable'
+  if (grade === 'caution') return 'is-caution'
+  if (grade === 'needs_improvement') return 'is-needs-improvement'
+  return ''
+}
+
 export function formatAnalysisMode(mode: PhotoAnalysisHistoryItem['analysis_mode']) {
   if (mode === 'full') {
     return '전신'

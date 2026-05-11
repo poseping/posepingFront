@@ -24,8 +24,9 @@ interface HistoryTrendPoint {
   label: string
   sortTime: number
   historyKey: string
+  postureScore: number | null
   craniovertebralAngle: number | null
-  spineAlignment: number | null
+  asymmetryScore: number | null
   item: PhotoAnalysisHistoryItem
 }
 
@@ -70,12 +71,11 @@ function buildHistoryTrendData(items: PhotoAnalysisHistoryItem[]) {
     .map((item, index) => {
       const dateValue = getHistoryDate(item)
       const date = dateValue ? new Date(dateValue) : null
-      const craniovertebralAngle = getNumericMetric(
-        item.side?.craniovertebral_angle ?? item.craniovertebral_angle ?? item.side?.neck_forward_angle ?? item.neck_forward_angle
-      )
-      const spineAlignment = getNumericMetric(item.front?.spine_alignment ?? item.spine_alignment)
+      const postureScore = getNumericMetric(item.posture_score)
+      const craniovertebralAngle = getNumericMetric(item.side?.craniovertebral_angle ?? item.craniovertebral_angle)
+      const asymmetryScore = getNumericMetric(item.front?.asymmetry_score ?? item.asymmetry_score)
 
-      if (craniovertebralAngle === null && spineAlignment === null) {
+      if (postureScore === null && craniovertebralAngle === null && asymmetryScore === null) {
         return null
       }
 
@@ -83,8 +83,9 @@ function buildHistoryTrendData(items: PhotoAnalysisHistoryItem[]) {
         label: date && !Number.isNaN(date.getTime()) ? `${date.getMonth() + 1}/${date.getDate()}` : `${index + 1}`,
         sortTime: date && !Number.isNaN(date.getTime()) ? date.getTime() : index,
         historyKey: getHistoryKey(item, index),
+        postureScore,
         craniovertebralAngle,
-        spineAlignment,
+        asymmetryScore,
         item,
       }
     })
@@ -144,12 +145,16 @@ export default function PhotoHistoryStatsPage() {
           </div>
           <div className="photo-stats-metrics">
             <div>
+              <span>신체 점수</span>
+              <strong>{formatMetric(latest?.postureScore ?? null, '점')}</strong>
+            </div>
+            <div>
               <span>CVA 추정값</span>
               <strong>{formatMetric(latest?.craniovertebralAngle ?? null, '°')}</strong>
             </div>
             <div>
-              <span>척추정렬도</span>
-              <strong>{formatMetric(latest?.spineAlignment ?? null)}</strong>
+              <span>좌우 비대칭</span>
+              <strong>{formatMetric(latest?.asymmetryScore ?? null, '%')}</strong>
             </div>
           </div>
         </div>
@@ -174,13 +179,13 @@ export default function PhotoHistoryStatsPage() {
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(100, 116, 139, 0.22)" />
                 <XAxis dataKey="label" tickLine={false} axisLine={false} />
-                <YAxis tickLine={false} axisLine={false} width={36} />
+                <YAxis tickLine={false} axisLine={false} width={36} domain={[0, 100]} />
                 <Tooltip />
                 <Legend />
                 <Line
                   type="monotone"
-                  dataKey="craniovertebralAngle"
-                  name="CVA 추정값"
+                  dataKey="postureScore"
+                  name="신체 점수"
                   stroke="#155eef"
                   strokeWidth={2.5}
                   dot={(props) => (
@@ -194,17 +199,20 @@ export default function PhotoHistoryStatsPage() {
                 />
                 <Line
                   type="monotone"
-                  dataKey="spineAlignment"
-                  name="척추정렬도"
-                  stroke="#0b7a75"
+                  dataKey="craniovertebralAngle"
+                  name="CVA 추정값"
+                  stroke="#0f766e"
                   strokeWidth={2.5}
-                  dot={(props) => (
-                    <SelectableTrendDot
-                      {...props}
-                      selectedHistoryKey={selectedHistoryKey}
-                      onSelect={setSelectedHistoryKey}
-                    />
-                  )}
+                  dot={false}
+                  connectNulls
+                />
+                <Line
+                  type="monotone"
+                  dataKey="asymmetryScore"
+                  name="좌우 비대칭"
+                  stroke="#f97316"
+                  strokeWidth={2.5}
+                  dot={false}
                   connectNulls
                 />
               </LineChart>

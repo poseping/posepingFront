@@ -6,6 +6,7 @@ interface SummaryMetricItem {
   label: string
   value: string
   range?: string
+  infoText?: string
 }
 
 export default function PhotoAnalysisSummaryCard({
@@ -14,6 +15,7 @@ export default function PhotoAnalysisSummaryCard({
   status,
   issues = [],
   issueContent,
+  preGridContent,
   metrics,
   warningMessage,
   alerts = [],
@@ -26,6 +28,7 @@ export default function PhotoAnalysisSummaryCard({
   status?: string | null
   issues?: string[]
   issueContent?: ReactNode
+  preGridContent?: ReactNode
   metrics: SummaryMetricItem[]
   warningMessage?: string
   alerts?: string[]
@@ -48,12 +51,27 @@ export default function PhotoAnalysisSummaryCard({
           ))}
         </div>
       </div>
+      {preGridContent}
       <div className="photo-summary-grid">
         {metrics.map((metric) => (
-          <div key={metric.label}>
-            <span>{metric.label}</span>
+          <div className={"photo-summary-grid-wrapper"} key={metric.label}>
+            <span className={"photo-summary-title"}>{metric.label}</span>
             <strong>{metric.value}</strong>
             {metric.range && <small className="photo-summary-range">{metric.range}</small>}
+            {metric.infoText && (
+                <div className="photo-summary-info">
+                  <button
+                      type="button"
+                      className="photo-summary-info__button"
+                      aria-label={`${metric.label} 설명 보기`}
+                  >
+                    i
+                  </button>
+                  <div className="photo-summary-info__tooltip" role="tooltip">
+                    {metric.infoText}
+                  </div>
+                </div>
+            )}
           </div>
         ))}
       </div>
