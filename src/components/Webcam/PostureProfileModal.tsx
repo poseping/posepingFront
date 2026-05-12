@@ -66,9 +66,10 @@ interface Props {
   onClose: () => void
   onUpdate: (data: { profile_name?: string; is_active?: boolean }) => Promise<void>
   onDelete: () => Promise<void>
+  editable?: boolean
 }
 
-export default function PostureProfileModal({ profile, onClose, onUpdate, onDelete }: Props) {
+export default function PostureProfileModal({ profile, onClose, onUpdate, onDelete, editable = true }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [editingName, setEditingName] = useState(false)
   const [nameValue, setNameValue] = useState(profile.profile_name)
@@ -128,7 +129,7 @@ export default function PostureProfileModal({ profile, onClose, onUpdate, onDele
 
         {/* Header */}
         <div className="wcam-modal-header">
-          {editingName ? (
+          {editingName && editable ? (
             <div className="wcam-modal-name-edit">
               <input
                 className="wcam-modal-name-input"
@@ -150,9 +151,11 @@ export default function PostureProfileModal({ profile, onClose, onUpdate, onDele
           ) : (
             <div className="wcam-modal-name-row">
               <h2 className="wcam-modal-title">{nameValue}</h2>
-              <button className="btn-icon" onClick={() => setEditingName(true)} title="이름 수정">
-                <FontAwesomeIcon icon={faPen} />
-              </button>
+              {editable && (
+                <button className="btn-icon" onClick={() => setEditingName(true)} title="이름 수정">
+                  <FontAwesomeIcon icon={faPen} />
+                </button>
+              )}
             </div>
           )}
           <button className="btn-icon btn-icon--circle" onClick={onClose}>
@@ -184,13 +187,15 @@ export default function PostureProfileModal({ profile, onClose, onUpdate, onDele
             className={`wcam-toggle-switch ${isActive ? 'on' : 'off'}`}
             onClick={handleToggleActive}
             aria-label={isActive ? '비활성화' : '활성화'}
+            disabled={!editable}
+            style={!editable ? { opacity: 0.5, cursor: 'default' } : undefined}
           />
         </div>
         {errorMsg && <p className="wcam-modal-error">{errorMsg}</p>}
 
         {/* 삭제 */}
-        <div className="wcam-modal-divider" />
-        {confirmDelete ? (
+        {editable && <div className="wcam-modal-divider" />}
+        {editable && (confirmDelete ? (
           <div className="wcam-modal-confirm">
             <p className="wcam-modal-confirm-text">이 기준 자세를 삭제할까요? 되돌릴 수 없습니다.</p>
             <div className="wcam-modal-confirm-row">
@@ -206,7 +211,7 @@ export default function PostureProfileModal({ profile, onClose, onUpdate, onDele
           <button className="btn--danger-outline btn--full" onClick={handleDelete}>
             삭제하기
           </button>
-        )}
+        ))}
 
       </div>
     </div>

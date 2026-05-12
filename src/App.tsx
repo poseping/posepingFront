@@ -13,7 +13,7 @@ import ScrollToTop from './components/ScrollToTop'
 import { RootState } from './store/store'
 
 const LoginPage = lazy(() => import('./pages/LoginPage'))
-const MainPage = lazy(() => import('./pages/MainPage'))
+const WebcamPage = lazy(() => import('./pages/WebcamPage'))
 const HomePage = lazy(() => import('./pages/HomePage'))
 const FirstLoginChoicePage = lazy(() => import('./pages/FirstLoginChoicePage'))
 const AssistantPage = lazy(() => import('./pages/AssistantPage'))
@@ -57,16 +57,16 @@ function App() {
           >
             <Route path="/home"     element={<HomePage />} />
             <Route path="/onboarding" element={<AssistantPage />} />
-            <Route path="/main"     element={<MainPage />} />
+            <Route path="/webcam"   element={<WebcamPage />} />
             <Route path="/photo"    element={<PhotoPage />} />
             <Route path="/photo/stats" element={<PhotoHistoryStatsPage />} />
             <Route path="/mypage"   element={<MyPage />} />
             <Route path="/mypage/settings" element={<SettingsPage />} />
-            <Route path="/admin" element={isAdmin ? <AdminDashboardPage /> : <Navigate to="/main" replace />} />
-            <Route path="/admin/members" element={isAdmin ? <AdminMembersPage /> : <Navigate to="/main" replace />} />
+            <Route path="/admin" element={isAdmin ? <AdminDashboardPage /> : <Navigate to="/webcam" replace />} />
+            <Route path="/admin/members" element={isAdmin ? <AdminMembersPage /> : <Navigate to="/webcam" replace />} />
           </Route>
 
-          <Route path="/" element={<Navigate to="/main" replace />} />
+          <Route path="/" element={<Navigate to="/webcam" replace />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </Suspense>

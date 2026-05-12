@@ -7,7 +7,7 @@ import { RootState } from '../store/store'
 import { hasPendingFirstLoginChoice, markFirstLoginChoiceSeen } from '../services/authService'
 import '../styles/pages/first-login-choice.scss'
 
-type ChoiceDestination = '/onboarding' | '/main' | '/photo'
+type ChoiceDestination = '/onboarding' | '/webcam' | '/photo'
 
 const BRAND_LOGO_SRC = '/assets/logo/android-icon-192x192.png'
 
@@ -26,7 +26,7 @@ const choices: Array<{
     primary: true,
   },
   {
-    to: '/main',
+    to: '/webcam',
     icon: faCamera,
     title: '실시간 자세 분석',
     description: '웹캠으로 실시간 자세를 분석하고 피드백을 받아요.',

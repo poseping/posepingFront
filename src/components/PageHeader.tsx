@@ -4,21 +4,21 @@ import { useSelector } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faCamera,
-  faChartBar,
   faClipboard,
   faHouse,
   faIdCard,
   faAddressBook,
-  faCircleUser,
+  faCircleUser,
+  faObjectGroup,
 } from '@fortawesome/free-regular-svg-icons'
 import { RootState } from '../store/store'
 import '../styles/layout/page-header.scss'
 
 const navItems = [
   { to: '/home', label: '홈', icon: faHouse },
-  { to: '/main', label: '분석', icon: faCamera },
-  { to: '/photo', label: '사진', icon: faChartBar },
-  { to: '/mypage', label: '마이페이지', icon: faCircleUser },
+  { to: '/webcam', label: '웹캠', icon: faObjectGroup },
+  { to: '/photo', label: '사진', icon: faCamera },
+  { to: '/mypage', label: '마이페이지', icon: faCircleUser },
 ]
 
 const adminNavItem = { to: '/admin', label: '관리자', icon: faIdCard }
