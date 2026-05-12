@@ -2,6 +2,8 @@
   --chat-form-bottom: 1rem;
   --chat-form-height: 70px;
   --chat-shell-padding: 2rem;
+  height: var(--chat-viewport-height, 100svh);
+  overflow: hidden;
 }
 
 .onboarding-chat-shell {
@@ -10,6 +12,9 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .onboarding-chat-card {
@@ -18,6 +23,7 @@
   flex: 1;
   gap: 1rem;
   min-height: 0;
+  height: 100%;
   position:relative;
 }
 
@@ -25,10 +31,13 @@
   flex: 1;
   min-height: 0;
   padding: var(--chat-shell-padding);
-  padding-bottom: calc(var(--chat-shell-padding) + 4rem);
+  padding-bottom: calc(var(--chat-shell-padding) + var(--chat-form-height) + 1.25rem);
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .onboarding-chat-empty {
@@ -279,11 +288,14 @@
   }
 
   .onboarding-chat-wrap {
-    bottom: var(--bottom-nav-height);
+    bottom: max(var(--bottom-nav-height), var(--chat-keyboard-inset, 0px));
   }
 
   .onboarding-chat-messages {
     scrollbar-width: none;
+    padding-bottom: calc(
+      var(--chat-shell-padding) + var(--chat-form-height) + max(var(--bottom-nav-height), var(--chat-keyboard-inset, 0px)) + 1.25rem
+    );
   }
 
   .onboarding-chat-bubble {

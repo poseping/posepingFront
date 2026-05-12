@@ -26,7 +26,7 @@ export default function AssistantPage() {
   const [redirectCountdown, setRedirectCountdown] = useState<number | null>(null)
   const [visibleInitialBubbleCount, setVisibleInitialBubbleCount] = useState(0)
   const latestMessageRef = useRef<HTMLElement | null>(null)
-  const messagesEndRef = useRef<HTMLDivElement | null>(null)
+  const messagesRef = useRef<HTMLDivElement | null>(null)
   const requestInFlightRef = useRef(false)
   const user = useSelector((state: RootState) => state.auth.user)
   const nickname = user?.nickname?.trim() || '사용자';
@@ -40,11 +40,23 @@ export default function AssistantPage() {
     latestMessageRef.current = node
   }
 
+  const hasMessageScroll = () => {
+    const messages = messagesRef.current
+    return messages ? messages.scrollHeight > messages.clientHeight + 8 : false
+  }
+
   const scrollToChatBottom = (behavior: ScrollBehavior = 'smooth') => {
     window.requestAnimationFrame(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior, block: 'end' })
-      window.scrollTo({
-        top: document.documentElement.scrollHeight,
+      const messages = messagesRef.current
+      if (!messages) return
+
+      if (!hasMessageScroll()) {
+        messages.scrollTo({ top: 0, behavior: 'auto' })
+        return
+      }
+
+      messages.scrollTo({
+        top: messages.scrollHeight,
         behavior,
       })
     })
@@ -118,6 +130,36 @@ export default function AssistantPage() {
     return () => window.clearTimeout(timerId)
   }, [chatHistory.length, visibleInitialBubbleCount, onboardingMutation.isPending, done, errorMessage])
 
+  useEffect(() => {
+    const handleViewportChange = () => {
+      window.requestAnimationFrame(() => {
+        const viewport = window.visualViewport
+        const viewportHeight = viewport?.height ?? window.innerHeight
+        const keyboardInset = viewport
+          ? Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop)
+          : 0
+
+        document.documentElement.style.setProperty('--chat-viewport-height', `${viewportHeight}px`)
+        document.documentElement.style.setProperty('--chat-keyboard-inset', `${keyboardInset}px`)
+
+        scrollToChatBottom('auto')
+      })
+    }
+
+    handleViewportChange()
+    window.visualViewport?.addEventListener('resize', handleViewportChange)
+    window.visualViewport?.addEventListener('scroll', handleViewportChange)
+    window.addEventListener('resize', handleViewportChange)
+
+    return () => {
+      window.visualViewport?.removeEventListener('resize', handleViewportChange)
+      window.visualViewport?.removeEventListener('scroll', handleViewportChange)
+      window.removeEventListener('resize', handleViewportChange)
+      document.documentElement.style.removeProperty('--chat-viewport-height')
+      document.documentElement.style.removeProperty('--chat-keyboard-inset')
+    }
+  }, [chatHistory.length, visibleInitialBubbleCount])
+
   const canSubmit = inputValue.trim().length > 0 && !onboardingMutation.isPending && !done
   const submitPrompt = (prompt: string) => {
     const trimmed = prompt.trim()
@@ -150,7 +192,7 @@ export default function AssistantPage() {
       <PageHeader />
       <main className="onboarding-chat-shell">
         <section className="onboarding-chat-card">
-          <div className="onboarding-chat-messages">
+          <div className="onboarding-chat-messages" ref={messagesRef}>
             {initialMessages.slice(0, visibleInitialBubbleCount).map((message, index) => (
               <div
                 key={message}
@@ -214,8 +256,6 @@ export default function AssistantPage() {
                 )}
               </div>
             )}
-
-            <div ref={messagesEndRef} aria-hidden="true" />
           </div>
 
           <div className={"onboarding-chat-wrap"}>
