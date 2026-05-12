@@ -1,60 +1,15 @@
 import { type PhotoAnalysisHistoryItem } from '../../services/photoAnalysisApi'
-
-const PHOTO_NORMAL_RANGES = {
-  neckForwardAngle: '정상 15° 이하',
-  shoulderSlope: '정상 10° 이하',
-  hipSlope: '정상 7° 이하',
-  asymmetryScore: '정상 5% 이하',
-}
-
-function getNumericMetric(value: unknown) {
-  return typeof value === 'number' && Number.isFinite(value) ? value : null
-}
-
-function formatMetric(value: number | null, suffix = '') {
-  if (value === null || Number.isNaN(value)) {
-    return '-'
-  }
-
-  return `${value.toFixed(1)}${suffix}`
-}
-
-function getHistoryDate(item: PhotoAnalysisHistoryItem) {
-  return item.saved_at ?? item.analyzed_at ?? item.created_at ?? ''
-}
-
-function formatHistoryDate(item: PhotoAnalysisHistoryItem) {
-  const dateValue = getHistoryDate(item)
-  const date = dateValue ? new Date(dateValue) : null
-
-  if (!date || Number.isNaN(date.getTime())) {
-    return '날짜 정보 없음'
-  }
-
-  return date.toLocaleString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
-
-function formatAnalysisMode(mode: PhotoAnalysisHistoryItem['analysis_mode']) {
-  if (mode === 'full') {
-    return '전신'
-  }
-
-  if (mode === 'upper_body_only') {
-    return '반신'
-  }
-
-  if (mode === 'manual_adjustment_required') {
-    return '수동 보정'
-  }
-
-  return '-'
-}
+import PhotoIssueCards, { filterFallbackIssues } from './PhotoIssueCards'
+import PhotoAnalysisSummaryCard from './PhotoAnalysisSummaryCard'
+import {
+  formatAnalysisMode,
+  formatHistoryDate,
+  formatMetric,
+  formatScoreGrade,
+  getScoreGradeClassName,
+  getNumericMetric,
+  PHOTO_NORMAL_RANGES,
+} from './photoSummary'
 
 function getMetric(
   item: PhotoAnalysisHistoryItem,
@@ -80,125 +35,139 @@ export default function PhotoHistoryRecordSummary({
   onDelete: (item: PhotoAnalysisHistoryItem) => void
 }) {
   const confidence = getNumericMetric(item.confidence)
+  const postureScore = getNumericMetric(item.posture_score)
   const neckForwardAngle = getNumericMetric(item.side?.neck_forward_angle ?? item.neck_forward_angle)
+  const craniovertebralAngle = getNumericMetric(item.side?.craniovertebral_angle ?? item.craniovertebral_angle)
   const shoulderSlope = getMetric(item, 'shoulder_slope', 'shoulder_slope')
   const hipSlope = getMetric(item, 'hip_slope', 'hip_slope')
   const asymmetryScore = getMetric(item, 'asymmetry_score', 'asymmetry_score')
+  const spineAlignment = getMetric(item, 'spine_alignment', 'spine_alignment')
   const alerts = item.alerts ?? []
   const issues = item.issues ?? []
   const missingLandmarks = item.missing_landmarks ?? []
   const aiMessage = item.ai_message?.trim()
+  const fallbackIssues = filterFallbackIssues(issues)
+  const metrics = [
+    {
+      label: '분석 모드',
+      value: formatAnalysisMode(item.analysis_mode),
+    },
+    {
+      label: '전체 신뢰도',
+      value: confidence === null ? '-' : `${Math.round(confidence * 100)}%`,
+    },
+    {
+      label: craniovertebralAngle === null ? '목 각도' : 'CVA 추정값',
+      value: formatMetric(craniovertebralAngle ?? neckForwardAngle, '°'),
+      range: craniovertebralAngle === null ? '이전 기록 기준값' : PHOTO_NORMAL_RANGES.craniovertebralAngle,
+      infoText:
+        craniovertebralAngle === null
+          ? undefined
+          : 'CVA는 거북목을 판단하는 데에 사용하는 지표입니다. 경추와 귀의 이주(Tragus)를 그은 선이 경추를 기준으로 그은 수평선과 이루는 각도를 나타냅니다. 간이 분석에서는 실제 정확한 수평선을 판정하기 어렵기 때문에 추정값을 대신 표시합니다.',
+    },
+    {
+      label: '어깨 기울기',
+      value: formatMetric(shoulderSlope, '°'),
+      range: PHOTO_NORMAL_RANGES.shoulderSlope,
+    },
+    {
+      label: '골반 기울기',
+      value: formatMetric(hipSlope, '°'),
+      range: PHOTO_NORMAL_RANGES.hipSlope,
+    },
+    {
+      label: '어깨-골반 정렬',
+      value: formatMetric(spineAlignment),
+      range: PHOTO_NORMAL_RANGES.spineAlignment,
+    },
+  ]
 
   return (
-    <section className="card photo-history-selected-record">
-      <div className="photo-summary-header">
+    <PhotoAnalysisSummaryCard
+      className="photo-history-selected-record"
+      header={(
         <div>
           <p className="photo-kicker">Selected Record</p>
           <h3>{formatHistoryDate(item)} 기록</h3>
         </div>
-        <div className="photo-summary-header-meta">
-          {item.status && <span className={`photo-status-chip ${item.status}`}>{item.status}</span>}
-          {issues.length > 0 && (
+      )}
+      status={item.status}
+      issues={issues}
+      issueContent={
+        <>
+          <PhotoIssueCards
+            issues={issues}
+            craniovertebralAngle={craniovertebralAngle ?? neckForwardAngle}
+            asymmetryScore={asymmetryScore}
+          />
+          {fallbackIssues.length > 0 && (
             <div className="photo-issue-tags photo-issue-tags--header">
-              {issues.map((issue) => (
+              {fallbackIssues.map((issue) => (
                 <span key={issue} className="photo-issue-tag">{issue}</span>
               ))}
             </div>
           )}
-        </div>
-      </div>
-      <div className="photo-summary-grid">
-        <div>
-          <span>분석 모드</span>
-          <strong>{formatAnalysisMode(item.analysis_mode)}</strong>
-        </div>
-        <div>
-          <span>전체 신뢰도</span>
-          <strong>{confidence === null ? '-' : `${Math.round(confidence * 100)}%`}</strong>
-        </div>
-        <div>
-          <span>목 각도</span>
-          <strong>{formatMetric(neckForwardAngle, '°')}</strong>
-          <small className="photo-summary-range">{PHOTO_NORMAL_RANGES.neckForwardAngle}</small>
-        </div>
-        <div>
-          <span>어깨 기울기</span>
-          <strong>{formatMetric(shoulderSlope, '°')}</strong>
-          <small className="photo-summary-range">{PHOTO_NORMAL_RANGES.shoulderSlope}</small>
-        </div>
-        <div>
-          <span>골반 기울기</span>
-          <strong>{formatMetric(hipSlope, '°')}</strong>
-          <small className="photo-summary-range">{PHOTO_NORMAL_RANGES.hipSlope}</small>
-        </div>
-        <div>
-          <span>좌우 비대칭</span>
-          <strong>{formatMetric(asymmetryScore, '%')}</strong>
-          <small className="photo-summary-range">{PHOTO_NORMAL_RANGES.asymmetryScore}</small>
-        </div>
-      </div>
-      {alerts.length > 0 && (
-        <div className="photo-message-block">
-          <h4>알림</h4>
-          <ul>
-            {alerts.map((alert) => (
-              <li key={alert}>{alert}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-      {missingLandmarks.length > 0 && (
-        <div className="photo-message-block">
-          <h4>보완이 필요한 랜드마크</h4>
-          <ul>
-            {missingLandmarks.map((landmark) => (
-              <li key={landmark}>{landmark}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-      {aiMessage && (
-        <div className="photo-message-block photo-message-block--assistant">
-          <h4>AI 코멘트</h4>
-          <p>{aiMessage}</p>
-        </div>
-      )}
-      <div className="photo-history-delete-actions">
-        <button
-          className="btn--danger-outline photo-history-delete-button"
-          type="button"
-          onClick={onRequestDelete}
-        >
-          삭제하기
-        </button>
-      </div>
-      {isConfirmingDelete && (
-        <div className="modal" role="dialog" aria-modal="true" aria-labelledby="photo-delete-title">
-          <div className="modal__backdrop" onClick={onCancelDelete} />
-          <div className="modal__card modal--xs photo-history-delete-modal">
-            <h3 id="photo-delete-title">해당 기록을 삭제하시겠습니까?</h3>
-            <div className="photo-history-delete-modal__actions">
-              <button
-                className="btn--secondary"
-                type="button"
-                onClick={onCancelDelete}
-                disabled={isDeleting}
-              >
-                취소
-              </button>
-              <button
-                className="btn--danger"
-                type="button"
-                onClick={() => onDelete(item)}
-                disabled={isDeleting}
-              >
-                {isDeleting ? '삭제 중...' : '삭제'}
-              </button>
+        </>
+      }
+      preGridContent={
+        <>
+          <div className={`photo-message-block photo-message-block--score ${getScoreGradeClassName(item.score_grade)}`.trim()}>
+            <h4>신체 점수</h4>
+            <div className={`photo-score-content ${getScoreGradeClassName(item.score_grade)}`.trim()}>
+              <strong>{postureScore === null ? '-' : `${Math.round(postureScore)}점`}</strong>
+              {item.score_grade && <span>{formatScoreGrade(item.score_grade)}</span>}
             </div>
           </div>
-        </div>
+          {aiMessage && (
+            <div className="photo-message-block photo-message-block--assistant">
+              <h4>AI 코멘트</h4>
+              <p>{aiMessage}</p>
+            </div>
+          )}
+        </>
+      }
+      metrics={metrics}
+      alerts={alerts}
+      missingLandmarks={missingLandmarks}
+      footer={(
+        <>
+          <div className="photo-history-delete-actions">
+            <button
+              className="btn--danger-outline photo-history-delete-button"
+              type="button"
+              onClick={onRequestDelete}
+            >
+              삭제하기
+            </button>
+          </div>
+          {isConfirmingDelete && (
+            <div className="modal" role="dialog" aria-modal="true" aria-labelledby="photo-delete-title">
+              <div className="modal__backdrop" onClick={onCancelDelete} />
+              <div className="modal__card modal--xs photo-history-delete-modal">
+                <h3 id="photo-delete-title">해당 기록을 삭제하시겠습니까?</h3>
+                <div className="photo-history-delete-modal__actions">
+                  <button
+                    className="btn--secondary"
+                    type="button"
+                    onClick={onCancelDelete}
+                    disabled={isDeleting}
+                  >
+                    취소
+                  </button>
+                  <button
+                    className="btn--danger"
+                    type="button"
+                    onClick={() => onDelete(item)}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? '삭제 중...' : '삭제'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
       )}
-    </section>
+    />
   )
 }
-

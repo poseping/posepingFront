@@ -1,21 +1,7 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons'
 import { PhotoAnalysisResponse } from '../../services/photoAnalysisApi'
-
-const PHOTO_NORMAL_RANGES = {
-  neckForwardAngle: '정상 15° 이하',
-  shoulderSlope: '정상 10° 이하',
-  hipSlope: '정상 7° 이하',
-  asymmetryScore: '정상 5% 이하',
-}
-
-function formatMetric(value: number | null, suffix = '') {
-  if (value === null || Number.isNaN(value)) {
-    return '-'
-  }
-
-  return `${value.toFixed(1)}${suffix}`
-}
+import PhotoAnalysisSummaryCard from './PhotoAnalysisSummaryCard'
+import { formatMetric, formatScoreGrade, getScoreGradeClassName, PHOTO_NORMAL_RANGES } from './photoSummary'
+import PhotoIssueCards, { filterFallbackIssues } from './PhotoIssueCards'
 
 export default function PhotoAnalysisResultSummary({
   title,
@@ -30,79 +16,93 @@ export default function PhotoAnalysisResultSummary({
   assistantCommentError: string | null
   isAssistantCommentPending: boolean
 }) {
+  const craniovertebralAngle = result.side.craniovertebral_angle ?? null
+  const metrics = [
+    {
+      label: '분석 모드',
+      value: result.analysis_mode === 'full' ? '전신' : '반신',
+    },
+    {
+      label: '전체 신뢰도',
+      value: `${Math.round(result.confidence * 100)}%`,
+    },
+    {
+      label: 'CVA 추정값',
+      value: formatMetric(craniovertebralAngle, '°'),
+      range: PHOTO_NORMAL_RANGES.craniovertebralAngle,
+      infoText:
+        'CVA는 거북목을 판단하는 데에 사용하는 지표입니다. 경추와 귀의 이주(Tragus)를 그은 선이 경추를 기준으로 그은 수평선과 이루는 각도를 나타냅니다. 간이 분석에서는 실제 정확한 수평선을 판정하기 어렵기 때문에 추정값을 대신 표시합니다.',
+    },
+    {
+      label: '어깨 기울기',
+      value: formatMetric(result.front.shoulder_slope, '°'),
+      range: PHOTO_NORMAL_RANGES.shoulderSlope,
+    },
+    {
+      label: '골반 기울기',
+      value: formatMetric(result.front.hip_slope, '°'),
+      range: PHOTO_NORMAL_RANGES.hipSlope,
+    },
+    {
+      label: '어깨-골반 정렬',
+      value: formatMetric(result.front.spine_alignment),
+      range: PHOTO_NORMAL_RANGES.spineAlignment,
+    },
+  ]
+  const fallbackIssues = filterFallbackIssues(result.issues)
+
   return (
-    <section className="card">
-      <div className="photo-summary-header">
-        <h3>{title}</h3>
-        <div className="photo-summary-header-meta">
-          <span className={`photo-status-chip ${result.status}`}>{result.status}</span>
-          {result.issues.length > 0 && (
+    <PhotoAnalysisSummaryCard
+      className="photo-analysis-result-card"
+      header={<h3>{title}</h3>}
+      status={result.status}
+      issues={result.issues}
+      issueContent={
+        <>
+          <PhotoIssueCards
+            issues={result.issues}
+            craniovertebralAngle={craniovertebralAngle}
+            asymmetryScore={result.front.asymmetry_score}
+          />
+          {fallbackIssues.length > 0 && (
             <div className="photo-issue-tags photo-issue-tags--header">
-              {result.issues.map((issue) => (
+              {fallbackIssues.map((issue) => (
                 <span key={issue} className="photo-issue-tag">{issue}</span>
               ))}
             </div>
           )}
-        </div>
-      </div>
-      <div className="photo-summary-grid">
-        <div>
-          <span>분석 모드</span>
-          <strong>{result.analysis_mode === 'full' ? '전신' : '반신'}</strong>
-        </div>
-        <div>
-          <span>전체 신뢰도</span>
-          <strong>{Math.round(result.confidence * 100)}%</strong>
-        </div>
-        <div>
-          <span>목 각도</span>
-          <strong>{formatMetric(result.side.neck_forward_angle, '°')}</strong>
-          <small className="photo-summary-range">{PHOTO_NORMAL_RANGES.neckForwardAngle}</small>
-        </div>
-        <div>
-          <span>어깨 기울기</span>
-          <strong>{formatMetric(result.front.shoulder_slope, '°')}</strong>
-          <small className="photo-summary-range">{PHOTO_NORMAL_RANGES.shoulderSlope}</small>
-        </div>
-        <div>
-          <span>골반 기울기</span>
-          <strong>{formatMetric(result.front.hip_slope, '°')}</strong>
-          <small className="photo-summary-range">{PHOTO_NORMAL_RANGES.hipSlope}</small>
-        </div>
-        <div>
-          <span>좌우 비대칭</span>
-          <strong>{formatMetric(result.front.asymmetry_score, '%')}</strong>
-          <small className="photo-summary-range">{PHOTO_NORMAL_RANGES.asymmetryScore}</small>
-        </div>
-      </div>
-      <div className="photo-message-block photo-message-block--warning">
-        <h4>
-          <FontAwesomeIcon icon={faTriangleExclamation} />
-        </h4>
-        <span>골반이 찍히지 않은 사진으로는 목과 어깨까지만 분석 가능해요.</span>
-      </div>
-      {result.missing_landmarks.length > 0 && (
-        <div className="photo-message-block">
-          <h4>보완이 필요한 랜드마크</h4>
-          <ul>
-            {result.missing_landmarks.map((landmark) => (
-              <li key={landmark}>{landmark}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-      <div className="photo-message-block photo-message-block--assistant">
-        <h4>AI 코멘트</h4>
-        {isAssistantCommentPending && !assistantComment ? (
-          <p className="photo-message-muted">코멘트를 작성하는 중입니다...</p>
-        ) : assistantCommentError ? (
-          <p className="photo-message-error">{assistantCommentError}</p>
-        ) : assistantComment ? (
-          <p>{assistantComment}</p>
-        ) : (
-          <p className="photo-message-muted">최종 분석이 완료되면 맞춤 코멘트를 보여드릴게요.</p>
-        )}
-      </div>
-    </section>
+        </>
+      }
+      preGridContent={
+        <>
+          <div className={`photo-message-block photo-message-block--score ${getScoreGradeClassName(result.score_grade)}`.trim()}>
+            <h4>신체 점수</h4>
+            <div className={`photo-score-content ${getScoreGradeClassName(result.score_grade)}`.trim()}>
+              <strong>{result.posture_score === null ? '-' : `${result.posture_score}점`}</strong>
+              {result.score_grade && <span>{formatScoreGrade(result.score_grade)}</span>}
+            </div>
+          </div>
+          <div className="photo-message-block photo-message-block--assistant">
+            <h4>AI 코멘트</h4>
+            {isAssistantCommentPending && !assistantComment ? (
+              <p className="photo-message-muted">코멘트를 작성하는 중입니다...</p>
+            ) : assistantCommentError ? (
+              <p className="photo-message-error">{assistantCommentError}</p>
+            ) : assistantComment ? (
+              <p>{assistantComment}</p>
+            ) : (
+              <p className="photo-message-muted">최종 분석이 완료되면 맞춤 코멘트를 보여드릴게요.</p>
+            )}
+          </div>
+        </>
+      }
+      metrics={metrics}
+      warningMessage={
+        result.analysis_mode === 'upper_body_only'
+          ? '골반이 찍히지 않은 사진으로는 목과 어깨까지만 분석 가능해요.'
+          : undefined
+      }
+      missingLandmarks={result.missing_landmarks}
+    />
   )
 }

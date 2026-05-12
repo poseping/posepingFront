@@ -2,6 +2,8 @@ import { ChangeEvent, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faImage } from '@fortawesome/free-solid-svg-icons'
 import {
   ManualLandmarkInput,
   PhotoAnalysisResponse,
@@ -75,6 +77,42 @@ function buildObjectUrl(file: File | null) {
   return file ? URL.createObjectURL(file) : null
 }
 
+function PhotoUploadField({
+  id,
+  label,
+  file,
+  hint,
+  onChange,
+}: {
+  id: string
+  label: string
+  file: File | null
+  hint: string
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void
+}) {
+  return (
+    <label className="photo-upload-field" htmlFor={id}>
+      <span>{label}</span>
+      <input
+        id={id}
+        className="photo-upload-input"
+        type="file"
+        accept="image/*"
+        onChange={onChange}
+      />
+      <div className="photo-upload-picker">
+        <div className="photo-upload-picker__icon" aria-hidden="true">
+          <FontAwesomeIcon icon={faImage} />
+        </div>
+        <div className="photo-upload-picker__content">
+          <strong>{file ? file.name : '사진을 선택해주세요'}</strong>
+          <small>{hint}</small>
+        </div>
+      </div>
+    </label>
+  )
+}
+
 
 export default function PhotoPage() {
   const queryClient = useQueryClient()
@@ -85,6 +123,8 @@ export default function PhotoPage() {
   const [sideView, setSideView] = useState<PhotoSideView>('left')
   const [frontPreviewUrl, setFrontPreviewUrl] = useState<string | null>(null)
   const [sidePreviewUrl, setSidePreviewUrl] = useState<string | null>(null)
+  const [frontImageSize, setFrontImageSize] = useState({ width: 0, height: 0 })
+  const [sideImageSize, setSideImageSize] = useState({ width: 0, height: 0 })
   const [finalResult, setFinalResult] = useState<PhotoAnalysisResponse | null>(null)
   const [frontLandmarks, setFrontLandmarks] = useState<ManualLandmarkInput[]>([])
   const [sideLandmarks, setSideLandmarks] = useState<ManualLandmarkInput[]>([])
@@ -147,7 +187,13 @@ export default function PhotoPage() {
         analyzeManualPhotoLandmarks(
             sideView,
             normalizeManualLandmarks(frontLandmarks),
-            normalizeManualLandmarks(sideLandmarks)
+            normalizeManualLandmarks(sideLandmarks),
+            {
+              frontWidth: frontImageSize.width,
+              frontHeight: frontImageSize.height,
+              sideWidth: sideImageSize.width,
+              sideHeight: sideImageSize.height,
+            }
         ),
     onSuccess: (data) => {
       setFinalResult(data)
@@ -174,6 +220,8 @@ export default function PhotoPage() {
       queryClient.invalidateQueries({ queryKey: ['photo-analysis-history-summary'] })
       setFrontFile(null)
       setSideFile(null)
+      setFrontImageSize({ width: 0, height: 0 })
+      setSideImageSize({ width: 0, height: 0 })
       setFinalResult(null)
       setFrontLandmarks([])
       setSideLandmarks([])
@@ -212,8 +260,10 @@ export default function PhotoPage() {
         const nextFile = event.target.files?.[0] ?? null
         if (kind === 'front') {
           setFrontFile(nextFile)
+          setFrontImageSize({ width: 0, height: 0 })
         } else {
           setSideFile(nextFile)
+          setSideImageSize({ width: 0, height: 0 })
         }
 
         setFinalResult(null)
@@ -249,16 +299,20 @@ export default function PhotoPage() {
             똑바로 서서 찍은 정면 사진과 측면 사진을 준비해주세요! 머리부터 골반까지 모두 나오면 좋아요.
           </p>
           <div className="photo-upload-grid">
-            <label className="photo-upload-field">
-              <span>정면 사진</span>
-              <input type="file" accept="image/*" onChange={handleFileChange('front')} />
-              <small>{frontFile ? frontFile.name : '머리부터 골반까지 보이는 사진을 권장합니다.'}</small>
-            </label>
-            <label className="photo-upload-field">
-              <span>측면 사진</span>
-              <input type="file" accept="image/*" onChange={handleFileChange('side')} />
-              <small>{sideFile ? sideFile.name : '왼쪽 또는 오른쪽 측면 사진을 선택하세요.'}</small>
-            </label>
+            <PhotoUploadField
+              id="photo-front-upload"
+              label="정면 사진"
+              file={frontFile}
+              hint="머리부터 골반까지 보이는 사진을 권장합니다."
+              onChange={handleFileChange('front')}
+            />
+            <PhotoUploadField
+              id="photo-side-upload"
+              label="측면 사진"
+              file={sideFile}
+              hint="왼쪽 또는 오른쪽 측면 사진을 선택하세요."
+              onChange={handleFileChange('side')}
+            />
             <label className="photo-upload-field compact">
               <span>측면 방향</span>
               <select value={sideView} onChange={(event) => setSideView(event.target.value as PhotoSideView)}>
@@ -300,6 +354,7 @@ export default function PhotoPage() {
               selectedLandmarkId={selectedFrontLandmarkId}
               onSelect={setSelectedFrontLandmarkId}
               onChange={setFrontLandmarks}
+              onImageSizeChange={setFrontImageSize}
           />
           <EditableLandmarkCanvas
               title="측면 사진"
@@ -310,6 +365,7 @@ export default function PhotoPage() {
               selectedLandmarkId={selectedSideLandmarkId}
               onSelect={setSelectedSideLandmarkId}
               onChange={setSideLandmarks}
+              onImageSizeChange={setSideImageSize}
           />
         </section>
         <section className="photo-action-row">

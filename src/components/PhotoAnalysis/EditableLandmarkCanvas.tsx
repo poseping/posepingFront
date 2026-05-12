@@ -15,21 +15,25 @@ interface EditableLandmarkCanvasProps {
   selectedLandmarkId: number | null
   onSelect: (landmarkId: number) => void
   onChange: (next: ManualLandmarkInput[]) => void
+  onImageSizeChange?: (size: { width: number; height: number }) => void
 }
 
 export const FRONT_EDIT_IDS = [0, 11, 12, 23, 24]
-export const LEFT_SIDE_EDIT_IDS = [7, 11, 23]
-export const RIGHT_SIDE_EDIT_IDS = [8, 12, 24]
+export const C7_LANDMARK_ID = 33
+export const LEFT_SIDE_EDIT_IDS = [7, C7_LANDMARK_ID, 11, 23]
+export const RIGHT_SIDE_EDIT_IDS = [8, C7_LANDMARK_ID, 12, 24]
 const FRONT_CONNECTIONS = [
   [0, 11], [0, 12], [11, 12], [11, 23], [12, 24], [23, 24],
 ]
 const SIDE_CONNECTIONS = [
-  [0, 11], [11, 23], [0, 23], [0, 12], [12, 24], [0, 24],
+  [7, C7_LANDMARK_ID], [C7_LANDMARK_ID, 11], [11, 23],
+  [8, C7_LANDMARK_ID], [C7_LANDMARK_ID, 12], [12, 24],
 ]
 const LANDMARK_LABELS: Record<number, string> = {
   0: '머리',
   7: '머리',
   8: '머리',
+  33: '경추',
   11: '왼쪽 어깨',
   12: '오른쪽 어깨',
   23: '왼쪽 골반',
@@ -57,6 +61,7 @@ export default function EditableLandmarkCanvas({
                                   selectedLandmarkId,
                                   onSelect,
                                   onChange,
+                                  onImageSizeChange,
                                 }: EditableLandmarkCanvasProps) {
   const frameRef = useRef<HTMLDivElement>(null)
   const dragStateRef = useRef<DragState | null>(null)
@@ -230,6 +235,7 @@ export default function EditableLandmarkCanvas({
                       if (image.naturalWidth > 0 && image.naturalHeight > 0) {
                         setImageSize({ width: image.naturalWidth, height: image.naturalHeight })
                         setFrameSize({ width: image.clientWidth, height: image.clientHeight })
+                        onImageSizeChange?.({ width: image.naturalWidth, height: image.naturalHeight })
                       }
                     }}
                 />
