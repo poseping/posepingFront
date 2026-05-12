@@ -296,6 +296,13 @@ body,
   background: var(--background);
   position: relative;
 }
+
+.app-frame:has(.onboarding-chat-page) {
+  height: var(--chat-viewport-height, 100svh);
+  min-height: var(--chat-viewport-height, 100svh);
+  overflow: hidden;
+  padding-bottom: 0;
+}
 .app-frame:has(.bottom-nav){
   padding-bottom: var(--bottom-nav-height);
 }

@@ -27,9 +27,7 @@ export default function AssistantPage() {
   const [visibleInitialBubbleCount, setVisibleInitialBubbleCount] = useState(0)
   const latestMessageRef = useRef<HTMLElement | null>(null)
   const messagesRef = useRef<HTMLDivElement | null>(null)
-  const messagesEndRef = useRef<HTMLDivElement | null>(null)
   const requestInFlightRef = useRef(false)
-  const maxViewportHeightRef = useRef(0)
   const user = useSelector((state: RootState) => state.auth.user)
   const nickname = user?.nickname?.trim() || '사용자';
   const initialMessages = [
@@ -42,24 +40,23 @@ export default function AssistantPage() {
     latestMessageRef.current = node
   }
 
-  const hasNaturalPageScroll = () => {
-    const documentElement = document.documentElement
-    const currentViewportHeight = Math.max(documentElement.clientHeight, window.innerHeight)
-    maxViewportHeightRef.current = Math.max(maxViewportHeightRef.current, currentViewportHeight)
-    const layoutViewportHeight = maxViewportHeightRef.current || currentViewportHeight
-    return documentElement.scrollHeight > layoutViewportHeight + 8
+  const hasMessageScroll = () => {
+    const messages = messagesRef.current
+    return messages ? messages.scrollHeight > messages.clientHeight + 8 : false
   }
 
   const scrollToChatBottom = (behavior: ScrollBehavior = 'smooth') => {
     window.requestAnimationFrame(() => {
-      if (!hasNaturalPageScroll()) {
-        window.scrollTo({ top: 0, behavior: 'auto' })
+      const messages = messagesRef.current
+      if (!messages) return
+
+      if (!hasMessageScroll()) {
+        messages.scrollTo({ top: 0, behavior: 'auto' })
         return
       }
 
-      messagesEndRef.current?.scrollIntoView({ behavior, block: 'end' })
-      window.scrollTo({
-        top: document.documentElement.scrollHeight,
+      messages.scrollTo({
+        top: messages.scrollHeight,
         behavior,
       })
     })
@@ -136,14 +133,20 @@ export default function AssistantPage() {
   useEffect(() => {
     const handleViewportChange = () => {
       window.requestAnimationFrame(() => {
-        if (hasNaturalPageScroll()) {
-          scrollToChatBottom('auto')
-        } else {
-          window.scrollTo({ top: 0, behavior: 'auto' })
-        }
+        const viewport = window.visualViewport
+        const viewportHeight = viewport?.height ?? window.innerHeight
+        const keyboardInset = viewport
+          ? Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop)
+          : 0
+
+        document.documentElement.style.setProperty('--chat-viewport-height', `${viewportHeight}px`)
+        document.documentElement.style.setProperty('--chat-keyboard-inset', `${keyboardInset}px`)
+
+        scrollToChatBottom('auto')
       })
     }
 
+    handleViewportChange()
     window.visualViewport?.addEventListener('resize', handleViewportChange)
     window.visualViewport?.addEventListener('scroll', handleViewportChange)
     window.addEventListener('resize', handleViewportChange)
@@ -152,6 +155,8 @@ export default function AssistantPage() {
       window.visualViewport?.removeEventListener('resize', handleViewportChange)
       window.visualViewport?.removeEventListener('scroll', handleViewportChange)
       window.removeEventListener('resize', handleViewportChange)
+      document.documentElement.style.removeProperty('--chat-viewport-height')
+      document.documentElement.style.removeProperty('--chat-keyboard-inset')
     }
   }, [chatHistory.length, visibleInitialBubbleCount])
 
@@ -251,8 +256,6 @@ export default function AssistantPage() {
                 )}
               </div>
             )}
-
-            <div ref={messagesEndRef} aria-hidden="true" />
           </div>
 
           <div className={"onboarding-chat-wrap"}>
