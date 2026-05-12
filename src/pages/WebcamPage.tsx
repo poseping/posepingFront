@@ -21,7 +21,6 @@ import {
   type PostureProfile,
   type WebcamAnalyzeResponse,
 } from '../services/webcamApi'
-import { usePostureNotification } from '../hooks/usePostureNotification'
 import { useStretchReminder, type StretchInterval } from '../hooks/useStretchReminder'
 import { useWebcamAssistantComment } from '../hooks/useWebcamAssistantComment'
 import WebcamStream, { type WebcamStreamRef } from '../components/Webcam/WebcamStream'
@@ -116,12 +115,12 @@ export default function WebcamPage() {
     onError: (error) => { console.error('웹캠 분석 실패:', error) },
   })
 
-  const { notify, permission: notifPermission } = usePostureNotification()
   const stretchReminder = useStretchReminder()
   const {
     assistantComment,
     assistantError,
     isAssistantCommentPending,
+    notifPermission,
     handleAnalyzeResult,
     resetAssistantComment,
   } = useWebcamAssistantComment(phase === 'analyzing')
@@ -177,7 +176,6 @@ export default function WebcamPage() {
   const handleResult = (data: WebcamAnalyzeResponse) => {
     setAnalyzeResult(data)
     handleAnalyzeResult(data)
-    notify(data.status as 'good' | 'warning' | 'bad', data.issues ?? [])
 
     if (data.status !== prevStatusRef.current) {
       const key = `${data.status}Count` as 'goodCount' | 'warningCount' | 'badCount'
@@ -221,6 +219,28 @@ export default function WebcamPage() {
   }, [isAnalyzing])
 
   // ── Ready phase ────────────────────────────────────────────────────────────
+
+  const renderReadyHero = () => (
+    <section className="wcam-hero-card">
+      <div>
+        <p className="wcam-hero-kicker">Webcam Analysis</p>
+        <h2>실시간 웹캠으로 자세를 분석합니다</h2>
+        <p>
+          카메라 앞에 바르게 앉아 기준 자세를 등록하면, 실시간으로 자세 이탈을 감지하고
+          거북목·굽은 어깨 등 문제를 즉시 알려드립니다.
+        </p>
+      </div>
+      <div className="wcam-hero-action">
+        <button
+          className="btn--primary btn--lg"
+          onClick={handleStartAnalysis}
+          disabled={!hasProfile || profilesLoading}
+        >
+          분석 시작하기
+        </button>
+      </div>
+    </section>
+  )
 
   const renderReadyPhase = () => (
     <div className="wcam-ready-phase">
@@ -279,14 +299,6 @@ export default function WebcamPage() {
           </>
         )}
       </div>
-      <button
-        className="btn--primary btn--lg btn--full"
-        onClick={handleStartAnalysis}
-        disabled={!hasProfile}
-      >
-        <FontAwesomeIcon icon={faPlay} />
-        분석 시작
-      </button>
       <WebcamHistoryStats />
     </div>
   )
@@ -497,15 +509,18 @@ export default function WebcamPage() {
   return (
     <>
       <PageHeader />
-      <main className="page-content">
-        {notifPermission === 'denied' && (
-          <div className="wcam-notif-banner">
-            알림이 차단되어 있어요. 주소창 자물쇠 아이콘 → 알림 → <strong>허용</strong> 후 새로고침하면 자세 경고를 받을 수 있습니다.
-          </div>
-        )}
-        {phase === 'ready'    && renderReadyPhase()}
-        {phase === 'analyzing' && renderAnalyzingPhase()}
-        {phase === 'summary'  && renderSummaryPhase()}
+      <main>
+        {phase === 'ready' && renderReadyHero()}
+        <div className="page-content">
+          {notifPermission === 'denied' && (
+            <div className="wcam-notif-banner">
+              알림이 차단되어 있어요. 주소창 자물쇠 아이콘 → 알림 → <strong>허용</strong> 후 새로고침하면 자세 경고를 받을 수 있습니다.
+            </div>
+          )}
+          {phase === 'ready'    && renderReadyPhase()}
+          {phase === 'analyzing' && renderAnalyzingPhase()}
+          {phase === 'summary'  && renderSummaryPhase()}
+        </div>
       </main>
 
       {/* 기준자세 목록 모달 (analyzing 중 📋 클릭) */}

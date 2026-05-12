@@ -21,6 +21,14 @@ export function useWebcamAssistantComment(isSessionActive: boolean) {
   const badPostureStartRef = useRef<number | null>(null);
   const [assistantComment, setAssistantComment] = useState<string | null>(null);
   const [assistantError, setAssistantError] = useState<string | null>(null);
+  const [notifPermission, setNotifPermission] =
+    useState<NotificationPermission>(Notification.permission);
+
+  useEffect(() => {
+    if (Notification.permission === "default") {
+      Notification.requestPermission().then(setNotifPermission);
+    }
+  }, []);
 
   const { mutate: requestWebcamComment, isPending: isAssistantCommentPending } =
     useMutation({
@@ -28,6 +36,12 @@ export function useWebcamAssistantComment(isSessionActive: boolean) {
       onSuccess: (data) => {
         if (data.requested && data.comment) {
           setAssistantComment(data.comment);
+          if (Notification.permission === "granted" && document.hidden) {
+            new Notification("포즈PING AI 코멘트", {
+              body: data.comment,
+              icon: "/favicon.ico",
+            });
+          }
         }
         setAssistantError(null);
       },
@@ -84,6 +98,7 @@ export function useWebcamAssistantComment(isSessionActive: boolean) {
     assistantComment,
     assistantError,
     isAssistantCommentPending,
+    notifPermission,
     handleAnalyzeResult,
     resetAssistantComment,
   };
