@@ -26,8 +26,10 @@ export default function AssistantPage() {
   const [redirectCountdown, setRedirectCountdown] = useState<number | null>(null)
   const [visibleInitialBubbleCount, setVisibleInitialBubbleCount] = useState(0)
   const latestMessageRef = useRef<HTMLElement | null>(null)
+  const messagesRef = useRef<HTMLDivElement | null>(null)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
   const requestInFlightRef = useRef(false)
+  const maxViewportHeightRef = useRef(0)
   const user = useSelector((state: RootState) => state.auth.user)
   const nickname = user?.nickname?.trim() || '사용자';
   const initialMessages = [
@@ -40,8 +42,21 @@ export default function AssistantPage() {
     latestMessageRef.current = node
   }
 
+  const hasNaturalPageScroll = () => {
+    const documentElement = document.documentElement
+    const currentViewportHeight = Math.max(documentElement.clientHeight, window.innerHeight)
+    maxViewportHeightRef.current = Math.max(maxViewportHeightRef.current, currentViewportHeight)
+    const layoutViewportHeight = maxViewportHeightRef.current || currentViewportHeight
+    return documentElement.scrollHeight > layoutViewportHeight + 8
+  }
+
   const scrollToChatBottom = (behavior: ScrollBehavior = 'smooth') => {
     window.requestAnimationFrame(() => {
+      if (!hasNaturalPageScroll()) {
+        window.scrollTo({ top: 0, behavior: 'auto' })
+        return
+      }
+
       messagesEndRef.current?.scrollIntoView({ behavior, block: 'end' })
       window.scrollTo({
         top: document.documentElement.scrollHeight,
@@ -118,6 +133,28 @@ export default function AssistantPage() {
     return () => window.clearTimeout(timerId)
   }, [chatHistory.length, visibleInitialBubbleCount, onboardingMutation.isPending, done, errorMessage])
 
+  useEffect(() => {
+    const handleViewportChange = () => {
+      window.requestAnimationFrame(() => {
+        if (hasNaturalPageScroll()) {
+          scrollToChatBottom('auto')
+        } else {
+          window.scrollTo({ top: 0, behavior: 'auto' })
+        }
+      })
+    }
+
+    window.visualViewport?.addEventListener('resize', handleViewportChange)
+    window.visualViewport?.addEventListener('scroll', handleViewportChange)
+    window.addEventListener('resize', handleViewportChange)
+
+    return () => {
+      window.visualViewport?.removeEventListener('resize', handleViewportChange)
+      window.visualViewport?.removeEventListener('scroll', handleViewportChange)
+      window.removeEventListener('resize', handleViewportChange)
+    }
+  }, [chatHistory.length, visibleInitialBubbleCount])
+
   const canSubmit = inputValue.trim().length > 0 && !onboardingMutation.isPending && !done
   const submitPrompt = (prompt: string) => {
     const trimmed = prompt.trim()
@@ -150,7 +187,7 @@ export default function AssistantPage() {
       <PageHeader />
       <main className="onboarding-chat-shell">
         <section className="onboarding-chat-card">
-          <div className="onboarding-chat-messages">
+          <div className="onboarding-chat-messages" ref={messagesRef}>
             {initialMessages.slice(0, visibleInitialBubbleCount).map((message, index) => (
               <div
                 key={message}

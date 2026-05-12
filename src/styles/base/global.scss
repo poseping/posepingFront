@@ -107,7 +107,7 @@
 // 주요 동작 CTA (분석 시작, 저장, 다음 등 핵심 액션)
 .btn--primary {
   @extend %btn-base;
-  background: linear-gradient(135deg, #0667bb 0%, #08aaab 100%);
+  background: linear-gradient(135deg, #208ce9 0%, #b581e3 100%);
   color: #fff;
   box-shadow: 0 8px 20px rgba(8, 145, 178, 0.22);
   &:hover:not(:disabled) { box-shadow: 0 12px 28px rgba(8, 145, 178, 0.32); transform: translateY(-1px); }

@@ -149,7 +149,7 @@ export default function PhotoHistoryStatsPage() {
               <strong>{formatMetric(latest?.postureScore ?? null, '점')}</strong>
             </div>
             <div>
-              <span>CVA 추정값</span>
+              <span>목 각도</span>
               <strong>{formatMetric(latest?.craniovertebralAngle ?? null, '°')}</strong>
             </div>
             <div>
@@ -200,9 +200,9 @@ export default function PhotoHistoryStatsPage() {
                 <Line
                   type="monotone"
                   dataKey="craniovertebralAngle"
-                  name="CVA 추정값"
+                  name="목 각도"
                   stroke="#0f766e"
-                  strokeWidth={2.5}
+                  strokeWidth={1.5}
                   dot={false}
                   connectNulls
                 />
@@ -211,7 +211,7 @@ export default function PhotoHistoryStatsPage() {
                   dataKey="asymmetryScore"
                   name="좌우 비대칭"
                   stroke="#f97316"
-                  strokeWidth={2.5}
+                  strokeWidth={1.5}
                   dot={false}
                   connectNulls
                 />
