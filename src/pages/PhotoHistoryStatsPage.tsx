@@ -41,14 +41,6 @@ function getNumericMetric(value: unknown) {
   return typeof value === 'number' && Number.isFinite(value) ? value : null
 }
 
-function formatMetric(value: number | null, suffix = '') {
-  if (value === null || Number.isNaN(value)) {
-    return '-'
-  }
-
-  return `${value.toFixed(1)}${suffix}`
-}
-
 function getHistoryDate(item: PhotoAnalysisHistoryItem) {
   return item.saved_at ?? item.analyzed_at ?? item.created_at ?? ''
 }
@@ -142,20 +134,6 @@ export default function PhotoHistoryStatsPage() {
           <div>
             <p className="photo-kicker">Saved History</p>
             <h3>저장된 기록 통계</h3>
-          </div>
-          <div className="photo-stats-metrics">
-            <div>
-              <span>신체 점수</span>
-              <strong>{formatMetric(latest?.postureScore ?? null, '점')}</strong>
-            </div>
-            <div>
-              <span>목 각도</span>
-              <strong>{formatMetric(latest?.craniovertebralAngle ?? null, '°')}</strong>
-            </div>
-            <div>
-              <span>좌우 비대칭</span>
-              <strong>{formatMetric(latest?.asymmetryScore ?? null, '%')}</strong>
-            </div>
           </div>
         </div>
 
