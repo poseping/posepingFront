@@ -18,8 +18,8 @@
   border-bottom: 1px solid rgba(19, 42, 76, 0.08);
   box-shadow: 0 18px 45px rgba(20, 38, 70, 0.08);
   background:
-    radial-gradient(circle at top left, rgba(255, 214, 153, 0.45), transparent 34%),
-    linear-gradient(135deg, #f8fafc 0%, #eef7ff 52%, #f5fbf5 100%);
+    radial-gradient(circle at top left, var(--choice-live-glow), transparent 36%),
+    linear-gradient(135deg, var(--choice-live-bg-start) 0%, var(--choice-live-bg-end) 100%);
   word-break: keep-all;
 }
 
@@ -517,6 +517,8 @@
 .photo-editor-label {
   fill: #f8fafc;
   font-weight: 700;
+  pointer-events: none;
+  user-select: none;
 }
 
 .photo-editor-empty {
@@ -606,11 +608,8 @@
 }
 
 .photo-summary-info__tooltip {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 0.5rem);
+  position: fixed;
   z-index: 3;
-  width: min(260px, calc(100vw - 4rem));
   padding: 0.8rem 0.9rem;
   border-radius: 14px;
   background: #f8fafc;
@@ -621,10 +620,13 @@
   visibility: hidden;
   transform: translateY(-4px);
   transition: opacity 0.16s ease, transform 0.16s ease, visibility 0.16s ease;
-  word-break: keep-all;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: anywhere;
+  pointer-events: none;
 }
 
-.photo-summary-info:focus-within .photo-summary-info__tooltip {
+.photo-summary-info__tooltip.is-open {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);

@@ -1,12 +1,83 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons'
-import type { ReactNode } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 
 interface SummaryMetricItem {
   label: string
   value: string
   range?: string
   infoText?: string
+}
+
+function SummaryMetricInfo({
+  label,
+  infoText,
+}: {
+  label: string
+  infoText: string
+}) {
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const [isOpen, setIsOpen] = useState(false)
+  const [tooltipStyle, setTooltipStyle] = useState<{ left: number; top: number; width: number } | null>(null)
+
+  const updateTooltipPosition = useCallback(() => {
+    const button = buttonRef.current
+    if (!button) return
+
+    const rect = button.getBoundingClientRect()
+    const viewportPadding = 12
+    const tooltipWidth = Math.min(280, Math.max(220, window.innerWidth - viewportPadding * 2))
+    const left = Math.min(
+      window.innerWidth - tooltipWidth - viewportPadding,
+      Math.max(viewportPadding, rect.right - tooltipWidth)
+    )
+    const top = rect.bottom + 8
+
+    setTooltipStyle({ left, top, width: tooltipWidth })
+  }, [])
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    updateTooltipPosition()
+
+    const handleViewportChange = () => updateTooltipPosition()
+    window.addEventListener('resize', handleViewportChange)
+    window.addEventListener('scroll', handleViewportChange, true)
+
+    return () => {
+      window.removeEventListener('resize', handleViewportChange)
+      window.removeEventListener('scroll', handleViewportChange, true)
+    }
+  }, [isOpen, updateTooltipPosition])
+
+  return (
+    <div
+      className="photo-summary-info"
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
+    >
+      <button
+        ref={buttonRef}
+        type="button"
+        className="photo-summary-info__button"
+        aria-label={`${label} 설명 보기`}
+        aria-expanded={isOpen}
+        onFocus={() => setIsOpen(true)}
+        onBlur={() => setIsOpen(false)}
+        onClick={() => setIsOpen((current) => !current)}
+      >
+        i
+      </button>
+      <div
+        className={`photo-summary-info__tooltip${isOpen ? ' is-open' : ''}`}
+        role="tooltip"
+        style={tooltipStyle ? { left: tooltipStyle.left, top: tooltipStyle.top, width: tooltipStyle.width } : undefined}
+      >
+        {infoText}
+      </div>
+    </div>
+  )
 }
 
 export default function PhotoAnalysisSummaryCard({
@@ -58,20 +129,7 @@ export default function PhotoAnalysisSummaryCard({
             <span className={"photo-summary-title"}>{metric.label}</span>
             <strong>{metric.value}</strong>
             {metric.range && <small className="photo-summary-range">{metric.range}</small>}
-            {metric.infoText && (
-                <div className="photo-summary-info">
-                  <button
-                      type="button"
-                      className="photo-summary-info__button"
-                      aria-label={`${metric.label} 설명 보기`}
-                  >
-                    i
-                  </button>
-                  <div className="photo-summary-info__tooltip" role="tooltip">
-                    {metric.infoText}
-                  </div>
-                </div>
-            )}
+            {metric.infoText && <SummaryMetricInfo label={metric.label} infoText={metric.infoText} />}
           </div>
         ))}
       </div>

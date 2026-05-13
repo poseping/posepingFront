@@ -280,8 +280,7 @@ export default function PhotoPage() {
           <p className="photo-kicker">Photo Analysis</p>
           <h2>업로드한 사진으로 자세를 세밀하게 보정해 분석합니다</h2>
           <p>
-            정면 사진과 측면 사진을 올리면 랜드마크를 먼저 잡아주고, 사용자가 직접 위치를 끌어 수정한 뒤
-            최종 분석과 DB 저장 여부를 결정할 수 있습니다.
+            내 자세 사진을 올리고 거북목 확률, 좌우 비대칭 확률을 확인할 수 있어요!
           </p>
         </div>
         <div className="photo-action-row">
@@ -408,7 +407,13 @@ export default function PhotoPage() {
             <button
                 className="btn--primary btn--lg"
                 onClick={() => saveMutation.mutate()}
-                disabled={!finalResult.can_save || !finalResult.save_token || saveMutation.isPending}
+                disabled={
+                  !finalResult.can_save ||
+                  !finalResult.save_token ||
+                  saveMutation.isPending ||
+                  photoCommentMutation.isPending ||
+                  !assistantComment
+                }
             >
               {saveMutation.isPending ? '기록 중...' : '기록하기'}
             </button>
