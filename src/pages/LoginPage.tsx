@@ -198,7 +198,8 @@ export default function LoginPage() {
             onClick={handleKakaoLogin}
             disabled={loading}
           >
-            <img src="/assets/img/kakao_login_medium_narrow.png" alt="카카오 로그인"/>
+            <img src="/assets/img/kakao_logo.svg" alt="" width={18} height={18} />
+            카카오로 로그인
           </button>
 
           <button

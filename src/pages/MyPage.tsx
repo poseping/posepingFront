@@ -5,6 +5,7 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import PageHeader from '../components/PageHeader'
 import MyProfileCard from '../components/MyPage/MyProfileCard'
 import MyHabitsCard from '../components/MyPage/MyHabitsCard'
+import MyPreferencesCard from '../components/MyPage/MyPreferencesCard'
 import { loginSuccess } from '../store/authSlice'
 import { saveUserInfo } from '../services/authService'
 import { getRandomNickname, updateNickname, getLifestyleHabits } from '../services/memberApi'
@@ -19,7 +20,7 @@ export default function MyPage() {
   const token = useSelector((state: RootState) => state.auth.token) ?? ''
 
   const [editingNickname, setEditingNickname] = useState(false)
-  const [nicknameInput, setNicknameInput] = useState(user?.nickname ?? '')
+  const [nicknameInput, setNicknameInput] = useState(user?.nickname ?? '')
 
   const { data: habitData, isLoading: habitLoading } = useQuery({
     queryKey: ['lifestyle-habit'],
@@ -99,6 +100,8 @@ export default function MyPage() {
           onRetakeHabits={() => navigate('/onboarding')}
         />
 
+        {/* ── 알림 및 설정 ── */}
+        <MyPreferencesCard />
 
       </main>
     </>
