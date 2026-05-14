@@ -1,3 +1,4 @@
+import '../../styles/components/webcam-history-stats.scss'
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'

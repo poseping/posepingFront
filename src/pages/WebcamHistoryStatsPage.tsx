@@ -15,6 +15,7 @@ import {
   type WebcamSessionHistoryItem,
 } from '../services/webcamApi'
 import '../styles/features/webcam.scss'
+import '../styles/components/webcam-history-stats.scss'
 
 const CAUSE_META: Record<string, { label: string; color: string }> = {
   NECK_FORWARD:   { label: '거북목',       color: '#f97316' },

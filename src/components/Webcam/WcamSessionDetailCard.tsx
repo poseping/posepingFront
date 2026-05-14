@@ -1,3 +1,4 @@
+import '../../styles/components/wcam-session-detail.scss'
 import { type WebcamSessionHistoryItem } from '../../services/webcamApi'
 
 const CAUSE_META: Record<string, { label: string; color: string }> = {

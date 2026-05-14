@@ -84,7 +84,7 @@ export default function WcamSessionSummaryChart({
 
   return (
     <section className="card wcam-session-summary">
-      <p className="history-kicker">Session Result</p>
+      <p className="wcam-session-summary__kicker">Session Result</p>
       <h3 className="wcam-session-summary__title">이번 세션 결과</h3>
 
       {total === 0 ? (
@@ -142,7 +142,7 @@ export default function WcamSessionSummaryChart({
           {assistantComment && (
             <div className="wcam-session-summary__comment">
               <p className="wcam-session-summary__comment-kicker">마지막 AI 코멘트</p>
-              <div className="wcam-chat-bubble">{assistantComment}</div>
+              <div className="wcam-session-summary__comment-bubble">{assistantComment}</div>
             </div>
           )}
         </>
