@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChartBar } from '@fortawesome/free-solid-svg-icons'
@@ -57,6 +57,7 @@ function buildChartData(sessions: WebcamSessionHistoryItem[]): ChartEntry[] {
     }
   })
 }
+
 
 function getActiveCauses(sessions: WebcamSessionHistoryItem[]): string[] {
   const keys = new Set<string>()
@@ -156,11 +157,28 @@ export default function WebcamHistoryStatsPage() {
     },
   })
 
+  useEffect(() => { setSelectedSessionId(null) }, [dateFilter, timeFilter])
+
   const sessions = data?.sessions ?? []
   const recentDates = useMemo(() => getRecentDates(sessions), [sessions])
   const filteredSessions = useMemo(() => applyFilters(sessions, dateFilter, timeFilter), [sessions, dateFilter, timeFilter])
   const chartData = useMemo(() => buildChartData(filteredSessions), [filteredSessions])
   const activeCauses = useMemo(() => getActiveCauses(filteredSessions), [filteredSessions])
+  const effectiveSelectedId = filteredSessions.some(s => s.session_id === selectedSessionId)
+    ? selectedSessionId
+    : null
+  const causeChartData = useMemo(
+    () => effectiveSelectedId !== null
+      ? chartData.filter(e => e.sessionId === effectiveSelectedId)
+      : chartData,
+    [chartData, effectiveSelectedId],
+  )
+  const causeActiveCauses = useMemo(
+    () => effectiveSelectedId !== null
+      ? getActiveCauses(filteredSessions.filter(s => s.session_id === effectiveSelectedId))
+      : activeCauses,
+    [filteredSessions, effectiveSelectedId, activeCauses],
+  )
   const selectedSession = filteredSessions.find(s => s.session_id === selectedSessionId) ?? filteredSessions[0] ?? null
 
   const handleChartClick = (state: unknown) => {
@@ -282,18 +300,35 @@ export default function WebcamHistoryStatsPage() {
                 </ResponsiveContainer>
               </div>
 
-              {activeCauses.length > 0 && (
+              {causeActiveCauses.length > 0 && (
                 <>
-                  <p className="wcam-history-chart-label">원인 분석</p>
+                  <p className="wcam-history-chart-label">
+                    원인 분석
+                    {effectiveSelectedId !== null && (
+                      <>
+                        <span className="wcam-history-chart-hint">
+                          · {chartData.find(e => e.sessionId === effectiveSelectedId)?.label}
+                        </span>
+                        <button
+                          type="button"
+                          className="wcam-filter-chip wcam-filter-chip--active"
+                          style={{ marginLeft: '0.5rem', fontSize: '0.75rem' }}
+                          onClick={() => setSelectedSessionId(null)}
+                        >
+                          전체 보기 ×
+                        </button>
+                      </>
+                    )}
+                  </p>
                   <div className="wcam-history-chart">
                     <ResponsiveContainer width="100%" height={220}>
-                      <BarChart data={chartData} margin={{ top: 8, right: 12, bottom: 4, left: 0 }} onClick={handleChartClick} style={{ cursor: 'pointer' }}>
+                      <BarChart data={causeChartData} margin={{ top: 8, right: 12, bottom: 4, left: 0 }} onClick={handleChartClick} style={{ cursor: 'pointer' }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(100, 116, 139, 0.22)" />
                         <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fontFamily: 'inherit' }} />
                         <YAxis tickLine={false} axisLine={false} width={36} tick={{ fontFamily: 'inherit' }} />
                         <Tooltip />
                         <Legend wrapperStyle={{ fontFamily: 'inherit', fontSize: '0.82rem' }} />
-                        {activeCauses.map(key => (
+                        {causeActiveCauses.map(key => (
                           <Bar
                             key={key}
                             dataKey={key}
