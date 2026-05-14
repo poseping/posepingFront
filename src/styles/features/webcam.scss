@@ -676,7 +676,6 @@ $_danger-fg:  #b91c1c;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  max-width: 640px;
   margin: 0 auto;
   width: 100%;
 }
@@ -952,43 +951,199 @@ $_danger-fg:  #b91c1c;
   strong { color: #f1f5f9; }
 }
 
-// ─── Session list (ready phase 삭제 기능) ─────────────────────────────────
-.wcam-history-session-list {
+// ─── History footer (자세히 보기) ─────────────────────────────────────────
+.wcam-history-footer {
   display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  margin-top: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(100, 116, 139, 0.12);
 }
 
-.wcam-history-session-row {
+.wcam-history-chart-hint {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #94a3b8;
+  margin-left: 0.5rem;
+}
+
+// ─── History Filters ──────────────────────────────────────────────────────
+.wcam-filter-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.85rem 0 1rem;
+  border-bottom: 1px solid rgba(100, 116, 139, 0.12);
+  margin-bottom: 0.25rem;
+}
+
+.wcam-filter-group {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  border-radius: 10px;
-  background: #f8fafc;
-  font-size: 0.83rem;
+  flex-wrap: wrap;
 }
 
-.wcam-history-session-label {
-  flex: 1;
-  font-weight: 600;
-  color: #334155;
-}
-
-.wcam-history-session-score {
+.wcam-filter-label {
+  font-size: 0.72rem;
   font-weight: 700;
-  color: var(--primary);
-  min-width: 2.5rem;
-  text-align: right;
+  color: var(--muted-foreground);
+  min-width: 2.75rem;
+  flex-shrink: 0;
 }
 
-.wcam-history-session-delete {
+.wcam-filter-chips {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.wcam-filter-chip {
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(100, 116, 139, 0.28);
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 0.78rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+
+  &:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  &--active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+    font-weight: 600;
+  }
+}
+
+.wcam-filter-select {
+  padding: 0.22rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(100, 116, 139, 0.28);
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 0.78rem;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.12s, color 0.12s;
+
+  &:hover,
+  &:focus {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+}
+
+// ─── Session Detail Card (WcamSessionDetailCard) ──────────────────────────
+.wcam-detail-card {
+  // inherits .card
+}
+
+.wcam-detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+
+  h3 { margin: 0.25rem 0 0; font-size: 1rem; }
+}
+
+.wcam-detail-duration {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: #94a3b8;
+}
+
+.wcam-detail-score {
+  flex-shrink: 0;
+  text-align: right;
+
+  strong { display: block; font-size: 2rem; font-weight: 700; line-height: 1; }
+  span   { font-size: 0.72rem; color: #94a3b8; }
+}
+
+.wcam-detail-frames {
+  margin-bottom: 1.25rem;
+}
+
+.wcam-detail-frame-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  gap: 2px;
+  margin-bottom: 0.5rem;
+
+  div { min-width: 2px; border-radius: 2px; }
+}
+
+.wcam-detail-frame-legend {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.8rem;
+}
+
+.wcam-detail-causes {
+  margin-bottom: 1.25rem;
+}
+
+.wcam-detail-causes-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin: 0 0 0.5rem;
+}
+
+.wcam-detail-causes ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.wcam-detail-causes li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.wcam-detail-cause-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.wcam-detail-cause-count {
+  margin-left: auto;
   color: #94a3b8;
   font-size: 0.8rem;
-  padding: 0.25rem 0.4rem;
-  transition: color 0.15s;
+}
 
-  &:hover:not(:disabled) { color: var(--destructive); }
-  &:disabled { opacity: 0.4; cursor: not-allowed; }
+.wcam-detail-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(100, 116, 139, 0.12);
+}
+
+.wcam-detail-modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
 }
