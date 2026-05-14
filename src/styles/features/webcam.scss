@@ -951,3 +951,44 @@ $_danger-fg:  #b91c1c;
   p      { margin: 0.15rem 0; font-size: 0.82rem; }
   strong { color: #f1f5f9; }
 }
+
+// ─── Session list (ready phase 삭제 기능) ─────────────────────────────────
+.wcam-history-session-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.wcam-history-session-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  background: #f8fafc;
+  font-size: 0.83rem;
+}
+
+.wcam-history-session-label {
+  flex: 1;
+  font-weight: 600;
+  color: #334155;
+}
+
+.wcam-history-session-score {
+  font-weight: 700;
+  color: var(--primary);
+  min-width: 2.5rem;
+  text-align: right;
+}
+
+.wcam-history-session-delete {
+  color: #94a3b8;
+  font-size: 0.8rem;
+  padding: 0.25rem 0.4rem;
+  transition: color 0.15s;
+
+  &:hover:not(:disabled) { color: var(--destructive); }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}

@@ -1,0 +1,132 @@
+$_heading: #10213d;
+$_surface: #f8fafc;
+
+.wcam-session-summary {
+  &__title {
+    font-size: 1.05rem;
+    color: $_heading;
+    margin-bottom: 0;
+  }
+
+  &__empty {
+    padding: 2rem 0;
+    text-align: center;
+    color: var(--muted-foreground);
+    font-size: 0.9rem;
+  }
+
+  &__chart {
+    max-width: 260px;
+    margin: 0 auto;
+  }
+
+  // 직전 세션 대비 변화량
+  &__delta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.9rem;
+    border-radius: 12px;
+    background: $_surface;
+    margin-bottom: 0.75rem;
+
+    span {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--muted-foreground);
+    }
+
+    strong {
+      font-size: 1rem;
+      font-weight: 800;
+    }
+  }
+
+  // good / warning / bad 카운트
+  &__counts {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  &__count {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.65rem 0.4rem;
+    border-radius: 12px;
+    text-align: center;
+
+    &--good    { background: #d1fae5; color: #065f46; }
+    &--warning { background: #fef3c7; color: #92400e; }
+    &--bad     { background: #fee2e2; color: #991b1b; }
+  }
+
+  &__count-value {
+    font-size: 1.1rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  &__count-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  // 주요 원인 목록
+  &__causes {
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    margin-bottom: 0.5rem;
+  }
+
+  &__causes-title {
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    margin-bottom: 0.6rem;
+  }
+
+  ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: $_heading;
+  }
+
+  &__cause-count {
+    margin-left: auto;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--muted-foreground);
+  }
+
+  // AI 코멘트
+  &__comment {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+
+  &__comment-kicker {
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    margin-bottom: 0.5rem;
+  }
+}

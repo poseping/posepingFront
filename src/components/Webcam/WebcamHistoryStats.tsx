@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faChartBar } from '@fortawesome/free-solid-svg-icons'
+import { faChartBar, faTrash } from '@fortawesome/free-solid-svg-icons'
 import {
   Bar,
   BarChart,
@@ -13,7 +13,7 @@ import {
   YAxis,
 } from 'recharts'
 import type { TooltipProps } from 'recharts'
-import { getWebcamHistory, type WebcamSessionHistoryItem } from '../../services/webcamApi'
+import { deleteWebcamSession, getWebcamHistory, type WebcamSessionHistoryItem } from '../../services/webcamApi'
 
 const CAUSE_META: Record<string, { label: string; color: string }> = {
   NECK_FORWARD:   { label: '거북목',        color: '#f97316' },
@@ -79,9 +79,9 @@ function buildChartData(sessions: WebcamSessionHistoryItem[]): ChartEntry[] {
       label,
       startedAt: s.started_at,
       endedAt: s.ended_at,
-      good: s.good_count,
-      warning: s.warning_count,
-      bad: s.bad_count,
+      good: s.good_frames,
+      warning: s.warning_frames,
+      bad: s.bad_frames,
       ...(s.cause_counts ?? {}),
     }
   })
@@ -96,10 +96,22 @@ function getActiveCauses(sessions: WebcamSessionHistoryItem[]): string[] {
 }
 
 export default function WebcamHistoryStats() {
+  const queryClient = useQueryClient()
+
   const { data, isLoading, isError } = useQuery({
     queryKey: ['webcam-history'],
     queryFn: () => getWebcamHistory(10),
   })
+
+  const { mutate: doDelete, isPending: isDeleting } = useMutation({
+    mutationFn: deleteWebcamSession,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['webcam-history'] }),
+  })
+
+  const handleDelete = (sessionId: number, label: string) => {
+    if (!window.confirm(`"${label}" 세션 기록을 삭제할까요?`)) return
+    doDelete(sessionId)
+  }
 
   const sessions = data?.sessions ?? []
   const chartData = useMemo(() => buildChartData(sessions), [sessions])
@@ -180,6 +192,31 @@ export default function WebcamHistoryStats() {
             </>
           )}
         </>
+      )}
+      {!isLoading && !isError && sessions.length > 0 && (
+        <div className="wcam-history-session-list">
+          <p className="wcam-history-chart-label">세션 목록</p>
+          {sessions.map(s => {
+            const date = new Date(s.started_at)
+            const label = `${date.getMonth() + 1}/${date.getDate()} #${s.session_id}`
+            return (
+              <div key={s.session_id} className="wcam-history-session-row">
+                <span className="wcam-history-session-label">{label}</span>
+                <span className="wcam-history-session-score">
+                  {Math.round(s.good_ratio * 100)}%
+                </span>
+                <button
+                  className="btn-icon wcam-history-session-delete"
+                  onClick={() => handleDelete(s.session_id, label)}
+                  disabled={isDeleting}
+                  title="세션 삭제"
+                >
+                  <FontAwesomeIcon icon={faTrash} />
+                </button>
+              </div>
+            )
+          })}
+        </div>
       )}
     </section>
   )
