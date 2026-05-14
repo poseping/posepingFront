@@ -465,6 +465,7 @@
   max-width: 100%;
   max-height: calc(100vh - 140px);
   line-height: 0;
+  touch-action: none;
 }
 
 .photo-editor-image {
@@ -482,6 +483,7 @@
   left: 0;
   top: 0;
   z-index: 1;
+  touch-action: none;
 }
 
 .photo-editor-overlay-back{
@@ -507,6 +509,7 @@
   fill: #ffd166;
   stroke: #0f172a;
   cursor: grab;
+  touch-action: none;
 }
 
 .photo-editor-point.selected {

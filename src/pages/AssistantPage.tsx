@@ -40,20 +40,10 @@ export default function AssistantPage() {
     latestMessageRef.current = node
   }
 
-  const hasMessageScroll = () => {
-    const messages = messagesRef.current
-    return messages ? messages.scrollHeight > messages.clientHeight + 8 : false
-  }
-
   const scrollToChatBottom = (behavior: ScrollBehavior = 'smooth') => {
     window.requestAnimationFrame(() => {
       const messages = messagesRef.current
       if (!messages) return
-
-      if (!hasMessageScroll()) {
-        messages.scrollTo({ top: 0, behavior: 'auto' })
-        return
-      }
 
       messages.scrollTo({
         top: messages.scrollHeight,
@@ -131,34 +121,23 @@ export default function AssistantPage() {
   }, [chatHistory.length, visibleInitialBubbleCount, onboardingMutation.isPending, done, errorMessage])
 
   useEffect(() => {
-    const handleViewportChange = () => {
-      window.requestAnimationFrame(() => {
-        const viewport = window.visualViewport
-        const viewportHeight = viewport?.height ?? window.innerHeight
-        const keyboardInset = viewport
-          ? Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop)
-          : 0
-
-        document.documentElement.style.setProperty('--chat-viewport-height', `${viewportHeight}px`)
-        document.documentElement.style.setProperty('--chat-keyboard-inset', `${keyboardInset}px`)
-
-        scrollToChatBottom('auto')
-      })
+    const updateViewportHeight = () => {
+      const viewportHeight = window.visualViewport?.height ?? window.innerHeight
+      document.documentElement.style.setProperty('--chat-viewport-height', `${viewportHeight}px`)
     }
 
-    handleViewportChange()
-    window.visualViewport?.addEventListener('resize', handleViewportChange)
-    window.visualViewport?.addEventListener('scroll', handleViewportChange)
-    window.addEventListener('resize', handleViewportChange)
+    updateViewportHeight()
+    window.visualViewport?.addEventListener('resize', updateViewportHeight)
+    window.visualViewport?.addEventListener('scroll', updateViewportHeight)
+    window.addEventListener('resize', updateViewportHeight)
 
     return () => {
-      window.visualViewport?.removeEventListener('resize', handleViewportChange)
-      window.visualViewport?.removeEventListener('scroll', handleViewportChange)
-      window.removeEventListener('resize', handleViewportChange)
+      window.visualViewport?.removeEventListener('resize', updateViewportHeight)
+      window.visualViewport?.removeEventListener('scroll', updateViewportHeight)
+      window.removeEventListener('resize', updateViewportHeight)
       document.documentElement.style.removeProperty('--chat-viewport-height')
-      document.documentElement.style.removeProperty('--chat-keyboard-inset')
     }
-  }, [chatHistory.length, visibleInitialBubbleCount])
+  }, [])
 
   const canSubmit = inputValue.trim().length > 0 && !onboardingMutation.isPending && !done
   const submitPrompt = (prompt: string) => {

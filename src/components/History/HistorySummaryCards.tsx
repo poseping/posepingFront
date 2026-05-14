@@ -3,15 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons'
+import type { ApexOptions } from 'apexcharts'
+import ReactApexChart from 'react-apexcharts'
 import { getPhotoAnalysisHistory } from '../../services/photoAnalysisApi'
 import '../../styles/components/history-summary-cards.scss'
-
-function daysAgo(isoStr: string) {
-  const days = Math.floor((Date.now() - new Date(isoStr).getTime()) / 86_400_000)
-  if (days === 0) return '오늘'
-  if (days === 1) return '어제'
-  return `${days}일 전`
-}
 
 export default function HistorySummaryCards() {
   const navigate = useNavigate()
@@ -26,21 +21,115 @@ export default function HistorySummaryCards() {
     const analyses = photoData ?? []
     if (!analyses.length) return null
 
-    const good = analyses.filter((analysis) => analysis.status === 'good').length
-    const warning = analyses.filter((analysis) => analysis.status === 'warning').length
-    const bad = analyses.filter((analysis) => analysis.status === 'bad').length
-    const withNeck = analyses.filter((analysis) => analysis.side?.forward_head_detected != null)
-    const neckRate = withNeck.length
-      ? Math.round((withNeck.filter((analysis) => analysis.side?.forward_head_detected).length / withNeck.length) * 100)
-      : null
-    const dates = analyses
-      .map((analysis) => analysis.analyzed_at ?? analysis.created_at ?? '')
-      .filter(Boolean)
-      .sort()
-    const lastDate = dates.length ? dates[dates.length - 1] : null
+    const scorePoints = analyses
+      .map((analysis) => {
+        const rawDate = analysis.saved_at ?? analysis.analyzed_at ?? analysis.created_at ?? ''
+        const date = rawDate ? new Date(rawDate) : null
+        const score = typeof analysis.posture_score === 'number' && Number.isFinite(analysis.posture_score)
+          ? Math.round(analysis.posture_score)
+          : null
 
-    return { total: analyses.length, loaded: analyses.length, good, warning, bad, neckRate, lastDate }
+        if (!date || Number.isNaN(date.getTime()) || score === null) {
+          return null
+        }
+
+        return {
+          score,
+          time: date.getTime(),
+        }
+      })
+      .filter((item): item is { score: number; time: number } => item !== null)
+      .sort((a, b) => a.time - b.time)
+      .slice(-10)
+
+    if (!scorePoints.length) {
+      return null
+    }
+
+    const latest = scorePoints[scorePoints.length - 1]
+
+    return {
+      latestScore: latest.score,
+      points: scorePoints.map((point) => ({
+        x: new Date(point.time).toISOString(),
+        y: point.score,
+      })),
+    }
   }, [photoData])
+
+  const chartOptions = useMemo<ApexOptions>(() => ({
+    chart: {
+      type: 'area',
+      height: 350,
+      toolbar: { show: false },
+      zoom: { enabled: false },
+      fontFamily: 'inherit',
+    },
+    colors: ['#008FFB'],
+    dataLabels: { enabled: false },
+    stroke: {
+      curve: 'smooth',
+      width: 4,
+    },
+    grid: {
+      borderColor: 'rgba(148, 163, 184, 0.18)',
+      strokeDashArray: 0,
+      padding: {
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+      },
+    },
+    xaxis: {
+      type: 'datetime',
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+      labels: {
+        datetimeUTC: false,
+        format: 'MM.dd',
+        style: {
+          colors: '#64748b',
+          fontSize: '12px',
+        },
+      },
+    },
+    yaxis: {
+      min: 0,
+      max: 100,
+      tickAmount: 4,
+      labels: {
+        style: {
+          colors: '#94a3b8',
+          fontSize: '12px',
+        },
+        formatter: (value) => `${Math.round(value)}`,
+      },
+    },
+    markers: {
+      size: 0,
+    },
+    tooltip: {
+      theme: 'light',
+      x: {
+        format: 'MM/dd',
+      },
+      y: {
+        formatter: (value) => `${Math.round(value)}점`,
+      },
+    },
+    legend: { show: false },
+  }), [photoStats])
+
+  const chartSeries = useMemo(
+    () => [
+      {
+        name: '신체 점수',
+        data: photoStats?.points ?? [],
+      },
+    ],
+    [photoStats]
+  )
 
   return (
     <section className="card">
@@ -55,38 +144,18 @@ export default function HistorySummaryCards() {
 
       {!photoLoading && photoStats && (
         <>
-          <div className="history-metrics">
-            <div className="history-metric">
-              <span>총 분석</span>
-              <strong>{photoStats.total}건</strong>
-            </div>
-            <div className="history-metric">
-              <span>거북목 감지</span>
-              <strong className={`history-score ${photoStats.neckRate != null && photoStats.neckRate >= 50 ? 'bad' : photoStats.neckRate != null && photoStats.neckRate >= 25 ? 'warning' : 'good'}`}>
-                {photoStats.neckRate != null ? `${photoStats.neckRate}%` : '-'}
-              </strong>
-            </div>
-            <div className="history-metric">
-              <span>마지막 분석</span>
-              <strong>{photoStats.lastDate ? daysAgo(photoStats.lastDate) : '-'}</strong>
-            </div>
+          <div className="history-score-summary">
+            <span>최신 신체 점수</span>
+            <strong>{photoStats.latestScore}점</strong>
           </div>
-
-          {photoStats.loaded > 0 && (
-            <div className="history-bar-section">
-              <p className="history-bar-label">자세 등급 분포</p>
-              <div className="history-stacked-bar">
-                <div className="history-bar-good" style={{ width: `${(photoStats.good / photoStats.loaded) * 100}%` }} />
-                <div className="history-bar-warning" style={{ width: `${(photoStats.warning / photoStats.loaded) * 100}%` }} />
-                <div className="history-bar-bad" style={{ width: `${(photoStats.bad / photoStats.loaded) * 100}%` }} />
-              </div>
-              <div className="history-bar-legend">
-                <span className="history-legend-item good">좋음 {Math.round((photoStats.good / photoStats.loaded) * 100)}%</span>
-                <span className="history-legend-item warning">주의 {Math.round((photoStats.warning / photoStats.loaded) * 100)}%</span>
-                <span className="history-legend-item bad">나쁨 {Math.round((photoStats.bad / photoStats.loaded) * 100)}%</span>
-              </div>
-            </div>
-          )}
+          <div className="history-score-chart">
+            <ReactApexChart
+              type="area"
+              height={350}
+              options={chartOptions}
+              series={chartSeries}
+            />
+          </div>
         </>
       )}
 

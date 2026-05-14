@@ -292,7 +292,7 @@ body,
 /* 앱 프레임: 기본은 꽉 차게, 큰 화면에서는 중앙 정렬 */
 .app-frame {
   width: 100%;
-  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--background);
   position: relative;
 }
@@ -303,8 +303,17 @@ body,
   overflow: hidden;
   padding-bottom: 0;
 }
+
 .app-frame:has(.bottom-nav){
   padding-bottom: var(--bottom-nav-height);
+}
+
+.app-frame:has(.onboarding-chat-page):has(.bottom-nav) {
+  padding-bottom: 0;
+}
+
+.app-frame:has(.onboarding-chat-page) .bottom-nav {
+  display: none;
 }
 
 @media screen and (min-width: 768px) {
@@ -316,7 +325,7 @@ body,
 .app {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 main, .sub {
