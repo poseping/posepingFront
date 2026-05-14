@@ -4,6 +4,8 @@ import { ManualLandmarkInput, PhotoSideView } from '../../services/photoAnalysis
 interface DragState {
   landmarkId: number
   panel: 'front' | 'side'
+  pointerId: number
+  pointerTarget: SVGCircleElement
 }
 
 interface EditableLandmarkCanvasProps {
@@ -65,6 +67,7 @@ export default function EditableLandmarkCanvas({
                                 }: EditableLandmarkCanvasProps) {
   const frameRef = useRef<HTMLDivElement>(null)
   const dragStateRef = useRef<DragState | null>(null)
+  const landmarksRef = useRef(landmarks)
   const [imageSize, setImageSize] = useState({ width: 4, height: 5 })
   const [frameSize, setFrameSize] = useState({ width: 4, height: 5 })
 
@@ -89,19 +92,40 @@ export default function EditableLandmarkCanvas({
   )
 
   useEffect(() => {
+    landmarksRef.current = landmarks
+  }, [landmarks])
+
+  useEffect(() => {
+    const clearDragState = (pointerId?: number) => {
+      const dragState = dragStateRef.current
+      if (!dragState || (pointerId !== undefined && dragState.pointerId !== pointerId)) {
+        return
+      }
+
+      if (dragState.pointerTarget.hasPointerCapture(dragState.pointerId)) {
+        dragState.pointerTarget.releasePointerCapture(dragState.pointerId)
+      }
+      dragStateRef.current = null
+    }
+
     const handlePointerMove = (event: PointerEvent) => {
       const dragState = dragStateRef.current
       const frame = frameRef.current
       if (!dragState || !frame) {
         return
       }
+      if (event.pointerId !== dragState.pointerId) {
+        return
+      }
+
+      event.preventDefault()
 
       const rect = frame.getBoundingClientRect()
       const nextX = clamp((event.clientX - rect.left) / rect.width)
       const nextY = clamp((event.clientY - rect.top) / rect.height)
 
       onChange(
-          landmarks.map((landmark) =>
+          landmarksRef.current.map((landmark) =>
               landmark.id === dragState.landmarkId
                   ? {
                     ...landmark,
@@ -114,18 +138,23 @@ export default function EditableLandmarkCanvas({
       )
     }
 
-    const handlePointerUp = () => {
-      dragStateRef.current = null
+    const handlePointerEnd = (event: PointerEvent) => {
+      clearDragState(event.pointerId)
     }
 
-    window.addEventListener('pointermove', handlePointerMove)
-    window.addEventListener('pointerup', handlePointerUp)
+    window.addEventListener('pointermove', handlePointerMove, { passive: false })
+    window.addEventListener('pointerup', handlePointerEnd)
+    window.addEventListener('pointercancel', handlePointerEnd)
+    window.addEventListener('lostpointercapture', handlePointerEnd)
 
     return () => {
       window.removeEventListener('pointermove', handlePointerMove)
-      window.removeEventListener('pointerup', handlePointerUp)
+      window.removeEventListener('pointerup', handlePointerEnd)
+      window.removeEventListener('pointercancel', handlePointerEnd)
+      window.removeEventListener('lostpointercapture', handlePointerEnd)
+      clearDragState()
     }
-  }, [landmarks, onChange])
+  }, [onChange])
 
   useEffect(() => {
     const frame = frameRef.current
@@ -208,7 +237,14 @@ export default function EditableLandmarkCanvas({
                               style={{ strokeWidth: pointStrokeWidth }}
                               onPointerDown={(event) => {
                                 event.preventDefault()
-                                dragStateRef.current = { landmarkId: landmark.id, panel }
+                                event.stopPropagation()
+                                event.currentTarget.setPointerCapture(event.pointerId)
+                                dragStateRef.current = {
+                                  landmarkId: landmark.id,
+                                  panel,
+                                  pointerId: event.pointerId,
+                                  pointerTarget: event.currentTarget,
+                                }
                                 onSelect(landmark.id)
                               }}
                               onClick={() => onSelect(landmark.id)}
