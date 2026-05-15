@@ -179,3 +179,16 @@ $_surface: #f8fafc;
     color: var(--primary);
   }
 }
+
+@media (max-width: 767px) { 
+  .wcam-history-header {
+    flex-direction: column;
+  }
+
+  .wcam-history-metrics {
+    width: 100%;
+    div {
+      flex: 1;
+    }
+  }
+}

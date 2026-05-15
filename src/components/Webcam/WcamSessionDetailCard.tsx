@@ -99,7 +99,7 @@ export default function WcamSessionDetailCard({
 
       <div className="wcam-detail-footer">
         <button
-          className="btn--danger-outline"
+          className="btn--danger-outline wcam-detail-delete-button"
           type="button"
           onClick={onRequestDelete}
           disabled={isDeleting}
