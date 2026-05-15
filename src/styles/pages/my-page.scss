@@ -33,7 +33,7 @@ $_surface: #f8fafc;
   display: flex;
   align-items: center;
   gap: 1.25rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.6rem;
 }
 
 .mp-avatar {
@@ -98,13 +98,31 @@ $_surface: #f8fafc;
 
 
 .mp-provider-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   padding: 0.18rem 0.55rem;
   border-radius: 999px;
   background: var(--secondary);
   color: var(--secondary-foreground);
   font-size: 0.72rem;
   font-weight: 700;
+
+  img {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.mp-provider-badge--kakao {
+  background: #FFE812;
+  color: #000;
+}
+
+.mp-provider-badge--google {
+  background: #fff;
+  color: #3c4043;
+  border: 1px solid #dadce0;
 }
 
 .mp-error {
@@ -116,6 +134,164 @@ $_surface: #f8fafc;
 // ─── Actions ──────────────────────────────────────────────────────────────
 
 // ─── Stats Card ───────────────────────────────────────────────────────────
+.mp-account-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+  padding-top: 0.95rem;
+}
+
+.mp-account-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 0;
+  background: transparent;
+  color: $_heading;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.15s ease, opacity 0.15s ease;
+
+  &:hover:not(:disabled) {
+    color: var(--primary);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+}
+
+.mp-account-action--danger {
+  padding-left: 1rem;
+  border-left: 1px solid rgba(15, 23, 42, 0.14);
+  color: var(--destructive);
+
+  &:hover:not(:disabled) {
+    color: #dc2626;
+  }
+}
+
+.mp-delete-modal {
+  padding: 1.5rem;
+}
+
+.mp-delete-modal__backdrop {
+  background: rgba(59, 76, 83, 0.34);
+  backdrop-filter: blur(1px);
+}
+
+.mp-delete-modal__card {
+  position: relative;
+  width: 100%;
+  max-width: 540px;
+  padding: 1.75rem;
+  border-radius: 24px;
+  background-color: #fff;
+  box-shadow: 0 25px 60px rgba(15, 23, 42, 0.2);
+  animation: mpTimeModalIn 0.18s ease-out;
+}
+
+.mp-delete-modal__icon {
+  width: 72px;
+  height: 72px;
+  margin-bottom: 1.6rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff0f1;
+  color: #ff5a5f;
+  font-size: 1.9rem;
+}
+
+.mp-delete-modal__title {
+  margin: 0 0 0.9rem;
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: #0f2a3a;
+}
+
+.mp-delete-modal__desc {
+  margin: 0;
+  max-width: 520px;
+  color: #687b83;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  word-break: keep-all;
+
+  strong {
+    color: #0f2a3a;
+    font-weight: 900;
+  }
+}
+
+.mp-delete-modal__notice {
+  margin-top: 1.75rem;
+  padding: 1.1rem 1.25rem;
+  border-radius: 14px;
+  background: #f5f7f8;
+  color: #687b83;
+
+  ul {
+    margin: 0;
+    padding-left: 1.1rem;
+  }
+
+  li {
+    font-size: 0.96rem;
+    line-height: 1.75;
+  }
+}
+
+.mp-delete-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.9rem;
+}
+
+.mp-delete-modal__cancel,
+.mp-delete-modal__confirm {
+  min-width: 90px;
+  min-height: 54px;
+  border-radius: 14px;
+  padding: 0 1.55rem;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.mp-delete-modal__cancel {
+  border: 1px solid #d8e0e5;
+  background: #fff;
+  color: #0f2a3a;
+
+  &:hover:not(:disabled) {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+  }
+}
+
+.mp-delete-modal__confirm {
+  border: 0;
+  background: #ff5a5f;
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background: #ef4444;
+  }
+}
+
 .mp-stats-header {
   display: flex;
   align-items: flex-start;
