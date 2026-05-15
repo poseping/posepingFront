@@ -19,6 +19,7 @@ const FirstLoginChoicePage = lazy(() => import('./pages/FirstLoginChoicePage'))
 const AssistantPage = lazy(() => import('./pages/AssistantPage'))
 const PhotoPage = lazy(() => import('./pages/PhotoPage'))
 const PhotoHistoryStatsPage = lazy(() => import('./pages/PhotoHistoryStatsPage'))
+const WebcamHistoryStatsPage = lazy(() => import('./pages/WebcamHistoryStatsPage'))
 const MyPage = lazy(() => import('./pages/MyPage'))
 const SettingsPage = lazy(() => import('./pages/SettingsPage'))
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage'))
@@ -58,6 +59,7 @@ function App() {
             <Route path="/home"     element={<HomePage />} />
             <Route path="/onboarding" element={<AssistantPage />} />
             <Route path="/webcam"   element={<WebcamPage />} />
+            <Route path="/webcam/stats" element={<WebcamHistoryStatsPage />} />
             <Route path="/photo"    element={<PhotoPage />} />
             <Route path="/photo/stats" element={<PhotoHistoryStatsPage />} />
             <Route path="/mypage"   element={<MyPage />} />

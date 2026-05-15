@@ -1,3 +1,4 @@
+import '../../styles/components/posture-guide-modal.scss'
 import { useRef, useEffect, useState, useCallback, useLayoutEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
