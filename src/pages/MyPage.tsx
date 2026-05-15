@@ -6,6 +6,7 @@ import PageHeader from '../components/PageHeader'
 import MyProfileCard from '../components/MyPage/MyProfileCard'
 import MyHabitsCard from '../components/MyPage/MyHabitsCard'
 import MyPreferencesCard from '../components/MyPage/MyPreferencesCard'
+import MyWebcamSettingsCard from '../components/MyPage/MyWebcamSettingsCard'
 import { loginSuccess } from '../store/authSlice'
 import { saveUserInfo } from '../services/authService'
 import { getRandomNickname, updateNickname, getLifestyleHabits } from '../services/memberApi'
@@ -102,6 +103,9 @@ export default function MyPage() {
 
         {/* ── 알림 및 설정 ── */}
         <MyPreferencesCard />
+
+        {/* ── 웹캠 자세 분석 설정 ── */}
+        <MyWebcamSettingsCard />
 
       </main>
     </>

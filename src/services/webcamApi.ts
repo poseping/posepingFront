@@ -76,12 +76,14 @@ export const deletePostureProfile = async (
 export const analyzeWebcam = async (
   imageBase64: string,
   profileId?: number,
+  sensitivity: "low" | "medium" | "high" = "medium",
 ): Promise<WebcamAnalyzeResponse> => {
   const response = await apiClient.post<WebcamAnalyzeResponse>(
     "/webcam/analyze",
     {
       image_base64: imageBase64,
       profile_id: profileId ?? null,
+      sensitivity,
     },
   );
   return response.data;

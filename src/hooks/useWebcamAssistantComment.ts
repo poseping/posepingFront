@@ -5,9 +5,6 @@ import {
   getWebcamComment,
 } from "../services/assistantApi";
 
-// 테스트용 : 추후 최소 60_000 (1분)으로 변경 예정
-const BAD_POSTURE_THRESHOLD_MS = 10_000;
-
 export interface WebcamAssistantAnalyzeInput {
   status: string;
   deviation_score: number;
@@ -17,7 +14,8 @@ export interface WebcamAssistantAnalyzeInput {
   judgement_signature?: string;
 }
 
-export function useWebcamAssistantComment(isSessionActive: boolean) {
+export function useWebcamAssistantComment(isSessionActive: boolean, thresholdSec: number = 60) {
+  const thresholdMs = thresholdSec * 1000;
   const badPostureStartRef = useRef<number | null>(null);
   const [assistantComment, setAssistantComment] = useState<string | null>(null);
   const [assistantError, setAssistantError] = useState<string | null>(null);
@@ -72,7 +70,7 @@ export function useWebcamAssistantComment(isSessionActive: boolean) {
     }
 
     const elapsed = Date.now() - badPostureStartRef.current;
-    if (elapsed < BAD_POSTURE_THRESHOLD_MS) return;
+    if (elapsed < thresholdMs) return;
     if (isAssistantCommentPending) return;
 
     badPostureStartRef.current = null;

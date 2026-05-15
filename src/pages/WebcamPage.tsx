@@ -23,6 +23,7 @@ import {
 } from '../services/webcamApi'
 import { useStretchReminder, type StretchInterval } from '../hooks/useStretchReminder'
 import { useWebcamAssistantComment } from '../hooks/useWebcamAssistantComment'
+import { getWebcamSettings } from '../services/webcamSettingsApi'
 import WebcamStream, { type WebcamStreamRef } from '../components/Webcam/WebcamStream'
 import WebcamHistoryStats from '../components/Webcam/WebcamHistoryStats'
 import WcamSessionSummaryChart from '../components/Webcam/WcamSessionSummaryChart'
@@ -97,6 +98,12 @@ export default function WebcamPage() {
   })
   const alertMap = Object.fromEntries(alertTypes.map((a) => [a.alert_type_id, a]))
 
+  const { data: webcamSettings } = useQuery({
+    queryKey: ['webcam-settings'],
+    queryFn: getWebcamSettings,
+    staleTime: 5 * 60 * 1000,
+  })
+
   const { mutate: doSaveSession } = useMutation({
     mutationFn: saveWebcamSession,
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['webcam-history'] }) },
@@ -120,7 +127,8 @@ export default function WebcamPage() {
     },
   })
   const { mutateAsync: runAnalyze } = useMutation({
-    mutationFn: (imageBase64: string) => analyzeWebcam(imageBase64),
+    mutationFn: (imageBase64: string) =>
+      analyzeWebcam(imageBase64, undefined, webcamSettings?.posture_sensitivity ?? 'medium'),
     onError: (error) => { console.error('웹캠 분석 실패:', error) },
   })
 
@@ -132,7 +140,7 @@ export default function WebcamPage() {
     notifPermission,
     handleAnalyzeResult,
     resetAssistantComment,
-  } = useWebcamAssistantComment(phase === 'analyzing')
+  } = useWebcamAssistantComment(phase === 'analyzing', webcamSettings?.ai_comment_threshold_sec ?? 60)
 
   const isAnalyzing = phase === 'analyzing' && analysisState === 'active'
   const canAddMore = profiles.filter((p) => p.is_active).length < 3
