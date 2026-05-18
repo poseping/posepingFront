@@ -339,22 +339,7 @@ $_danger-fg:  #b91c1c;
 }
 
 
-// ─── Stretch Reminder Popover ─────────────────────────────────────────────
-.wcam-stretch-label    { font-size: 0.88rem; font-weight: 700; color: $_heading; }
-
-.wcam-stretch-select {
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  padding: 0.35rem 0.6rem;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #374151;
-  background: $_surface;
-  cursor: pointer;
-  outline: none;
-
-  &:hover { border-color: #94a3b8; }
-}
+// ─── Stretch Reminder Popover styles moved below (Control bar section) ────
 
 
 // ─── Notification Banner ──────────────────────────────────────────────────
@@ -446,21 +431,185 @@ $_danger-fg:  #b91c1c;
   pointer-events: none;
 }
 
+// ─── Stretch Reminder Popover ─────────────────────────────────────────────
 .wcam-stretch-popover {
   position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: calc(100% + 10px);
+  left: 0;
+  width: 290px;
+  max-width: calc(100vw - 2rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.95rem 1rem 0.4rem;
+  background: #fff;
+  border: 1px solid rgba(19, 42, 76, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 14px 32px rgba(20, 38, 70, 0.16);
+  z-index: 100;
+}
+
+.wcam-stretch-popover__head {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.65rem;
+}
+
+.wcam-stretch-popover__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+
+  &--active {
+    color: var(--primary);
+    background: rgba(8, 145, 178, 0.1);
+  }
+}
+
+.wcam-stretch-popover__titles {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.25;
+
+  strong { color: $_heading; font-size: 0.92rem; font-weight: 700; }
+  span   { color: var(--muted-foreground); font-size: 0.78rem; font-weight: 500; margin-top: 2px; }
+}
+
+.wcam-stretch-popover__switch {
+  position: relative;
+  display: inline-block;
+  width: 42px;
+  height: 24px;
+  flex-shrink: 0;
+  cursor: pointer;
+
+  input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+}
+
+.wcam-stretch-popover__switch-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: #d1d5db;
+  transition: background 0.2s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease;
+  }
+}
+
+.wcam-stretch-popover__switch input:checked + .wcam-stretch-popover__switch-track {
+  background: var(--primary);
+}
+
+.wcam-stretch-popover__switch input:checked + .wcam-stretch-popover__switch-track::before {
+  transform: translateX(18px);
+}
+
+.wcam-stretch-popover__intervals {
+  border: 0;
+  padding: 0;
+  margin: 0;
+
+  legend {
+    padding: 0;
+    margin-bottom: 0.4rem;
+    color: var(--muted-foreground);
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  &:disabled {
+    legend { opacity: 0.5; }
+  }
+}
+
+.wcam-stretch-popover__chip-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.wcam-stretch-chip {
+  padding: 0.45rem 0;
+  border-radius: 10px;
+  border: 1px solid rgba(100, 116, 139, 0.2);
   background: #fff;
-  border: 1px solid rgba(19, 42, 76, 0.12);
-  border-radius: 12px;
-  padding: 0.65rem 0.85rem;
-  box-shadow: 0 8px 24px rgba(20, 38, 70, 0.12);
-  white-space: nowrap;
-  z-index: 100;
+  color: #475569;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s, color 0.12s, opacity 0.12s;
+
+  &:hover {
+    border-color: $_heading;
+    color: $_heading;
+  }
+
+  &--active {
+    background: $_heading;
+    border-color: $_heading;
+    color: #fff;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  &--active:disabled {
+    background: #94a3b8;
+    border-color: #94a3b8;
+    color: #fff;
+    opacity: 0.6;
+  }
+}
+
+.wcam-stretch-popover__footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.25rem;
+}
+
+.wcam-stretch-popover__done {
+  background: transparent;
+  border: 0;
+  padding: 0.3rem 0.2rem;
+  color: var(--primary);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:hover { text-decoration: underline; }
 }
 
 .wcam-ctrl-action-btn {

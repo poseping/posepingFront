@@ -159,3 +159,15 @@ export const getPhotoAnalysisHistory = async (): Promise<PhotoAnalysisHistoryIte
 
   return response.data.items ?? response.data.analyses ?? response.data.results ?? []
 }
+
+export const getLatestPhotoAnalysis = async (): Promise<PhotoAnalysisHistoryItem> => {
+  const response = await apiClient.get<
+    PhotoAnalysisHistoryItem
+  >('/photo/analyses/latest')
+
+  if (response.data) {
+    return response.data
+  }
+
+  return response.data
+}

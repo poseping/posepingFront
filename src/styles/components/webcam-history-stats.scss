@@ -109,26 +109,47 @@ $_surface: #f8fafc;
 // ─── History Filters ──────────────────────────────────────────────────────
 .wcam-filter-section {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.9rem;
   padding: 0.85rem 0 1rem;
   border-bottom: 1px solid rgba(100, 116, 139, 0.12);
-  margin-bottom: 0.25rem;
 }
 
 .wcam-filter-group {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
+  padding-right: 0.9rem;
+
+  &:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 1rem;
+    background: rgba(100, 116, 139, 0.25);
+  }
 }
 
 .wcam-filter-label {
-  font-size: 0.72rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: var(--muted-foreground);
-  min-width: 2.75rem;
   flex-shrink: 0;
+
+  .svg-inline--fa {
+    font-size: 0.85rem;
+    color: var(--muted-foreground);
+  }
 }
 
 .wcam-filter-chips {
@@ -138,7 +159,7 @@ $_surface: #f8fafc;
 }
 
 .wcam-filter-chip {
-  padding: 0.22rem 0.65rem;
+  padding: 0.22rem 0.62rem;
   border-radius: 999px;
   border: 1px solid rgba(100, 116, 139, 0.28);
   background: transparent;
@@ -163,7 +184,7 @@ $_surface: #f8fafc;
 
 .wcam-filter-select {
   padding: 0.22rem 0.5rem;
-  border-radius: 8px;
+  border-radius: 14px;
   border: 1px solid rgba(100, 116, 139, 0.28);
   background: transparent;
   color: var(--muted-foreground);
@@ -180,7 +201,166 @@ $_surface: #f8fafc;
   }
 }
 
-@media (max-width: 767px) { 
+// ─── Date Calendar Popover ────────────────────────────────────────────────
+.wcam-cal {
+  position: relative;
+  display: inline-flex;
+}
+
+.wcam-cal-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.22rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(100, 116, 139, 0.28);
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 0.78rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+
+  .svg-inline--fa { font-size: 0.85rem; }
+
+  .wcam-cal-caret {
+    font-size: 0.65rem;
+    margin-left: 0.1rem;
+  }
+
+  &:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  &--active {
+    background: rgba(8, 145, 178, 0.08);
+    border-color: var(--primary);
+    color: var(--primary);
+    font-weight: 600;
+  }
+}
+
+.wcam-cal-popover {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  z-index: 50;
+  padding: 0.6rem 0.75rem 0.5rem;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.15);
+  border: 1px solid rgba(100, 116, 139, 0.12);
+
+  .rdp-root {
+    --rdp-accent-color: var(--primary);
+    --rdp-accent-background-color: rgba(8, 145, 178, 0.08);
+    --rdp-day-width: 36px;
+    --rdp-day-height: 36px;
+    --rdp-day_button-width: 32px;
+    --rdp-day_button-height: 32px;
+    --rdp-today-color: var(--primary);
+    --rdp-weekday-opacity: 1;
+    font-size: 0.85rem;
+    color: $_dark;
+  }
+
+  .rdp-caption_label {
+    font-weight: 700;
+    color: $_dark;
+    font-size: 0.95rem;
+  }
+
+  .rdp-nav button {
+    color: var(--muted-foreground);
+    border-radius: 8px;
+
+    &:hover { background: rgba(100, 116, 139, 0.08); }
+  }
+
+  .rdp-weekday {
+    color: var(--muted-foreground);
+    font-weight: 600;
+    font-size: 0.74rem;
+    text-transform: none;
+
+    &:first-child { color: #ef4444; }
+    &:last-child  { color: #3b82f6; }
+  }
+
+  .rdp-day_button {
+    position: relative;
+    color: inherit;
+    font-size: 0.85rem;
+  }
+
+  .rdp-sun .rdp-day_button { color: #ef4444; }
+  .rdp-sat .rdp-day_button { color: #3b82f6; }
+
+  .rdp-outside .rdp-day_button {
+    color: rgba(100, 116, 139, 0.4);
+  }
+
+  .rdp-has-session .rdp-day_button::after {
+    content: '';
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--primary);
+  }
+
+  .rdp-selected .rdp-day_button {
+    border-color: var(--primary);
+    color: var(--primary);
+    font-weight: 700;
+    background: transparent;
+  }
+}
+
+.wcam-cal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.55rem 0.15rem 0.15rem;
+  margin-top: 0.4rem;
+  border-top: 1px solid rgba(100, 116, 139, 0.12);
+  font-size: 0.76rem;
+}
+
+.wcam-cal-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--muted-foreground);
+}
+
+.wcam-cal-legend-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+.wcam-cal-today-btn {
+  background: transparent;
+  border: 0;
+  color: var(--primary);
+  font-family: inherit;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
+
+  &:hover { background: rgba(8, 145, 178, 0.08); }
+}
+
+@media (max-width: 767px) {
   .wcam-history-header {
     flex-direction: column;
   }
@@ -190,5 +370,9 @@ $_surface: #f8fafc;
     div {
       flex: 1;
     }
+  }
+
+  .wcam-filter-group:not(:last-child)::after {
+    display: none;
   }
 }

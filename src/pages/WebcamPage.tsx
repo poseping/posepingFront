@@ -370,28 +370,58 @@ export default function WebcamPage() {
               )}
             </button>
             {isStretchOpen && (
-              <div className="wcam-stretch-popover">
-                <span className="wcam-stretch-label">스트레칭 알림</span>
-                {!stretchReminder.isEnabled && (
-                  <select
-                    className="wcam-stretch-select"
-                    value={stretchReminder.intervalMinutes}
-                    onChange={(e) =>
-                      stretchReminder.setIntervalMinutes(Number(e.target.value) as StretchInterval)
-                    }
+              <div className="wcam-stretch-popover" role="dialog">
+                <div className="wcam-stretch-popover__head">
+                  <div
+                    className={`wcam-stretch-popover__icon${stretchReminder.isEnabled ? ' wcam-stretch-popover__icon--active' : ''}`}
+                    aria-hidden="true"
                   >
-                    <option value={1}>1분</option>
-                    <option value={30}>30분</option>
-                    <option value={60}>1시간</option>
-                    <option value={120}>2시간</option>
-                  </select>
-                )}
-                <button
-                  className={stretchReminder.isEnabled ? 'btn--secondary btn--sm' : 'btn--primary btn--sm'}
-                  onClick={() => { stretchReminder.toggle(); setIsStretchOpen(false) }}
+                    <FontAwesomeIcon icon={faClock} />
+                  </div>
+                  <div className="wcam-stretch-popover__titles">
+                    <strong>스트레칭 알림</strong>
+                    <span>
+                      {stretchReminder.isEnabled
+                        ? '주기적으로 스트레칭을 안내해요'
+                        : '알림이 꺼져 있어요'}
+                    </span>
+                  </div>
+                  <label className="wcam-stretch-popover__switch" aria-label="스트레칭 알림 켜기/끄기">
+                    <input
+                      type="checkbox"
+                      checked={stretchReminder.isEnabled}
+                      onChange={() => stretchReminder.toggle()}
+                    />
+                    <span className="wcam-stretch-popover__switch-track" />
+                  </label>
+                </div>
+                <fieldset
+                  className="wcam-stretch-popover__intervals"
+                  disabled={!stretchReminder.isEnabled}
                 >
-                  {stretchReminder.isEnabled ? '끄기' : '켜기'}
-                </button>
+                  <legend>주기</legend>
+                  <div className="wcam-stretch-popover__chip-row">
+                    {([1, 30, 60, 120] as StretchInterval[]).map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        className={`wcam-stretch-chip${stretchReminder.intervalMinutes === m ? ' wcam-stretch-chip--active' : ''}`}
+                        onClick={() => stretchReminder.setIntervalMinutes(m)}
+                      >
+                        {m < 60 ? `${m}분` : `${m / 60}시간`}
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+                <div className="wcam-stretch-popover__footer">
+                  <button
+                    type="button"
+                    className="wcam-stretch-popover__done"
+                    onClick={() => setIsStretchOpen(false)}
+                  >
+                    완료
+                  </button>
+                </div>
               </div>
             )}
           </div>

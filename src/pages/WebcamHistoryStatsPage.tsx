@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faChartBar } from '@fortawesome/free-solid-svg-icons'
+import { faChartBar, faCalendar, faClock } from '@fortawesome/free-solid-svg-icons'
 import {
   Bar, BarChart, CartesianGrid, Legend,
   ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts'
 import PageHeader from '../components/PageHeader'
 import WcamSessionDetailCard from '../components/Webcam/WcamSessionDetailCard'
+import WcamDateCalendar from '../components/Webcam/WcamDateCalendar'
 import {
   deleteWebcamSession,
   getWebcamHistory,
@@ -68,20 +69,6 @@ function getActiveCauses(sessions: WebcamSessionHistoryItem[]): string[] {
   return Object.keys(CAUSE_META).filter(k => keys.has(k))
 }
 
-function getRecentDates(sessions: WebcamSessionHistoryItem[], max = 7): string[] {
-  const seen = new Set<string>()
-  const result: string[] = []
-  for (const s of sessions) {
-    const d = s.started_at.slice(0, 10)
-    if (!seen.has(d)) {
-      seen.add(d)
-      result.push(d)
-      if (result.length >= max) break
-    }
-  }
-  return result
-}
-
 function applyFilters(
   sessions: WebcamSessionHistoryItem[],
   dateFilter: DateFilter,
@@ -105,11 +92,6 @@ function applyFilters(
     if (timeFilter === 'afternoon' && date.getHours() < 12) return false
     return true
   })
-}
-
-function fmtDateChip(dateStr: string): string {
-  const [, m, d] = dateStr.split('-')
-  return `${parseInt(m)}/${parseInt(d)}`
 }
 
 function getTodayStr(): string {
@@ -161,7 +143,10 @@ export default function WebcamHistoryStatsPage() {
   useEffect(() => { setSelectedSessionId(null) }, [dateFilter, timeFilter])
 
   const sessions = data?.sessions ?? []
-  const recentDates = useMemo(() => getRecentDates(sessions), [sessions])
+  const allSessionDates = useMemo(
+    () => Array.from(new Set(sessions.map(s => s.started_at.slice(0, 10)))),
+    [sessions],
+  )
   const filteredSessions = useMemo(() => applyFilters(sessions, dateFilter, timeFilter), [sessions, dateFilter, timeFilter])
   const chartData = useMemo(() => buildChartData(filteredSessions), [filteredSessions])
   const activeCauses = useMemo(() => getActiveCauses(filteredSessions), [filteredSessions])
@@ -225,7 +210,10 @@ export default function WebcamHistoryStatsPage() {
           {!isLoading && !isError && sessions.length > 0 && (
             <div className="wcam-filter-section">
               <div className="wcam-filter-group">
-                <span className="wcam-filter-label">날짜</span>
+                <span className="wcam-filter-label">
+                  <FontAwesomeIcon icon={faCalendar} />
+                  날짜
+                </span>
                 <div className="wcam-filter-chips">
                   {DATE_FILTER_PRESETS.map(({ value, label }) => (
                     <button
@@ -244,20 +232,22 @@ export default function WebcamHistoryStatsPage() {
                   >
                     오늘
                   </button>
-                  <select
-                    className="wcam-filter-select"
-                    value={dateFilter !== 'all' && dateFilter !== 'this-week' && dateFilter !== 'this-month' ? dateFilter : ''}
-                    onChange={e => { if (e.target.value) setDateFilter(e.target.value) }}
-                  >
-                    <option value="">날짜 선택</option>
-                    {recentDates.map(d => (
-                      <option key={d} value={d}>{fmtDateChip(d)}</option>
-                    ))}
-                  </select>
+                <WcamDateCalendar
+                  sessionDates={allSessionDates}
+                  selectedDate={
+                    dateFilter !== 'all' && dateFilter !== 'this-week' && dateFilter !== 'this-month'
+                      ? dateFilter
+                      : null
+                  }
+                  onSelect={d => setDateFilter(d)}
+                />
                 </div>
               </div>
               <div className="wcam-filter-group">
-                <span className="wcam-filter-label">시간대</span>
+                <span className="wcam-filter-label">
+                  <FontAwesomeIcon icon={faClock} />
+                  시간대
+                </span>
                 <div className="wcam-filter-chips">
                   {TIME_FILTER_OPTIONS.map(({ value, label }) => (
                     <button
