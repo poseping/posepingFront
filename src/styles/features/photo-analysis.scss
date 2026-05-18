@@ -47,7 +47,7 @@
 
 .photo-upload-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
 }
 
@@ -800,7 +800,7 @@
 @media (max-width: 1024px) {
   .photo-upload-grid,
   .photo-editor-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .photo-summary-grid {
