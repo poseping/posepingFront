@@ -1,0 +1,194 @@
+// ─────────────────────────────────────────────────────────────────────────
+// webcam-history-stats.scss  ·  WebcamHistoryStats + WebcamHistoryStatsPage
+// ─────────────────────────────────────────────────────────────────────────
+
+$_heading: #10213d;
+$_dark:    #0f172a;
+$_surface: #f8fafc;
+
+
+// ─── History Stats ────────────────────────────────────────────────────────
+.wcam-history-stats { display: flex; flex-direction: column; }
+
+.wcam-history-kicker {
+  margin: 0;
+  margin-bottom: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.wcam-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h3 { color: #13223f; }
+}
+
+.wcam-history-metrics {
+  display: flex;
+  gap: 0.75rem;
+  flex-shrink: 0;
+
+  div    { min-width: 110px; padding: 0.85rem 1rem; border-radius: 14px; background: $_surface; }
+  span   { display: block; margin-bottom: 0.35rem; color: var(--muted-foreground); font-size: 0.8rem; font-weight: 700; }
+  strong { color: $_dark; font-size: 1.05rem; }
+}
+
+.wcam-history-chart-label {
+  margin: 1rem 0 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.wcam-history-chart {
+  width: 100%;
+  height: 220px;
+
+  text { font-family: inherit; }
+}
+
+.wcam-history-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 180px;
+  border-radius: 16px;
+  background: $_surface;
+  color: var(--muted-foreground);
+  font-weight: 700;
+
+  .svg-inline--fa { font-size: 1.5rem; opacity: 0.4; }
+}
+
+.wcam-history-tooltip {
+  padding: 0.7rem 0.9rem;
+  border-radius: 12px;
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  min-width: 160px;
+}
+
+.wcam-history-tooltip-title  { margin-bottom: 0.25rem; font-size: 0.82rem; font-weight: 800; color: #f1f5f9; }
+.wcam-history-tooltip-time   { margin-bottom: 0.55rem; font-size: 0.8rem; color: #94a3b8; }
+.wcam-history-tooltip-duration { color: var(--muted-foreground); }
+
+.wcam-history-tooltip-rows {
+  p      { margin: 0.15rem 0; font-size: 0.82rem; }
+  strong { color: #f1f5f9; }
+}
+
+// ─── History footer (자세히 보기) ─────────────────────────────────────────
+.wcam-history-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(100, 116, 139, 0.12);
+}
+
+.wcam-history-chart-hint {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #94a3b8;
+  margin-left: 0.5rem;
+}
+
+
+// ─── History Filters ──────────────────────────────────────────────────────
+.wcam-filter-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.85rem 0 1rem;
+  border-bottom: 1px solid rgba(100, 116, 139, 0.12);
+  margin-bottom: 0.25rem;
+}
+
+.wcam-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.wcam-filter-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted-foreground);
+  min-width: 2.75rem;
+  flex-shrink: 0;
+}
+
+.wcam-filter-chips {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.wcam-filter-chip {
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(100, 116, 139, 0.28);
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 0.78rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+
+  &:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  &--active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+    font-weight: 600;
+  }
+}
+
+.wcam-filter-select {
+  padding: 0.22rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(100, 116, 139, 0.28);
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 0.78rem;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.12s, color 0.12s;
+
+  &:hover,
+  &:focus {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+}
+
+@media (max-width: 767px) { 
+  .wcam-history-header {
+    flex-direction: column;
+  }
+
+  .wcam-history-metrics {
+    width: 100%;
+    div {
+      flex: 1;
+    }
+  }
+}

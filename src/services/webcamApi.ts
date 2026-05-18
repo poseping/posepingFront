@@ -76,12 +76,14 @@ export const deletePostureProfile = async (
 export const analyzeWebcam = async (
   imageBase64: string,
   profileId?: number,
+  sensitivity: "low" | "medium" | "high" = "medium",
 ): Promise<WebcamAnalyzeResponse> => {
   const response = await apiClient.post<WebcamAnalyzeResponse>(
     "/webcam/analyze",
     {
       image_base64: imageBase64,
       profile_id: profileId ?? null,
+      sensitivity,
     },
   );
   return response.data;
@@ -101,9 +103,9 @@ export const getAlertTypes = async (): Promise<AlertType[]> => {
 export interface WebcamSessionRequest {
   started_at: string;
   ended_at: string;
-  good_count: number;
-  warning_count: number;
-  bad_count: number;
+  good_frames: number;
+  warning_frames: number;
+  bad_frames: number;
   cause_counts: Record<string, number>;
 }
 
@@ -113,14 +115,18 @@ export const saveWebcamSession = async (
   await apiClient.post("/webcam/session", data);
 };
 
+export const deleteWebcamSession = async (sessionId: number): Promise<void> => {
+  await apiClient.delete(`/webcam/session/${sessionId}`);
+};
+
 export interface WebcamSessionHistoryItem {
   session_id: number;
   started_at: string;
   ended_at: string | null;
-  good_count: number;
-  warning_count: number;
-  bad_count: number;
-  total_count: number;
+  good_frames: number;
+  warning_frames: number;
+  bad_frames: number;
+  total_frames: number;
   good_ratio: number;
   cause_counts: Record<string, number> | null;
 }

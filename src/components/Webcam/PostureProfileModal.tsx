@@ -1,3 +1,4 @@
+import '../../styles/components/posture-profile-modal.scss'
 import { useEffect, useRef, useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPen, faXmark } from '@fortawesome/free-solid-svg-icons'

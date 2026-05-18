@@ -1,0 +1,119 @@
+// ─────────────────────────────────────────────────────────────────────────
+// wcam-session-detail.scss  ·  WcamSessionDetailCard styles
+// ─────────────────────────────────────────────────────────────────────────
+
+
+// ─── Session Detail Card ──────────────────────────────────────────────────
+.wcam-detail-card {
+  // inherits .card
+}
+
+.wcam-detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+
+  h3 { margin: 0.25rem 0 0; font-size: 1rem; }
+}
+
+.wcam-detail-duration {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: #94a3b8;
+}
+
+.wcam-detail-score {
+  flex-shrink: 0;
+  text-align: right;
+
+  strong { display: block; font-size: 2rem; font-weight: 700; line-height: 1; }
+  span   { font-size: 0.72rem; color: #94a3b8; }
+}
+
+.wcam-detail-frames {
+  margin-bottom: 1.25rem;
+}
+
+.wcam-detail-frame-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  gap: 2px;
+  margin-bottom: 0.5rem;
+
+  div { min-width: 2px; border-radius: 2px; }
+}
+
+.wcam-detail-frame-legend {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.8rem;
+}
+
+.wcam-detail-causes {
+  margin-bottom: 1.25rem;
+}
+
+.wcam-detail-causes-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin: 0 0 0.5rem;
+}
+
+.wcam-detail-causes ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.wcam-detail-causes li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.wcam-detail-cause-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.wcam-detail-cause-count {
+  margin-left: auto;
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+.wcam-detail-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.25rem;
+}
+
+.wcam-detail-delete-button { 
+  width: 100%;
+}
+
+.wcam-detail-modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+}
+
+@media (min-width: 769px) {
+  .wcam-detail-delete-button {
+    max-width: 200px;
+  }
+}

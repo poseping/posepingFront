@@ -1,0 +1,169 @@
+// ─────────────────────────────────────────────────────────────────────────
+// posture-guide-modal.scss  ·  PostureGuideModal styles
+// ─────────────────────────────────────────────────────────────────────────
+
+$_heading:    #10213d;
+$_dark:       #0f172a;
+$_success-fg: #166534;
+$_danger-bg:  #fee2e2;
+$_danger-fg:  #b91c1c;
+
+
+// FontAwesome icon color overrides for guide elements
+.guide-step-icon,
+.guide-step-tip {
+  .svg-inline--fa { color: #0667bb; }
+}
+
+.guide-countdown-badge {
+  .svg-inline--fa { color: inherit; }
+}
+
+
+// ─── Posture Guide Modal ──────────────────────────────────────────────────
+.guide-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+}
+
+.guide-modal {
+  background: #fff;
+  border-radius: 28px;
+  box-shadow: 0 32px 80px rgba(20, 38, 70, 0.22);
+  width: min(820px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.75rem;
+
+  @media (max-width: 640px) { padding: 1.25rem; gap: 1rem; }
+}
+
+.guide-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.guide-dots {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.guide-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: background 0.2s, transform 0.2s;
+
+  &.active, &.done { background: var(--primary); }
+  &.active          { transform: scale(1.25); }
+}
+
+.guide-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: center;
+
+  @media (max-width: 640px) { grid-template-columns: 1fr; }
+}
+
+.guide-preview-wrap {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  background: $_dark;
+  aspect-ratio: 4 / 3;
+}
+
+.guide-preview-canvas { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.guide-countdown-badge {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 5rem;
+  font-weight: 900;
+  color: #fff;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+  animation: pulse-in 0.35s ease;
+
+  &.done { font-size: 4rem; background: rgba(8, 145, 178, 0.55); }
+}
+
+@keyframes pulse-in {
+  from { transform: scale(1.4); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.guide-instruction { display: flex; flex-direction: column; gap: 0.6rem; }
+
+.guide-step-icon  { font-size: 2.4rem; line-height: 1; }
+
+.guide-step-label {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.guide-step-title {
+  font-size: 1.3rem;
+  color: $_heading;
+
+  @media (max-width: 640px) { font-size: 1.1rem; }
+}
+
+.guide-step-desc { margin: 0; color: #475569; font-size: 0.95rem; line-height: 1.65; }
+
+.guide-step-tip {
+  margin: 0;
+  padding: 0.6rem 0.85rem;
+  border-radius: 12px;
+  background: #f0fdf4;
+  color: $_success-fg;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.5;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.guide-error-msg {
+  margin: 0;
+  padding: 0.6rem 0.85rem;
+  border-radius: 12px;
+  background: $_danger-bg;
+  color: $_danger-fg;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.guide-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.25rem;
+  border-top: 1px solid rgba(19, 42, 76, 0.07);
+}
+
+.guide-footer-right { margin-left: auto; }

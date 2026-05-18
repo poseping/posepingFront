@@ -1,27 +1,15 @@
+import '../../styles/components/webcam-history-stats.scss'
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faChartBar } from '@fortawesome/free-solid-svg-icons'
+import { faChartBar, faArrowRight } from '@fortawesome/free-solid-svg-icons'
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Legend,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
+  Bar, BarChart, CartesianGrid, Legend,
+  ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts'
 import type { TooltipProps } from 'recharts'
 import { getWebcamHistory, type WebcamSessionHistoryItem } from '../../services/webcamApi'
-
-const CAUSE_META: Record<string, { label: string; color: string }> = {
-  NECK_FORWARD:   { label: '거북목',        color: '#f97316' },
-  HEAD_TILT:      { label: '머리 기울어짐',  color: '#a855f7' },
-  SHOULDER_SLOPE: { label: '어깨 기울기',    color: '#ef4444' },
-  HIP_DEVIATION:  { label: '골반 틀어짐',    color: '#eab308' },
-  BAD_POSTURE:    { label: '나쁜 자세',      color: '#6b7280' },
-}
 
 interface ChartEntry {
   label: string
@@ -30,7 +18,6 @@ interface ChartEntry {
   good: number
   warning: number
   bad: number
-  [key: string]: unknown
 }
 
 function fmtTime(iso: string) {
@@ -79,31 +66,23 @@ function buildChartData(sessions: WebcamSessionHistoryItem[]): ChartEntry[] {
       label,
       startedAt: s.started_at,
       endedAt: s.ended_at,
-      good: s.good_count,
-      warning: s.warning_count,
-      bad: s.bad_count,
-      ...(s.cause_counts ?? {}),
+      good: s.good_frames,
+      warning: s.warning_frames,
+      bad: s.bad_frames,
     }
   })
 }
 
-function getActiveCauses(sessions: WebcamSessionHistoryItem[]): string[] {
-  const keys = new Set<string>()
-  sessions.forEach(s => {
-    if (s.cause_counts) Object.keys(s.cause_counts).forEach(k => keys.add(k))
-  })
-  return Object.keys(CAUSE_META).filter(k => keys.has(k))
-}
-
 export default function WebcamHistoryStats() {
+  const navigate = useNavigate()
+
   const { data, isLoading, isError } = useQuery({
     queryKey: ['webcam-history'],
-    queryFn: () => getWebcamHistory(10),
+    queryFn: () => getWebcamHistory(5),
   })
 
   const sessions = data?.sessions ?? []
   const chartData = useMemo(() => buildChartData(sessions), [sessions])
-  const activeCauses = useMemo(() => getActiveCauses(sessions), [sessions])
   const latest = sessions[0]
 
   return (
@@ -137,50 +116,27 @@ export default function WebcamHistoryStats() {
       )}
 
       {!isLoading && !isError && chartData.length > 0 && (
-        <>
-          <p className="wcam-history-chart-label">자세 분포</p>
-          <div className="wcam-history-chart">
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={chartData} margin={{ top: 8, right: 12, bottom: 4, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(100, 116, 139, 0.22)" />
-                <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fontFamily: 'inherit' }} />
-                <YAxis tickLine={false} axisLine={false} width={36} tick={{ fontFamily: 'inherit' }} />
-                <Tooltip content={<SessionTooltip />} />
-                <Legend wrapperStyle={{ fontFamily: 'inherit', fontSize: '0.82rem' }} />
-                <Bar dataKey="good" name="좋음" stackId="a" fill="#10b981" />
-                <Bar dataKey="warning" name="경고" stackId="a" fill="#f59e0b" />
-                <Bar dataKey="bad" name="나쁨" stackId="a" fill="#ef4444" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          {activeCauses.length > 0 && (
-            <>
-              <p className="wcam-history-chart-label">원인 분석</p>
-              <div className="wcam-history-chart">
-                <ResponsiveContainer width="100%" height={220}>
-                  <BarChart data={chartData} margin={{ top: 8, right: 12, bottom: 4, left: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(100, 116, 139, 0.22)" />
-                    <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fontFamily: 'inherit' }} />
-                    <YAxis tickLine={false} axisLine={false} width={36} tick={{ fontFamily: 'inherit' }} />
-                    <Tooltip content={<SessionTooltip />} />
-                    <Legend wrapperStyle={{ fontFamily: 'inherit', fontSize: '0.82rem' }} />
-                    {activeCauses.map(key => (
-                      <Bar
-                        key={key}
-                        dataKey={key}
-                        name={CAUSE_META[key]?.label ?? key}
-                        fill={CAUSE_META[key]?.color ?? '#94a3b8'}
-                        radius={[3, 3, 0, 0]}
-                      />
-                    ))}
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </>
-          )}
-        </>
+        <div className="wcam-history-chart">
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={chartData} margin={{ top: 8, right: 12, bottom: 4, left: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(100, 116, 139, 0.22)" />
+              <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fontFamily: 'inherit' }} />
+              <YAxis tickLine={false} axisLine={false} width={36} tick={{ fontFamily: 'inherit' }} />
+              <Tooltip content={<SessionTooltip />} />
+              <Legend wrapperStyle={{ fontFamily: 'inherit', fontSize: '0.82rem' }} />
+              <Bar dataKey="good" name="좋음" stackId="a" fill="#10b981" />
+              <Bar dataKey="warning" name="주의" stackId="a" fill="#f59e0b" />
+              <Bar dataKey="bad" name="나쁨" stackId="a" fill="#ef4444" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       )}
+
+      <div className="wcam-history-footer">
+        <button className="btn--tonal" type="button" onClick={() => navigate('/webcam/stats')}>
+          자세히 보기 <FontAwesomeIcon icon={faArrowRight} />
+        </button>
+      </div>
     </section>
   )
 }

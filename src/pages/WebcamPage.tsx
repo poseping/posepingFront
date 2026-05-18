@@ -21,11 +21,12 @@ import {
   type PostureProfile,
   type WebcamAnalyzeResponse,
 } from '../services/webcamApi'
-import { usePostureNotification } from '../hooks/usePostureNotification'
 import { useStretchReminder, type StretchInterval } from '../hooks/useStretchReminder'
 import { useWebcamAssistantComment } from '../hooks/useWebcamAssistantComment'
+import { getWebcamSettings } from '../services/webcamSettingsApi'
 import WebcamStream, { type WebcamStreamRef } from '../components/Webcam/WebcamStream'
 import WebcamHistoryStats from '../components/Webcam/WebcamHistoryStats'
+import WcamSessionSummaryChart from '../components/Webcam/WcamSessionSummaryChart'
 import PostureProfileModal from '../components/Webcam/PostureProfileModal'
 import PostureGuideModal from '../components/Webcam/PostureGuideModal'
 import PageHeader from '../components/PageHeader'
@@ -61,6 +62,7 @@ export default function WebcamPage() {
 
   const [phase, setPhase] = useState<WcamPhase>('ready')
   const [analysisState, setAnalysisState] = useState<AnalysisState>('active')
+  const [prevGoodRatio, setPrevGoodRatio] = useState<number | null>(null)
   const [analyzeResult, setAnalyzeResult] = useState<WebcamAnalyzeResponse | null>(null)
   const [isGuideOpen, setIsGuideOpen] = useState(false)
   const [selectedProfile, setSelectedProfile] = useState<PostureProfile | null>(null)
@@ -73,6 +75,10 @@ export default function WebcamPage() {
     warningCount: 0,
     badCount: 0,
     causeCounts: {} as Record<string, number>,
+    goodFrames: 0,
+    warningFrames: 0,
+    badFrames: 0,
+    totalFrames: 0,
   })
   const prevStatusRef = useRef<string | null>(null)
   const prevIssuesRef = useRef<Set<string>>(new Set())
@@ -92,7 +98,16 @@ export default function WebcamPage() {
   })
   const alertMap = Object.fromEntries(alertTypes.map((a) => [a.alert_type_id, a]))
 
-  const { mutate: doSaveSession } = useMutation({ mutationFn: saveWebcamSession })
+  const { data: webcamSettings } = useQuery({
+    queryKey: ['webcam-settings'],
+    queryFn: getWebcamSettings,
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const { mutate: doSaveSession } = useMutation({
+    mutationFn: saveWebcamSession,
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['webcam-history'] }) },
+  })
   const { mutateAsync: runUpdate } = useMutation({
     mutationFn: ({ profileId, data }: { profileId: number; data: Parameters<typeof updatePostureProfile>[1] }) =>
       updatePostureProfile(profileId, data),
@@ -112,19 +127,20 @@ export default function WebcamPage() {
     },
   })
   const { mutateAsync: runAnalyze } = useMutation({
-    mutationFn: (imageBase64: string) => analyzeWebcam(imageBase64),
+    mutationFn: (imageBase64: string) =>
+      analyzeWebcam(imageBase64, undefined, webcamSettings?.posture_sensitivity ?? 'medium'),
     onError: (error) => { console.error('웹캠 분석 실패:', error) },
   })
 
-  const { notify, permission: notifPermission } = usePostureNotification()
   const stretchReminder = useStretchReminder()
   const {
     assistantComment,
     assistantError,
     isAssistantCommentPending,
+    notifPermission,
     handleAnalyzeResult,
     resetAssistantComment,
-  } = useWebcamAssistantComment(phase === 'analyzing')
+  } = useWebcamAssistantComment(phase === 'analyzing', webcamSettings?.ai_comment_threshold_sec ?? 60)
 
   const isAnalyzing = phase === 'analyzing' && analysisState === 'active'
   const canAddMore = profiles.filter((p) => p.is_active).length < 3
@@ -142,6 +158,10 @@ export default function WebcamPage() {
       warningCount: 0,
       badCount: 0,
       causeCounts: {},
+      goodFrames: 0,
+      warningFrames: 0,
+      badFrames: 0,
+      totalFrames: 0,
     }
     prevStatusRef.current = null
     prevIssuesRef.current = new Set()
@@ -158,15 +178,17 @@ export default function WebcamPage() {
   const handleResume = () => setAnalysisState('active')
 
   const handleStop = () => {
-    const { startedAt, goodCount, warningCount, badCount, causeCounts } = sessionRef.current
-    const total = goodCount + warningCount + badCount
-    if (startedAt && total > 0) {
+    const historyCache = queryClient.getQueryData<{ sessions: { good_ratio: number }[] }>(['webcam-history'])
+    setPrevGoodRatio(historyCache?.sessions[0]?.good_ratio ?? null)
+
+    const { startedAt, goodFrames, warningFrames, badFrames, totalFrames, causeCounts } = sessionRef.current
+    if (startedAt && totalFrames > 0) {
       doSaveSession({
         started_at: startedAt,
         ended_at: new Date().toISOString(),
-        good_count: goodCount,
-        warning_count: warningCount,
-        bad_count: badCount,
+        good_frames: goodFrames,
+        warning_frames: warningFrames,
+        bad_frames: badFrames,
         cause_counts: causeCounts,
       })
     }
@@ -177,7 +199,11 @@ export default function WebcamPage() {
   const handleResult = (data: WebcamAnalyzeResponse) => {
     setAnalyzeResult(data)
     handleAnalyzeResult(data)
-    notify(data.status as 'good' | 'warning' | 'bad', data.issues ?? [])
+
+    sessionRef.current.totalFrames++
+    if (data.status === 'good') sessionRef.current.goodFrames++
+    else if (data.status === 'warning') sessionRef.current.warningFrames++
+    else sessionRef.current.badFrames++
 
     if (data.status !== prevStatusRef.current) {
       const key = `${data.status}Count` as 'goodCount' | 'warningCount' | 'badCount'
@@ -221,6 +247,28 @@ export default function WebcamPage() {
   }, [isAnalyzing])
 
   // ── Ready phase ────────────────────────────────────────────────────────────
+
+  const renderReadyHero = () => (
+    <section className="wcam-hero-card">
+      <div>
+        <p className="wcam-hero-kicker">Webcam Analysis</p>
+        <h2>실시간 웹캠으로 자세를 분석합니다</h2>
+        <p>
+          카메라 앞에 바르게 앉아 기준 자세를 등록하면, 실시간으로 자세 이탈을 감지하고
+          거북목·굽은 어깨 등 문제를 즉시 알려드립니다.
+        </p>
+      </div>
+      <div className="wcam-hero-action">
+        <button
+          className="btn--primary btn--lg"
+          onClick={handleStartAnalysis}
+          disabled={!hasProfile || profilesLoading}
+        >
+          분석 시작하기
+        </button>
+      </div>
+    </section>
+  )
 
   const renderReadyPhase = () => (
     <div className="wcam-ready-phase">
@@ -279,14 +327,6 @@ export default function WebcamPage() {
           </>
         )}
       </div>
-      <button
-        className="btn--primary btn--lg btn--full"
-        onClick={handleStartAnalysis}
-        disabled={!hasProfile}
-      >
-        <FontAwesomeIcon icon={faPlay} />
-        분석 시작
-      </button>
       <WebcamHistoryStats />
     </div>
   )
@@ -433,52 +473,21 @@ export default function WebcamPage() {
   // ── Summary phase ──────────────────────────────────────────────────────────
 
   const renderSummaryPhase = () => {
-    const { goodCount, warningCount, badCount, causeCounts } = sessionRef.current
-    const total = goodCount + warningCount + badCount
+    const { goodCount, warningCount, badCount, causeCounts, goodFrames, warningFrames, totalFrames } = sessionRef.current
     return (
       <div className="wcam-summary-phase">
-        <div className="card">
-          <h3>세션 요약</h3>
-          {total > 0 ? (
-            <>
-              <div className="wcam-summary-stats">
-                <div className="wcam-summary-stat wcam-summary-stat--good">
-                  <span className="wcam-summary-stat__label">좋은 자세</span>
-                  <span className="wcam-summary-stat__value">{goodCount}회</span>
-                </div>
-                <div className="wcam-summary-stat wcam-summary-stat--warning">
-                  <span className="wcam-summary-stat__label">자세 주의</span>
-                  <span className="wcam-summary-stat__value">{warningCount}회</span>
-                </div>
-                <div className="wcam-summary-stat wcam-summary-stat--bad">
-                  <span className="wcam-summary-stat__label">자세 불량</span>
-                  <span className="wcam-summary-stat__value">{badCount}회</span>
-                </div>
-              </div>
-              {Object.keys(causeCounts).length > 0 && (
-                <div className="wcam-issue-block">
-                  <h4>자주 발생한 문제</h4>
-                  <ul>
-                    {Object.entries(causeCounts)
-                      .sort(([, a], [, b]) => b - a)
-                      .slice(0, 3)
-                      .map(([typeId, count]) => (
-                        <li key={typeId}>{alertMap[typeId]?.alert_name ?? typeId} ({count}회)</li>
-                      ))}
-                  </ul>
-                </div>
-              )}
-            </>
-          ) : (
-            <p className="wcam-comment-muted">분석 데이터가 없습니다.</p>
-          )}
-          {assistantComment && (
-            <div className="wcam-chat-area" style={{ marginTop: '1rem' }}>
-              <p className="wcam-kicker" style={{ marginBottom: '0.5rem' }}>마지막 AI 코멘트</p>
-              <div className="wcam-chat-bubble">{assistantComment}</div>
-            </div>
-          )}
-        </div>
+        <WcamSessionSummaryChart
+          goodCount={goodCount}
+          warningCount={warningCount}
+          badCount={badCount}
+          causeCounts={causeCounts}
+          alertMap={alertMap}
+          prevGoodRatio={prevGoodRatio}
+          assistantComment={assistantComment}
+          goodFrames={goodFrames}
+          warningFrames={warningFrames}
+          totalFrames={totalFrames}
+        />
         <div className="wcam-summary-actions">
           <button
             className="btn--secondary btn--lg"
@@ -497,15 +506,18 @@ export default function WebcamPage() {
   return (
     <>
       <PageHeader />
-      <main className="page-content">
-        {notifPermission === 'denied' && (
-          <div className="wcam-notif-banner">
-            알림이 차단되어 있어요. 주소창 자물쇠 아이콘 → 알림 → <strong>허용</strong> 후 새로고침하면 자세 경고를 받을 수 있습니다.
-          </div>
-        )}
-        {phase === 'ready'    && renderReadyPhase()}
-        {phase === 'analyzing' && renderAnalyzingPhase()}
-        {phase === 'summary'  && renderSummaryPhase()}
+      <main>
+        {phase === 'ready' && renderReadyHero()}
+        <div className="page-content">
+          {notifPermission === 'denied' && (
+            <div className="wcam-notif-banner">
+              알림이 차단되어 있어요. 주소창 자물쇠 아이콘 → 알림 → <strong>허용</strong> 후 새로고침하면 자세 경고를 받을 수 있습니다.
+            </div>
+          )}
+          {phase === 'ready'    && renderReadyPhase()}
+          {phase === 'analyzing' && renderAnalyzingPhase()}
+          {phase === 'summary'  && renderSummaryPhase()}
+        </div>
       </main>
 
       {/* 기준자세 목록 모달 (analyzing 중 📋 클릭) */}
