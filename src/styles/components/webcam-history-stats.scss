@@ -109,26 +109,47 @@ $_surface: #f8fafc;
 // ─── History Filters ──────────────────────────────────────────────────────
 .wcam-filter-section {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.9rem;
   padding: 0.85rem 0 1rem;
   border-bottom: 1px solid rgba(100, 116, 139, 0.12);
-  margin-bottom: 0.25rem;
 }
 
 .wcam-filter-group {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
+  padding-right: 0.9rem;
+
+  &:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 1rem;
+    background: rgba(100, 116, 139, 0.25);
+  }
 }
 
 .wcam-filter-label {
-  font-size: 0.72rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: var(--muted-foreground);
-  min-width: 2.75rem;
   flex-shrink: 0;
+
+  .svg-inline--fa {
+    font-size: 0.85rem;
+    color: var(--muted-foreground);
+  }
 }
 
 .wcam-filter-chips {
@@ -138,7 +159,7 @@ $_surface: #f8fafc;
 }
 
 .wcam-filter-chip {
-  padding: 0.22rem 0.65rem;
+  padding: 0.22rem 0.62rem;
   border-radius: 999px;
   border: 1px solid rgba(100, 116, 139, 0.28);
   background: transparent;
@@ -163,7 +184,7 @@ $_surface: #f8fafc;
 
 .wcam-filter-select {
   padding: 0.22rem 0.5rem;
-  border-radius: 8px;
+  border-radius: 14px;
   border: 1px solid rgba(100, 116, 139, 0.28);
   background: transparent;
   color: var(--muted-foreground);
@@ -180,7 +201,7 @@ $_surface: #f8fafc;
   }
 }
 
-@media (max-width: 767px) { 
+@media (max-width: 767px) {
   .wcam-history-header {
     flex-direction: column;
   }
@@ -190,5 +211,9 @@ $_surface: #f8fafc;
     div {
       flex: 1;
     }
+  }
+
+  .wcam-filter-group:not(:last-child)::after {
+    display: none;
   }
 }

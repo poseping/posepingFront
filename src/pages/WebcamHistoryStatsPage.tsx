@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faChartBar } from '@fortawesome/free-solid-svg-icons'
+import { faChartBar, faCalendar, faClock } from '@fortawesome/free-solid-svg-icons'
 import {
   Bar, BarChart, CartesianGrid, Legend,
   ResponsiveContainer, Tooltip, XAxis, YAxis,
@@ -225,7 +225,10 @@ export default function WebcamHistoryStatsPage() {
           {!isLoading && !isError && sessions.length > 0 && (
             <div className="wcam-filter-section">
               <div className="wcam-filter-group">
-                <span className="wcam-filter-label">날짜</span>
+                <span className="wcam-filter-label">
+                  <FontAwesomeIcon icon={faCalendar} />
+                  날짜
+                </span>
                 <div className="wcam-filter-chips">
                   {DATE_FILTER_PRESETS.map(({ value, label }) => (
                     <button
@@ -257,7 +260,10 @@ export default function WebcamHistoryStatsPage() {
                 </div>
               </div>
               <div className="wcam-filter-group">
-                <span className="wcam-filter-label">시간대</span>
+                <span className="wcam-filter-label">
+                  <FontAwesomeIcon icon={faClock} />
+                  시간대
+                </span>
                 <div className="wcam-filter-chips">
                   {TIME_FILTER_OPTIONS.map(({ value, label }) => (
                     <button
