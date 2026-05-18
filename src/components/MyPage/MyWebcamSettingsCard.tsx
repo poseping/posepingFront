@@ -117,7 +117,7 @@ export default function MyWebcamSettingsCard() {
           <li className="mp-pref-row mp-pref-row--save">
             <button
               type="button"
-              className="btn btn--tonal"
+              className="mp-pref-download"
               disabled={!isDirty || isPending}
               onClick={() => saveSettings(draft)}
             >
