@@ -249,10 +249,17 @@ export default function PhotoPage() {
     },
   })
 
+  const requestPhotoComment = (result: PhotoAnalysisResponse | null = finalResult) => {
+    if (!result) return
+
+    setAssistantCommentError(null)
+    photoCommentMutation.mutate(buildPhotoCommentPayload(result))
+  }
+
   useEffect(() => {
     if (!finalResult) return
 
-    photoCommentMutation.mutate(buildPhotoCommentPayload(finalResult))
+    requestPhotoComment(finalResult)
   }, [finalResult])
 
   const handleFileChange =
@@ -393,6 +400,7 @@ export default function PhotoPage() {
               assistantComment={assistantComment}
               assistantCommentError={assistantCommentError}
               isAssistantCommentPending={photoCommentMutation.isPending}
+              onRetryAssistantComment={() => requestPhotoComment()}
           />
           <div className="photo-save-actions">
             <button
@@ -411,8 +419,7 @@ export default function PhotoPage() {
                   !finalResult.can_save ||
                   !finalResult.save_token ||
                   saveMutation.isPending ||
-                  photoCommentMutation.isPending ||
-                  !assistantComment
+                  photoCommentMutation.isPending
                 }
             >
               {saveMutation.isPending ? '기록 중...' : '기록하기'}

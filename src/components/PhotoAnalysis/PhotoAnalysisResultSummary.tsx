@@ -9,12 +9,14 @@ export default function PhotoAnalysisResultSummary({
   assistantComment,
   assistantCommentError,
   isAssistantCommentPending,
+  onRetryAssistantComment,
 }: {
   title: string
   result: PhotoAnalysisResponse
   assistantComment: string | null
   assistantCommentError: string | null
   isAssistantCommentPending: boolean
+  onRetryAssistantComment: () => void
 }) {
   const craniovertebralAngle = result.side.craniovertebral_angle ?? null
   const metrics = [
@@ -87,7 +89,17 @@ export default function PhotoAnalysisResultSummary({
             {isAssistantCommentPending && !assistantComment ? (
               <p className="photo-message-muted">코멘트를 작성하는 중입니다...</p>
             ) : assistantCommentError ? (
-              <p className="photo-message-error">{assistantCommentError}</p>
+              <>
+                <p className="photo-message-error">{assistantCommentError}</p>
+                <button
+                  type="button"
+                  className="btn--tonal"
+                  onClick={onRetryAssistantComment}
+                  disabled={isAssistantCommentPending}
+                >
+                  새로고침
+                </button>
+              </>
             ) : assistantComment ? (
               <p>{assistantComment}</p>
             ) : (

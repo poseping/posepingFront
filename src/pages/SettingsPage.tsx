@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faRightFromBracket, faTrash } from '@fortawesome/free-solid-svg-icons'
 import PageHeader from '../components/PageHeader'
@@ -13,21 +13,25 @@ import '../styles/pages/settings.scss'
 export default function SettingsPage() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
+  const clearSession = () => {
+    queryClient.clear()
+    dispatch(logout())
+    clearAuth()
+    navigate('/login')
+  }
 
   const deleteMutation = useMutation({
     mutationFn: deleteAccount,
     onSuccess: () => {
-      dispatch(logout())
-      clearAuth()
-      navigate('/login')
+      clearSession()
     },
   })
 
   const handleLogout = () => {
-    dispatch(logout())
-    clearAuth()
-    navigate('/login')
+    clearSession()
   }
 
   return (

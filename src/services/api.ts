@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { getToken, clearAuth } from './authService'
+import { queryClient } from './queryClient'
 
 const envApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim()
 const API_BASE = envApiBaseUrl || '/api'
@@ -41,6 +42,7 @@ apiClient.interceptors.response.use(
 
     if (error.response?.status === 401) {
       // 토큰 만료 또는 유효하지 않음
+      queryClient.clear()
       clearAuth()
       window.location.href = '/login'
     }
