@@ -12,10 +12,11 @@ interface WebcamStreamProps {
   frameWidth?: number
   frameHeight?: number
   statusColor?: string
+  onCameraError?: (message: string) => void
 }
 
 const WebcamStream = forwardRef<WebcamStreamRef, WebcamStreamProps>(
-  function WebcamStream({ webcamNeeded, landmarks, frameWidth, frameHeight, statusColor }, ref) {
+  function WebcamStream({ webcamNeeded, landmarks, frameWidth, frameHeight, statusColor, onCameraError }, ref) {
     const videoRef = useRef<HTMLVideoElement>(null)
     const captureCanvasRef = useRef<HTMLCanvasElement>(null)
     const displayCanvasRef = useRef<HTMLCanvasElement>(null)
@@ -32,6 +33,7 @@ const WebcamStream = forwardRef<WebcamStreamRef, WebcamStreamProps>(
           else stream.getTracks().forEach((t) => t.stop())
         } catch (error) {
           console.error('웹캠 접근 실패:', error)
+          onCameraError?.('카메라에 접근할 수 없습니다. 다른 앱이 카메라를 사용 중이거나 드라이버 문제일 수 있습니다.')
         }
       }
       startWebcam()
