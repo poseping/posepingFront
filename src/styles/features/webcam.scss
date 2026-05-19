@@ -91,6 +91,7 @@ $_danger-fg:  #b91c1c;
 
 // ─── Stage (canvas area) ──────────────────────────────────────────────────
 .wcam-stage-inner {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -98,6 +99,44 @@ $_danger-fg:  #b91c1c;
   background:
     linear-gradient(135deg, rgba(17, 94, 239, 0.06), rgba(11, 122, 117, 0.08)),
     $_dark;
+}
+
+.wcam-canvas-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.65);
+  border-radius: inherit;
+  z-index: 10;
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  &__icon {
+    font-size: 2rem;
+    opacity: 0.7;
+  }
+
+  &__msg {
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.5;
+    max-width: 240px;
+  }
+
+  &__hint {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+  }
 }
 
 .webcam-canvas {
@@ -626,6 +665,12 @@ $_danger-fg:  #b91c1c;
   font-weight: 600;
   color: #92400e;
   text-align: center;
+
+  &--error {
+    background: #fee2e2;
+    border-color: #f87171;
+    color: #991b1b;
+  }
 }
 
 

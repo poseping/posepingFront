@@ -68,6 +68,8 @@ export default function WebcamPage() {
   const [selectedProfile, setSelectedProfile] = useState<PostureProfile | null>(null)
   const [isProfileListOpen, setIsProfileListOpen] = useState(false)
   const [isStretchOpen, setIsStretchOpen] = useState(false)
+  const [webcamError, setWebcamError] = useState<string | null>(null)
+  const [analyzeError, setAnalyzeError] = useState<string | null>(null)
 
   const sessionRef = useRef({
     startedAt: null as string | null,
@@ -129,7 +131,12 @@ export default function WebcamPage() {
   const { mutateAsync: runAnalyze } = useMutation({
     mutationFn: (imageBase64: string) =>
       analyzeWebcam(imageBase64, undefined, webcamSettings?.posture_sensitivity ?? 'medium'),
-    onError: (error) => { console.error('웹캠 분석 실패:', error) },
+    onSuccess: () => { setAnalyzeError(null) },
+    onError: (error) => {
+      console.error('웹캠 분석 실패:', error)
+      setAnalyzeError('카메라가 감지되지 않습니다. 카메라 앞에 바르게 앉은 후 재개해주세요.')
+      setAnalysisState('paused')
+    },
   })
 
   const stretchReminder = useStretchReminder()
@@ -142,7 +149,7 @@ export default function WebcamPage() {
     resetAssistantComment,
   } = useWebcamAssistantComment(phase === 'analyzing', webcamSettings?.ai_comment_threshold_sec ?? 60)
 
-  const isAnalyzing = phase === 'analyzing' && analysisState === 'active'
+  const isAnalyzing = phase === 'analyzing' && analysisState === 'active' && !webcamError
   const canAddMore = profiles.filter((p) => p.is_active).length < 3
   const profileEditable = phase !== 'analyzing' || analysisState === 'paused'
 
@@ -152,6 +159,8 @@ export default function WebcamPage() {
 
   const handleStartAnalysis = () => {
     resetAssistantComment()
+    setWebcamError(null)
+    setAnalyzeError(null)
     sessionRef.current = {
       startedAt: new Date().toISOString(),
       goodCount: 0,
@@ -175,7 +184,10 @@ export default function WebcamPage() {
     setAnalysisState('paused')
   }
 
-  const handleResume = () => setAnalysisState('active')
+  const handleResume = () => {
+    setAnalyzeError(null)
+    setAnalysisState('active')
+  }
 
   const handleStop = () => {
     const historyCache = queryClient.getQueryData<{ sessions: { good_ratio: number }[] }>(['webcam-history'])
@@ -231,6 +243,8 @@ export default function WebcamPage() {
           try {
             const data = await runAnalyze(imageBase64)
             handleResult(data)
+          } catch {
+            // onError에서 analyzeError 상태로 처리
           } finally {
             requestInFlightRef.current = false
           }
@@ -345,7 +359,20 @@ export default function WebcamPage() {
               frameWidth={analyzeResult?.frame_width}
               frameHeight={analyzeResult?.frame_height}
               statusColor={analyzeResult ? STATUS_COLOR[analyzeResult.status] : undefined}
+              onCameraError={setWebcamError}
             />
+            {(webcamError || analyzeError) && (
+              <div className="wcam-canvas-overlay">
+                <div className="wcam-canvas-overlay__content">
+                  <p className="wcam-canvas-overlay__msg">
+                    {webcamError ?? analyzeError}
+                  </p>
+                  {analyzeError && !webcamError && (
+                    <p className="wcam-canvas-overlay__hint">아래 재개 버튼을 눌러주세요</p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -434,7 +461,7 @@ export default function WebcamPage() {
               일시정지
             </button>
           ) : (
-            <button className="btn--primary wcam-ctrl-action-btn" onClick={handleResume} disabled={!hasProfile}>
+            <button className="btn--primary wcam-ctrl-action-btn" onClick={handleResume} disabled={!hasProfile || !!webcamError}>
               <FontAwesomeIcon icon={faPlay} />
               재개
             </button>
@@ -493,7 +520,9 @@ export default function WebcamPage() {
           </div>
         ) : (
           <div className="card wcam-result-placeholder">
-            <p className="wcam-comment-muted">분석이 시작되면 결과가 여기 표시됩니다.</p>
+            <p className="wcam-comment-muted">
+              {webcamError || analyzeError ? '분석 대기 중...' : '카메라 연결 중...'}
+            </p>
           </div>
         )}
       </div>
