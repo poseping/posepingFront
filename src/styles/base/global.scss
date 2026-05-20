@@ -305,7 +305,8 @@ body,
 }
 
 .app-frame:has(.bottom-nav){
-  padding-bottom: var(--bottom-nav-height);
+  padding-bottom:  calc(
+          env(safe-area-inset-bottom) + var(--bottom-nav-height));
 }
 
 .app-frame:has(.onboarding-chat-page):has(.bottom-nav) {
