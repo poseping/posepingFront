@@ -118,7 +118,7 @@ export default function WebcamHistoryStats() {
       {!isLoading && !isError && chartData.length > 0 && (
         <div className="wcam-history-chart">
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={chartData} margin={{ top: 8, right: 12, bottom: 4, left: 0 }}>
+            <BarChart data={chartData} margin={{ top: 8, right: 12, bottom: 4, left: 0 }} maxBarSize={56}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(100, 116, 139, 0.22)" />
               <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fontFamily: 'inherit' }} />
               <YAxis tickLine={false} axisLine={false} width={36} tick={{ fontFamily: 'inherit' }} />

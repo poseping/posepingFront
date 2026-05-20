@@ -193,10 +193,11 @@ $_danger-fg:  #b91c1c;
 .wcam-status-chip {
   display: inline-flex;
   align-items: center;
-  padding: 0.4rem 0.85rem;
+  padding: 0.5rem 0.85rem;
   border-radius: 999px;
   font-size: 0.78rem;
   font-weight: 800;
+  line-height: 1;
 
   &.good    { background: $_success-bg; color: $_success-fg; }
   &.warning { background: #fef3c7; color: #92400e; }
@@ -434,6 +435,7 @@ $_danger-fg:  #b91c1c;
 // ─── Control bar ──────────────────────────────────────────────────────────
 .wcam-control-bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.65rem;
   padding: 0.65rem 1rem;
@@ -443,7 +445,12 @@ $_danger-fg:  #b91c1c;
   box-shadow: 0 4px 12px rgba(20, 38, 70, 0.06);
 }
 
-.wcam-ctrl-spacer { flex: 1; }
+.wcam-ctrl-spacer {
+  flex: 1; 
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
 
 .wcam-camera-select {
   height: 36px;
@@ -671,6 +678,17 @@ $_danger-fg:  #b91c1c;
   padding: 0.45rem 0.9rem;
 }
 
+@media (max-width: 767px) {
+  .wcam-camera-select {
+    flex: 1;
+    max-width: none;
+  }
+
+  .wcam-ctrl-action-btn:not(.btn--danger-outline) {
+    flex: 1;
+  }
+}
+
 .wcam-paused-banner {
   padding: 0.55rem 1rem;
   background: #fef3c7;
@@ -777,7 +795,6 @@ $_danger-fg:  #b91c1c;
   flex: 1;
   font-size: 0.75rem;
   color: #64748b;
-  text-align: center;
 }
 
 
