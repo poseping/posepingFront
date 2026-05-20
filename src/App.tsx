@@ -8,6 +8,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useSelector } from 'react-redux'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import ProtectedRoute from './components/ProtectedRoute'
+import ErrorBoundary from './components/ErrorBoundary'
 import AppLayout from './components/AppLayout'
 import ScrollToTop from './components/ScrollToTop'
 import { RootState } from './store/store'
@@ -35,6 +36,7 @@ function App() {
     <Router>
       <ScrollToTop />
       <div className="app-frame">
+      <ErrorBoundary>
       <Suspense fallback={null}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
@@ -72,6 +74,7 @@ function App() {
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </Suspense>
+      </ErrorBoundary>
       </div>
     </Router>
     </GoogleOAuthProvider>
