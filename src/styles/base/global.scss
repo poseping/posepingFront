@@ -243,6 +243,20 @@ body {
   line-height: 1.5;
 }
 
+// ── Select ────────────────────────────────────────────────────────────────
+// 모든 <select>의 OS 기본 화살표를 숨기고 커스텀 chevron으로 통일
+// 개별 select 스타일에서: background는 `background-color:`로 (단축 `background:` 금지) + 우측 padding 1.85rem 이상 확보
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path fill='none' stroke='%2364748b' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M3 4.5L6 7.5L9 4.5'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.7rem center;
+  font-family: inherit;
+  cursor: pointer;
+}
+
 h1,
 h2,
 h3,

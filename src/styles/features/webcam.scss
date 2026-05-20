@@ -444,14 +444,13 @@ $_danger-fg:  #b91c1c;
 
 .wcam-camera-select {
   height: 36px;
-  padding: 0 0.5rem;
+  padding: 0 1.85rem 0 0.65rem;
   border: 1px solid rgba(19, 42, 76, 0.15);
   border-radius: 8px;
-  background: #fff;
+  background-color: #fff;
   color: #374151;
   font-size: 0.78rem;
-  max-width: 160px;
-  cursor: pointer;
+  max-width: 200px;
   &:focus { outline: none; border-color: var(--color-primary, #115ef0); }
 }
 
