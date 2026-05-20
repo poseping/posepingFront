@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons'
 import PageHeader from '../components/PageHeader'
@@ -18,6 +18,7 @@ const ASSISTANT_AVATAR_SRC = '/assets/logo/android-icon-48x48.png'
 
 export default function AssistantPage() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([])
   const [collectedFields, setCollectedFields] = useState<Record<string, string>>({})
   const [done, setDone] = useState(false)
@@ -101,6 +102,7 @@ export default function AssistantPage() {
       scrollToLatestMessage()
 
       if (data.done) {
+        queryClient.invalidateQueries({ queryKey: ['lifestyle-habit'] })
         setRedirectCountdown(REDIRECT_DELAY_SECONDS)
       }
     },
