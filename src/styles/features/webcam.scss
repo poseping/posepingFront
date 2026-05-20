@@ -442,6 +442,19 @@ $_danger-fg:  #b91c1c;
 
 .wcam-ctrl-spacer { flex: 1; }
 
+.wcam-camera-select {
+  height: 36px;
+  padding: 0 0.5rem;
+  border: 1px solid rgba(19, 42, 76, 0.15);
+  border-radius: 8px;
+  background: #fff;
+  color: #374151;
+  font-size: 0.78rem;
+  max-width: 160px;
+  cursor: pointer;
+  &:focus { outline: none; border-color: var(--color-primary, #115ef0); }
+}
+
 .wcam-ctrl-icon {
   position: relative;
   color: #64748b;
@@ -744,11 +757,6 @@ $_danger-fg:  #b91c1c;
   &--bad     { background: $_danger-bg;  color: $_danger-fg; }
 }
 
-.wcam-summary-actions {
-  display: flex;
-  gap: 0.75rem;
-  justify-content: center;
-}
 
 
 // ─── Profile list modal (analyzing 중 조회) ───────────────────────────────
