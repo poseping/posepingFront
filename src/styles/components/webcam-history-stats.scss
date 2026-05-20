@@ -7,6 +7,78 @@ $_dark:    #0f172a;
 $_surface: #f8fafc;
 
 
+// 캘린더(react-day-picker)가 들어가는 popover의 공통 스타일
+@mixin rdp-popover-calendar {
+  .rdp-root {
+    --rdp-accent-color: var(--primary);
+    --rdp-accent-background-color: rgba(8, 145, 178, 0.08);
+    --rdp-day-width: 36px;
+    --rdp-day-height: 36px;
+    --rdp-day_button-width: 32px;
+    --rdp-day_button-height: 32px;
+    --rdp-today-color: var(--primary);
+    --rdp-weekday-opacity: 1;
+    font-size: 0.85rem;
+    color: $_dark;
+  }
+
+  .rdp-caption_label {
+    font-weight: 700;
+    color: $_dark;
+    font-size: 0.95rem;
+  }
+
+  .rdp-nav button {
+    color: var(--muted-foreground);
+    border-radius: 8px;
+
+    &:hover { background: rgba(100, 116, 139, 0.08); }
+  }
+
+  .rdp-weekday {
+    color: var(--muted-foreground);
+    font-weight: 600;
+    font-size: 0.74rem;
+    text-transform: none;
+
+    &:first-child { color: #ef4444; }
+    &:last-child  { color: #3b82f6; }
+  }
+
+  .rdp-day_button {
+    position: relative;
+    color: inherit;
+    font-size: 0.85rem;
+  }
+
+  .rdp-sun .rdp-day_button { color: #ef4444; }
+  .rdp-sat .rdp-day_button { color: #3b82f6; }
+
+  .rdp-outside .rdp-day_button {
+    color: rgba(100, 116, 139, 0.4);
+  }
+
+  .rdp-has-session .rdp-day_button::after {
+    content: '';
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--primary);
+  }
+
+  .rdp-selected .rdp-day_button {
+    border-color: var(--primary);
+    color: var(--primary);
+    font-weight: 700;
+    background: transparent;
+  }
+}
+
+
 // ─── History Stats ────────────────────────────────────────────────────────
 .wcam-history-stats { display: flex; flex-direction: column; }
 
@@ -63,6 +135,7 @@ $_surface: #f8fafc;
   justify-content: center;
   gap: 0.5rem;
   min-height: 180px;
+  margin-top: 10px;
   border-radius: 16px;
   background: $_surface;
   color: var(--muted-foreground);
@@ -182,6 +255,268 @@ $_surface: #f8fafc;
   }
 }
 
+.wcam-period-picker {
+  position: relative;
+  display: inline-flex;
+}
+
+.wcam-period-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.15rem 0.3rem;
+  border-radius: 999px;
+  border: 1px solid rgba(100, 116, 139, 0.28);
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 0.78rem;
+}
+
+.wcam-period-nav__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 0;
+  background: transparent;
+  border-radius: 999px;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.7rem;
+  transition: background 0.12s, color 0.12s;
+
+  &:hover:not(:disabled) {
+    background: rgba(8, 145, 178, 0.08);
+    color: var(--primary);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+}
+
+.wcam-period-nav__content {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 0.3rem;
+  line-height: 1;
+
+  strong { font-weight: 700; color: #1e293b; }
+  span   { color: var(--primary); font-size: 0.74rem; font-weight: 700;}
+
+  &--button {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    font-family: inherit;
+    border-radius: 6px;
+    transition: background 0.12s;
+
+    &:hover { background: rgba(8, 145, 178, 0.08); }
+  }
+}
+
+// ─── Period Popover (recent weeks list + calendar) ───────────────────────
+.wcam-period-backdrop { display: none; }
+
+.wcam-period-popover {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  z-index: 50;
+  width: max-content;
+  min-width: 252px;
+  padding: 0.5rem 0.6rem 0.4rem;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid rgba(100, 116, 139, 0.12);
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.15);
+
+  @include rdp-popover-calendar;
+
+  // 모바일 전용 요소: 데스크탑에서는 숨김
+  &__sheet-handle,
+  &__sheet-header { display: none; }
+}
+
+.wcam-period-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.wcam-period-list__row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: $_dark;
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.12s;
+
+  &:hover { background: rgba(100, 116, 139, 0.06); }
+
+  &--active {
+    background: rgba(16, 185, 129, 0.1);
+    &:hover { background: rgba(16, 185, 129, 0.14); }
+
+    .wcam-period-list__rel { color: #047857; }
+  }
+}
+
+.wcam-period-list__rel {
+  font-weight: 700;
+  text-align: left;
+}
+
+.wcam-period-list__range {
+  color: var(--muted-foreground);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.wcam-period-list__count {
+  min-width: 1.6rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(100, 116, 139, 0.14);
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.wcam-period-popover__switch {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  margin-top: 0.4rem;
+  padding: 0.7rem 0.7rem;
+  border: 0;
+  border-top: 1px solid rgba(100, 116, 139, 0.12);
+  background: transparent;
+  color: $_dark;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 0 0 12px 12px;
+  transition: background 0.12s;
+
+  &:hover { background: rgba(100, 116, 139, 0.06); }
+
+  .svg-inline--fa {
+    color: var(--muted-foreground);
+    font-size: 0.95rem;
+  }
+
+  span {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  strong { font-size: 0.85rem; font-weight: 700; }
+  small  { color: var(--muted-foreground); font-size: 0.75rem; font-weight: 500; }
+}
+
+// 캘린더 뷰 상단: [돌아가기 | 월 네비게이션] 한 줄
+.wcam-period-popover__cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.35rem;
+}
+
+.wcam-period-popover__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.55rem;
+  border: 0;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.12s, color 0.12s;
+
+  &:hover { background: rgba(100, 116, 139, 0.06); color: $_dark; }
+
+  .svg-inline--fa { font-size: 0.72rem; }
+}
+
+.wcam-period-popover__month-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.wcam-period-popover__month-label {
+  font-weight: 700;
+  color: $_dark;
+  font-size: 0.9rem;
+  padding: 0 0.25rem;
+  min-width: 5rem;
+  text-align: center;
+}
+
+.wcam-period-popover__month-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  font-size: 0.72rem;
+  transition: background 0.12s, color 0.12s;
+
+  &:hover:not(:disabled) {
+    background: rgba(100, 116, 139, 0.08);
+    color: $_dark;
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}
+
+// DayPicker 기본 month_caption 숨김 (자체 헤더로 대체)
+.wcam-period-popover .rdp-month_caption {
+  display: none;
+}
+
+.wcam-period-popover__hint {
+  margin: 0.25rem 0 0.15rem;
+  text-align: center;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+// 선택된 주의 모든 날짜를 연한 강조 (셀 전체 채워서 가로로 연속된 바)
+.rdp-selected-week {
+  background-color: rgba(16, 185, 129, 0.18);
+}
+
 .wcam-filter-select {
   padding: 0.22rem 1.65rem 0.22rem 0.5rem;
   border-radius: 14px;
@@ -250,73 +585,7 @@ $_surface: #f8fafc;
   box-shadow: 0 14px 32px rgba(15, 23, 42, 0.15);
   border: 1px solid rgba(100, 116, 139, 0.12);
 
-  .rdp-root {
-    --rdp-accent-color: var(--primary);
-    --rdp-accent-background-color: rgba(8, 145, 178, 0.08);
-    --rdp-day-width: 36px;
-    --rdp-day-height: 36px;
-    --rdp-day_button-width: 32px;
-    --rdp-day_button-height: 32px;
-    --rdp-today-color: var(--primary);
-    --rdp-weekday-opacity: 1;
-    font-size: 0.85rem;
-    color: $_dark;
-  }
-
-  .rdp-caption_label {
-    font-weight: 700;
-    color: $_dark;
-    font-size: 0.95rem;
-  }
-
-  .rdp-nav button {
-    color: var(--muted-foreground);
-    border-radius: 8px;
-
-    &:hover { background: rgba(100, 116, 139, 0.08); }
-  }
-
-  .rdp-weekday {
-    color: var(--muted-foreground);
-    font-weight: 600;
-    font-size: 0.74rem;
-    text-transform: none;
-
-    &:first-child { color: #ef4444; }
-    &:last-child  { color: #3b82f6; }
-  }
-
-  .rdp-day_button {
-    position: relative;
-    color: inherit;
-    font-size: 0.85rem;
-  }
-
-  .rdp-sun .rdp-day_button { color: #ef4444; }
-  .rdp-sat .rdp-day_button { color: #3b82f6; }
-
-  .rdp-outside .rdp-day_button {
-    color: rgba(100, 116, 139, 0.4);
-  }
-
-  .rdp-has-session .rdp-day_button::after {
-    content: '';
-    position: absolute;
-    bottom: 3px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: var(--primary);
-  }
-
-  .rdp-selected .rdp-day_button {
-    border-color: var(--primary);
-    color: var(--primary);
-    font-weight: 700;
-    background: transparent;
-  }
+  @include rdp-popover-calendar;
 }
 
 .wcam-cal-footer {
@@ -373,4 +642,85 @@ $_surface: #f8fafc;
   .wcam-filter-group:not(:last-child)::after {
     display: none;
   }
+
+  .wcam-cal-trigger > .svg-inline--fa:not(.wcam-cal-caret) {
+    display: none;
+  }
+
+  // ── Period Picker: 모바일에서는 바텀시트로 ─────────────────────────────
+  .wcam-period-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.42);
+    z-index: 99;
+    animation: wcam-fade-in 0.18s ease;
+  }
+
+  .wcam-period-popover {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    padding: 0.4rem 1rem 1.4rem;
+    border-radius: 20px 20px 0 0;
+    border-bottom: 0;
+    box-shadow: 0 -12px 32px rgba(15, 23, 42, 0.15);
+    z-index: 100;
+    animation: wcam-sheet-up 0.22s ease;
+
+    &__sheet-handle {
+      display: block;
+      width: 36px;
+      height: 4px;
+      margin: 0.25rem auto 0.6rem;
+      border-radius: 999px;
+      background: rgba(100, 116, 139, 0.3);
+    }
+
+    &__sheet-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.2rem 0 0.85rem;
+
+      h3 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        color: $_dark;
+      }
+    }
+
+    &__sheet-close {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      border: 0;
+      background: transparent;
+      color: var(--muted-foreground);
+      font-size: 1.5rem;
+      line-height: 1;
+      cursor: pointer;
+      border-radius: 8px;
+
+      &:hover { background: rgba(100, 116, 139, 0.08); }
+    }
+  }
+}
+
+@keyframes wcam-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes wcam-sheet-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
 }

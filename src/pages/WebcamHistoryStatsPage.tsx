@@ -8,7 +8,7 @@ import {
 } from 'recharts'
 import PageHeader from '../components/PageHeader'
 import WcamSessionDetailCard from '../components/Webcam/WcamSessionDetailCard'
-import WcamDateCalendar from '../components/Webcam/WcamDateCalendar'
+import WcamPeriodPicker from '../components/Webcam/WcamPeriodPicker'
 import {
   deleteWebcamSession,
   getWebcamHistory,
@@ -25,8 +25,32 @@ const CAUSE_META: Record<string, { label: string; color: string }> = {
   BAD_POSTURE:    { label: '나쁜 자세',     color: '#6b7280' },
 }
 
-type DateFilter = 'all' | 'this-week' | 'this-month' | string
+type PeriodUnit = 'day' | 'week' | 'month'
 type TimeFilter = 'all' | 'morning' | 'afternoon'
+
+function startOfDay(d: Date): Date {
+  const x = new Date(d); x.setHours(0, 0, 0, 0); return x
+}
+function endOfDay(d: Date): Date {
+  const x = new Date(d); x.setHours(23, 59, 59, 999); return x
+}
+function startOfWeek(d: Date): Date {
+  const x = startOfDay(d)
+  const dow = x.getDay()
+  x.setDate(x.getDate() - (dow === 0 ? 6 : dow - 1)) // 월요일 시작
+  return x
+}
+function getPeriodRange(unit: PeriodUnit, anchor: Date): { start: Date; end: Date } {
+  if (unit === 'day') return { start: startOfDay(anchor), end: endOfDay(anchor) }
+  if (unit === 'week') {
+    const start = startOfWeek(anchor)
+    const end = endOfDay(new Date(start.getTime() + 6 * 24 * 60 * 60 * 1000))
+    return { start, end }
+  }
+  const start = new Date(anchor.getFullYear(), anchor.getMonth(), 1, 0, 0, 0, 0)
+  const end = new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0, 23, 59, 59, 999)
+  return { start, end }
+}
 
 interface ChartEntry {
   label: string
@@ -71,39 +95,21 @@ function getActiveCauses(sessions: WebcamSessionHistoryItem[]): string[] {
 
 function applyFilters(
   sessions: WebcamSessionHistoryItem[],
-  dateFilter: DateFilter,
+  periodUnit: PeriodUnit,
+  periodAnchor: Date,
   timeFilter: TimeFilter,
 ): WebcamSessionHistoryItem[] {
-  const now = new Date()
+  const { start, end } = getPeriodRange(periodUnit, periodAnchor)
   return sessions.filter(s => {
     const date = new Date(s.started_at)
-    if (dateFilter === 'this-week') {
-      const dow = now.getDay()
-      const weekStart = new Date(now)
-      weekStart.setDate(now.getDate() - (dow === 0 ? 6 : dow - 1))
-      weekStart.setHours(0, 0, 0, 0)
-      if (date < weekStart) return false
-    } else if (dateFilter === 'this-month') {
-      if (date.getFullYear() !== now.getFullYear() || date.getMonth() !== now.getMonth()) return false
-    } else if (dateFilter !== 'all') {
-      if (s.started_at.slice(0, 10) !== dateFilter) return false
-    }
+    if (date < start || date > end) return false
     if (timeFilter === 'morning' && date.getHours() >= 12) return false
     if (timeFilter === 'afternoon' && date.getHours() < 12) return false
     return true
   })
 }
 
-function getTodayStr(): string {
-  const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
-
-const DATE_FILTER_PRESETS: Array<{ value: 'all' | 'this-week' | 'this-month'; label: string }> = [
-  { value: 'all',        label: '전체' },
-  { value: 'this-week',  label: '이번 주' },
-  { value: 'this-month', label: '이번 달' },
-]
+const PERIOD_UNIT: PeriodUnit = 'week'
 
 const TIME_FILTER_OPTIONS: Array<{ value: TimeFilter; label: string }> = [
   { value: 'all',       label: '전체' },
@@ -115,9 +121,8 @@ export default function WebcamHistoryStatsPage() {
   const queryClient = useQueryClient()
   const [selectedSessionId, setSelectedSessionId] = useState<number | null>(null)
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<number | null>(null)
-  const [dateFilter, setDateFilter] = useState<DateFilter>('all')
+  const [periodAnchor, setPeriodAnchor] = useState<Date>(() => new Date())
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('all')
-  const todayStr = useMemo(getTodayStr, [])
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['webcam-history-full'],
@@ -140,14 +145,13 @@ export default function WebcamHistoryStatsPage() {
     },
   })
 
-  useEffect(() => { setSelectedSessionId(null) }, [dateFilter, timeFilter])
+  useEffect(() => { setSelectedSessionId(null) }, [periodAnchor, timeFilter])
 
   const sessions = data?.sessions ?? []
-  const allSessionDates = useMemo(
-    () => Array.from(new Set(sessions.map(s => s.started_at.slice(0, 10)))),
-    [sessions],
+  const filteredSessions = useMemo(
+    () => applyFilters(sessions, PERIOD_UNIT, periodAnchor, timeFilter),
+    [sessions, periodAnchor, timeFilter],
   )
-  const filteredSessions = useMemo(() => applyFilters(sessions, dateFilter, timeFilter), [sessions, dateFilter, timeFilter])
   const chartData = useMemo(() => buildChartData(filteredSessions), [filteredSessions])
   const activeCauses = useMemo(() => getActiveCauses(filteredSessions), [filteredSessions])
   const effectiveSelectedId = filteredSessions.some(s => s.session_id === selectedSessionId)
@@ -212,36 +216,13 @@ export default function WebcamHistoryStatsPage() {
               <div className="wcam-filter-group">
                 <span className="wcam-filter-label">
                   <FontAwesomeIcon icon={faCalendar} />
-                  날짜
+                  기간
                 </span>
-                <div className="wcam-filter-chips">
-                  {DATE_FILTER_PRESETS.map(({ value, label }) => (
-                    <button
-                      key={value}
-                      type="button"
-                      className={`wcam-filter-chip${dateFilter === value ? ' wcam-filter-chip--active' : ''}`}
-                      onClick={() => setDateFilter(value)}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                  <button
-                    type="button"
-                    className={`wcam-filter-chip${dateFilter === todayStr ? ' wcam-filter-chip--active' : ''}`}
-                    onClick={() => setDateFilter(todayStr)}
-                  >
-                    오늘
-                  </button>
-                <WcamDateCalendar
-                  sessionDates={allSessionDates}
-                  selectedDate={
-                    dateFilter !== 'all' && dateFilter !== 'this-week' && dateFilter !== 'this-month'
-                      ? dateFilter
-                      : null
-                  }
-                  onSelect={d => setDateFilter(d)}
+                <WcamPeriodPicker
+                  anchor={periodAnchor}
+                  onChange={setPeriodAnchor}
+                  sessions={sessions}
                 />
-                </div>
               </div>
               <div className="wcam-filter-group">
                 <span className="wcam-filter-label">
@@ -278,7 +259,7 @@ export default function WebcamHistoryStatsPage() {
               </p>
               <div className="wcam-history-chart">
                 <ResponsiveContainer width="100%" height={220}>
-                  <BarChart data={chartData} margin={{ top: 8, right: 12, bottom: 4, left: 0 }} onClick={handleChartClick} style={{ cursor: 'pointer' }}>
+                  <BarChart data={chartData} margin={{ top: 8, right: 12, bottom: 4, left: 0 }} maxBarSize={56} onClick={handleChartClick} style={{ cursor: 'pointer' }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(100, 116, 139, 0.22)" />
                     <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fontFamily: 'inherit' }} />
                     <YAxis tickLine={false} axisLine={false} width={36} tick={{ fontFamily: 'inherit' }} />
@@ -313,7 +294,7 @@ export default function WebcamHistoryStatsPage() {
                   </p>
                   <div className="wcam-history-chart">
                     <ResponsiveContainer width="100%" height={220}>
-                      <BarChart data={causeChartData} margin={{ top: 8, right: 12, bottom: 4, left: 0 }} onClick={handleChartClick} style={{ cursor: 'pointer' }}>
+                      <BarChart data={causeChartData} margin={{ top: 8, right: 12, bottom: 4, left: 0 }} maxBarSize={20} onClick={handleChartClick} style={{ cursor: 'pointer' }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(100, 116, 139, 0.22)" />
                         <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fontFamily: 'inherit' }} />
                         <YAxis tickLine={false} axisLine={false} width={36} tick={{ fontFamily: 'inherit' }} />
