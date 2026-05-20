@@ -312,7 +312,7 @@ export default function WebcamPage() {
             <div className="wcam-empty-icon"><FontAwesomeIcon icon={faClipboardList} /></div>
             <h4>등록된 기준 자세가 없습니다</h4>
             <p>카메라 앞에 바르게 앉은 후 기준 자세를 등록하면 실시간 분석을 시작할 수 있습니다.</p>
-            <button className="btn--primary btn--lg btn--full" onClick={() => setIsGuideOpen(true)}>
+            <button className="btn--primary btn--lg" onClick={() => setIsGuideOpen(true)}>
               <FontAwesomeIcon icon={faCamera} />
               기준 자세 등록하기
             </button>

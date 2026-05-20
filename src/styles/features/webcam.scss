@@ -171,12 +171,16 @@ $_danger-fg:  #b91c1c;
     color: var(--muted-foreground);
     font-size: 0.88rem;
     line-height: 1.55;
-    max-width: 26ch;
   }
 }
 
 
 // ─── Result Card ──────────────────────────────────────────────────────────
+.wcam-result-card,
+.wcam-result-placeholder {
+  flex: 1;
+}
+
 .wcam-result-header {
   display: flex;
   align-items: center;
@@ -414,7 +418,6 @@ $_danger-fg:  #b91c1c;
   grid-template-columns: 3fr 2fr;
   gap: 1.5rem;
   width: 100%;
-  align-items: start;
 
   @media (max-width: 768px) { grid-template-columns: 1fr; gap: 1rem; }
 }
