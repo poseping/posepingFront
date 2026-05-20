@@ -6,7 +6,6 @@
   height: var(--bottom-nav-height);
   background-color: rgb(255 255 255 / 73%);
   backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid var(--border);
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
