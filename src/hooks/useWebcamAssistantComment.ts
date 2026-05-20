@@ -19,10 +19,12 @@ export function useWebcamAssistantComment(isSessionActive: boolean, thresholdSec
   const badPostureStartRef = useRef<number | null>(null);
   const [assistantComment, setAssistantComment] = useState<string | null>(null);
   const [assistantError, setAssistantError] = useState<string | null>(null);
+  const supportsNotification = typeof Notification !== 'undefined'
   const [notifPermission, setNotifPermission] =
-    useState<NotificationPermission>(Notification.permission);
+    useState<NotificationPermission>(supportsNotification ? Notification.permission : 'denied')
 
   useEffect(() => {
+    if (!supportsNotification) return
     if (Notification.permission === "default") {
       Notification.requestPermission().then(setNotifPermission);
     }
@@ -34,7 +36,7 @@ export function useWebcamAssistantComment(isSessionActive: boolean, thresholdSec
       onSuccess: (data) => {
         if (data.requested && data.comment) {
           setAssistantComment(data.comment);
-          if (Notification.permission === "granted" && document.hidden) {
+          if (supportsNotification && Notification.permission === "granted" && document.hidden) {
             new Notification("포즈PING AI 코멘트", {
               body: data.comment,
               icon: "/favicon.ico",
