@@ -23,6 +23,7 @@ interface Props {
   goodFrames: number
   warningFrames: number
   totalFrames: number
+  onRestart: () => void
 }
 
 export default function WcamSessionSummaryChart({
@@ -30,6 +31,7 @@ export default function WcamSessionSummaryChart({
   causeCounts, alertMap,
   prevGoodRatio, assistantComment,
   goodFrames, warningFrames, totalFrames,
+  onRestart,
 }: Props) {
   const total = goodCount + warningCount + badCount
   const thisRatio = totalFrames > 0
@@ -147,6 +149,11 @@ export default function WcamSessionSummaryChart({
           )}
         </>
       )}
+      <div className="wcam-session-summary__actions">
+        <button className="btn--secondary btn--lg" onClick={onRestart}>
+          재시작
+        </button>
+      </div>
     </section>
   )
 }

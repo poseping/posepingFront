@@ -149,4 +149,12 @@ $_surface: #f8fafc;
     color: #0c4a6e;
     word-break: keep-all;
   }
+
+  &__actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
 }

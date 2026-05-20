@@ -8,15 +8,17 @@ export interface WebcamStreamRef {
 
 interface WebcamStreamProps {
   webcamNeeded: boolean
+  deviceId?: string
   landmarks?: Landmark[]
   frameWidth?: number
   frameHeight?: number
   statusColor?: string
   onCameraError?: (message: string) => void
+  onDevicesFound?: (devices: MediaDeviceInfo[]) => void
 }
 
 const WebcamStream = forwardRef<WebcamStreamRef, WebcamStreamProps>(
-  function WebcamStream({ webcamNeeded, landmarks, frameWidth, frameHeight, statusColor, onCameraError }, ref) {
+  function WebcamStream({ webcamNeeded, deviceId, landmarks, frameWidth, frameHeight, statusColor, onCameraError, onDevicesFound }, ref) {
     const videoRef = useRef<HTMLVideoElement>(null)
     const captureCanvasRef = useRef<HTMLCanvasElement>(null)
     const displayCanvasRef = useRef<HTMLCanvasElement>(null)
@@ -25,15 +27,29 @@ const WebcamStream = forwardRef<WebcamStreamRef, WebcamStreamProps>(
       if (!webcamNeeded) return
       let stopped = false
       const startWebcam = async () => {
+        const attach = async (stream: MediaStream) => {
+          if (!stopped && videoRef.current) {
+            videoRef.current.srcObject = stream
+            const all = await navigator.mediaDevices.enumerateDevices()
+            if (!stopped) onDevicesFound?.(all.filter((d) => d.kind === 'videoinput'))
+          } else {
+            stream.getTracks().forEach((t) => t.stop())
+          }
+        }
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: { width: { ideal: 1280 }, height: { ideal: 720 } },
-          })
-          if (!stopped && videoRef.current) videoRef.current.srcObject = stream
-          else stream.getTracks().forEach((t) => t.stop())
-        } catch (error) {
-          console.error('웹캠 접근 실패:', error)
-          onCameraError?.('카메라에 접근할 수 없습니다. 다른 앱이 카메라를 사용 중이거나 드라이버 문제일 수 있습니다.')
+          const videoConstraints = deviceId
+            ? { deviceId: { exact: deviceId } }
+            : { width: { ideal: 1280 }, height: { ideal: 720 } }
+          const stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints })
+          await attach(stream)
+        } catch {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+            await attach(stream)
+          } catch (error) {
+            console.error('웹캠 접근 실패:', error)
+            onCameraError?.('카메라에 접근할 수 없습니다. 다른 앱이 카메라를 사용 중이거나 드라이버 문제일 수 있습니다.')
+          }
         }
       }
       startWebcam()
@@ -44,7 +60,7 @@ const WebcamStream = forwardRef<WebcamStreamRef, WebcamStreamProps>(
           videoRef.current.srcObject = null
         }
       }
-    }, [webcamNeeded])
+    }, [webcamNeeded, deviceId])
 
     useEffect(() => {
       if (displayCanvasRef.current && landmarks?.length) {
