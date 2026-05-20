@@ -227,7 +227,6 @@ export default function WcamPeriodPicker({ anchor, onChange, sessions }: Props) 
                     type="button"
                     className="wcam-period-popover__month-btn"
                     onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1))}
-                    disabled={calendarMonth.getFullYear() === now.getFullYear() && calendarMonth.getMonth() >= now.getMonth()}
                     aria-label="다음 달"
                   >
                     <FontAwesomeIcon icon={faChevronRight} />

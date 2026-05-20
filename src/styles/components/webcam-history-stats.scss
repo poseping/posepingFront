@@ -663,9 +663,10 @@ $_surface: #f8fafc;
     bottom: 0;
     left: 0;
     right: 0;
-    width: auto;
+    width: 100%;
     min-width: 0;
-    max-width: none;
+    max-width: 480px;
+    margin: 0 auto;
     padding: 0.4rem 1rem 1.4rem;
     border-radius: 20px 20px 0 0;
     border-bottom: 0;
@@ -711,6 +712,15 @@ $_surface: #f8fafc;
       border-radius: 8px;
 
       &:hover { background: rgba(100, 116, 139, 0.08); }
+    }
+
+    // 모바일에선 캘린더 셀을 크게 키워서 시트를 채움 (터치 타겟도 확보)
+    .rdp-root {
+      margin: 0 auto;
+      --rdp-day-width: 54px;
+      --rdp-day-height: 44px;
+      --rdp-day_button-width: 44px;
+      --rdp-day_button-height: 38px;
     }
   }
 }
