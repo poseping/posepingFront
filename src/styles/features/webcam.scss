@@ -628,11 +628,11 @@ $_danger-fg:  #b91c1c;
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.12s, background 0.12s, color 0.12s, opacity 0.12s;
+  transition: border-color 0.06s, background 0.06s, color 0.06s, opacity 0.06s;
 
   &:hover {
     border-color: $_heading;
-    color: $_heading;
+    color: #fff;
   }
 
   &--active {
@@ -676,6 +676,7 @@ $_danger-fg:  #b91c1c;
 .wcam-ctrl-action-btn {
   font-size: 0.88rem;
   padding: 0.45rem 0.9rem;
+  border: 1px solid transparent;
 }
 
 @media (max-width: 767px) {
