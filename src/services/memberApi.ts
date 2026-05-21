@@ -21,6 +21,7 @@ export interface LifestyleHabit {
   sitting_hours_per_day: string | null;
   exercise_days_per_week: string | null;
   pain_areas: string | null;
+  sleep_position: string | null;
   updated_at: string | null;
 }
 
