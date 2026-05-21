@@ -29,7 +29,8 @@ export default function MyPage() {
   const { data: habitData, isLoading: habitLoading } = useQuery({
     queryKey: ['lifestyle-habit'],
     queryFn: getLifestyleHabits,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
+    refetchOnMount: 'always',
   })
 
   const randomNicknameMutation = useMutation({
