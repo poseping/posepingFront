@@ -75,10 +75,12 @@ export default function WebcamPage() {
 
   const sessionRef = useRef({
     startedAt: null as string | null,
-    goodCount: 0,
-    warningCount: 0,
-    badCount: 0,
+    // 상태 전환 횟수 (summary "X회" 표시용)
+    goodTransitions: 0,
+    warningTransitions: 0,
+    badTransitions: 0,
     causeCounts: {} as Record<string, number>,
+    // 프레임 수 (자세 점수 계산용)
     goodFrames: 0,
     warningFrames: 0,
     badFrames: 0,
@@ -173,9 +175,9 @@ export default function WebcamPage() {
     consecutiveErrorRef.current = 0
     sessionRef.current = {
       startedAt: new Date().toISOString(),
-      goodCount: 0,
-      warningCount: 0,
-      badCount: 0,
+      goodTransitions: 0,
+      warningTransitions: 0,
+      badTransitions: 0,
       causeCounts: {},
       goodFrames: 0,
       warningFrames: 0,
@@ -229,7 +231,7 @@ export default function WebcamPage() {
     else sessionRef.current.badFrames++
 
     if (data.status !== prevStatusRef.current) {
-      const key = `${data.status}Count` as 'goodCount' | 'warningCount' | 'badCount'
+      const key = `${data.status}Transitions` as 'goodTransitions' | 'warningTransitions' | 'badTransitions'
       sessionRef.current[key]++
       prevStatusRef.current = data.status
     }
@@ -312,7 +314,7 @@ export default function WebcamPage() {
             <div className="wcam-empty-icon"><FontAwesomeIcon icon={faClipboardList} /></div>
             <h4>등록된 기준 자세가 없습니다</h4>
             <p>카메라 앞에 바르게 앉은 후 기준 자세를 등록하면 실시간 분석을 시작할 수 있습니다.</p>
-            <button className="btn--primary btn--lg btn--full" onClick={() => setIsGuideOpen(true)}>
+            <button className="btn--primary btn--lg" onClick={() => setIsGuideOpen(true)}>
               <FontAwesomeIcon icon={faCamera} />
               기준 자세 등록하기
             </button>
@@ -574,13 +576,13 @@ export default function WebcamPage() {
   // ── Summary phase ──────────────────────────────────────────────────────────
 
   const renderSummaryPhase = () => {
-    const { goodCount, warningCount, badCount, causeCounts, goodFrames, warningFrames, totalFrames } = sessionRef.current
+    const { goodTransitions, warningTransitions, badTransitions, causeCounts, goodFrames, warningFrames, totalFrames } = sessionRef.current
     return (
       <div className="wcam-summary-phase">
         <WcamSessionSummaryChart
-          goodCount={goodCount}
-          warningCount={warningCount}
-          badCount={badCount}
+          goodCount={goodTransitions}
+          warningCount={warningTransitions}
+          badCount={badTransitions}
           causeCounts={causeCounts}
           alertMap={alertMap}
           prevGoodRatio={prevGoodRatio}

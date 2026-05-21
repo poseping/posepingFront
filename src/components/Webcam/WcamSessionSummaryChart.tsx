@@ -150,7 +150,7 @@ export default function WcamSessionSummaryChart({
         </>
       )}
       <div className="wcam-session-summary__actions">
-        <button className="btn--secondary btn--lg" onClick={onRestart}>
+        <button className="btn--secondary btn--lg btn--full" onClick={onRestart}>
           재시작
         </button>
       </div>

@@ -601,6 +601,9 @@ $_surface: #f8fafc;
   font-size: 0.78rem;
   font-weight: 500;
   color: var(--muted-foreground);
+  @media (max-width: 768px) { 
+    display: none;
+  }
 }
 
 // ─── Time Chips (알림 시간 행) ─────────────────────────────────────────────
@@ -833,6 +836,10 @@ $_surface: #f8fafc;
     background: rgba(31, 181, 172, 0.06);
     color: #0E847D;
   }
+
+  @media (max-width: 768px) {
+    border-radius: 10px;
+  }
 }
 
 // ─── Error Message ────────────────────────────────────────────────────────
@@ -924,4 +931,3 @@ $_surface: #f8fafc;
     transform: translateY(-1px);
   }
 }
-

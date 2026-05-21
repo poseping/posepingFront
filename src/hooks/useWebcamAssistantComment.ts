@@ -5,6 +5,8 @@ import {
   getWebcamComment,
 } from "../services/assistantApi";
 
+const supportsNotification = typeof Notification !== "undefined";
+
 export interface WebcamAssistantAnalyzeInput {
   status: string;
   deviation_score: number;
@@ -15,11 +17,11 @@ export interface WebcamAssistantAnalyzeInput {
 }
 
 export function useWebcamAssistantComment(isSessionActive: boolean, thresholdSec: number = 60) {
-  const thresholdMs = thresholdSec * 1000;
+  const thresholdMsRef = useRef(thresholdSec * 1000);
+  useEffect(() => { thresholdMsRef.current = thresholdSec * 1000 }, [thresholdSec]);
   const badPostureStartRef = useRef<number | null>(null);
   const [assistantComment, setAssistantComment] = useState<string | null>(null);
   const [assistantError, setAssistantError] = useState<string | null>(null);
-  const supportsNotification = typeof Notification !== 'undefined'
   const [notifPermission, setNotifPermission] =
     useState<NotificationPermission>(supportsNotification ? Notification.permission : 'denied')
 
@@ -72,7 +74,7 @@ export function useWebcamAssistantComment(isSessionActive: boolean, thresholdSec
     }
 
     const elapsed = Date.now() - badPostureStartRef.current;
-    if (elapsed < thresholdMs) return;
+    if (elapsed < thresholdMsRef.current) return;
     if (isAssistantCommentPending) return;
 
     badPostureStartRef.current = null;
@@ -83,7 +85,7 @@ export function useWebcamAssistantComment(isSessionActive: boolean, thresholdSec
       issues: result.issues,
       profile_name: result.profile_name,
       ai_context: result.ai_context,
-      judgement_signature: String(Date.now()),
+      judgement_signature: result.judgement_signature ?? String(Date.now()),
       previous_judgement_signature: null,
     });
   };
