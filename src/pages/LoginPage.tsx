@@ -54,7 +54,8 @@ export default function LoginPage() {
       `https://kauth.kakao.com/oauth/authorize` +
       `?client_id=${import.meta.env.VITE_KAKAO_REST_KEY}` +
       `&redirect_uri=${encodeURIComponent(callbackUrl)}` +
-      `&response_type=code`
+      `&response_type=code` +
+      `&prompt=login`
 
     const popup = window.open(kakaoAuthUrl, 'kakaoLogin', 'width=500,height=600,scrollbars=yes')
     if (!popup) {
