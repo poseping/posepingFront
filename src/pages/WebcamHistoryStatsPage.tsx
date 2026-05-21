@@ -262,7 +262,7 @@ export default function WebcamHistoryStatsPage() {
                   <BarChart data={chartData} margin={{ top: 8, right: 12, bottom: 4, left: 0 }} maxBarSize={56} onClick={handleChartClick} style={{ cursor: 'pointer' }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(100, 116, 139, 0.22)" />
                     <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fontFamily: 'inherit' }} />
-                    <YAxis tickLine={false} axisLine={false} width={36} tick={{ fontFamily: 'inherit' }} />
+                    <YAxis tickLine={false} axisLine={false} width={44} tick={{ fontFamily: 'inherit' }} />
                     <Tooltip />
                     <Legend wrapperStyle={{ fontFamily: 'inherit', fontSize: '0.82rem' }} />
                     <Bar dataKey="good" name="좋음" stackId="a" fill="#10b981" />
@@ -297,7 +297,7 @@ export default function WebcamHistoryStatsPage() {
                       <BarChart data={causeChartData} margin={{ top: 8, right: 12, bottom: 4, left: 0 }} maxBarSize={20} onClick={handleChartClick} style={{ cursor: 'pointer' }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(100, 116, 139, 0.22)" />
                         <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fontFamily: 'inherit' }} />
-                        <YAxis tickLine={false} axisLine={false} width={36} tick={{ fontFamily: 'inherit' }} />
+                        <YAxis tickLine={false} axisLine={false} width={44} tick={{ fontFamily: 'inherit' }} />
                         <Tooltip />
                         <Legend wrapperStyle={{ fontFamily: 'inherit', fontSize: '0.82rem' }} />
                         {causeActiveCauses.map(key => (
