@@ -126,7 +126,7 @@ export default function WebcamHistoryStatsPage() {
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['webcam-history-full'],
-    queryFn: () => getWebcamHistory(50),
+    queryFn: () => getWebcamHistory({ limit: 50 }),
   })
 
   const { mutate: doDelete, isPending: isDeleting } = useMutation({

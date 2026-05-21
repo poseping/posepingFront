@@ -63,8 +63,12 @@ const WebcamStream = forwardRef<WebcamStreamRef, WebcamStreamProps>(
     }, [webcamNeeded, deviceId])
 
     useEffect(() => {
-      if (displayCanvasRef.current && landmarks?.length) {
-        drawSkeleton(displayCanvasRef.current, landmarks, frameWidth ?? 0, frameHeight ?? 0, statusColor)
+      const canvas = displayCanvasRef.current
+      if (!canvas) return
+      if (landmarks?.length) {
+        drawSkeleton(canvas, landmarks, frameWidth ?? 0, frameHeight ?? 0, statusColor)
+      } else {
+        canvas.getContext('2d')?.clearRect(0, 0, canvas.width, canvas.height)
       }
     }, [landmarks, frameWidth, frameHeight, statusColor])
 

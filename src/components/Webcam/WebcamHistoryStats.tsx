@@ -78,7 +78,7 @@ export default function WebcamHistoryStats() {
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['webcam-history'],
-    queryFn: () => getWebcamHistory(5),
+    queryFn: () => getWebcamHistory({ limit: 5 }),
   })
 
   const sessions = data?.sessions ?? []
