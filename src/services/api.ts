@@ -83,7 +83,17 @@ export const analyzePose = async (imageBase64: string): Promise<PoseAnalysisResp
 
 // 헬스 체크
 export const healthCheck = async (): Promise<any> => {
-  const response = await apiClient.get('/pose/health')
+  const response = await apiClient.get('/health')
+  return response.data
+}
+
+export const warmBackend = async (): Promise<any> => {
+  const response = await apiClient.get('/health', {
+    timeout: 30000,
+    headers: {
+      'Cache-Control': 'no-cache',
+    },
+  })
   return response.data
 }
 
