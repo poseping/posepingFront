@@ -139,9 +139,6 @@ export default function MyPage() {
           onRetakeHabits={() => navigate('/onboarding')}
         />
 
-        {/* ── 알림 및 설정 ── */}
-        <MyPreferencesCard />
-
         {/* ── 웹캠 자세 분석 설정 ── */}
         <MyWebcamSettingsCard />
 
