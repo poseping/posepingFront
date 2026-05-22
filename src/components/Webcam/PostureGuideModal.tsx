@@ -6,9 +6,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faArrowLeft,
   faArrowRight,
+  faBone,
   faCamera,
   faCheck,
+  faCircleCheck,
   faLightbulb,
+  faPerson,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons'
 import { analyzePose } from '../../services/api'
