@@ -26,25 +26,25 @@ interface PostureGuideModalProps {
 const STEPS = [
   {
     title: '카메라 위치 잡기',
-    // icon: faCamera,
+    icon: faCamera,
     instruction: '카메라와 눈높이를 맞추고, 머리부터 허리까지 화면에 보이도록 거리를 조정해주세요.',
     tip: '카메라에서 약 50~80cm 거리가 적당해요',
   },
   {
     title: '허리와 등 펴기',
-    // icon: faBone,
+    icon: faBone,
     instruction: '등받이에 기대지 말고 허리를 곧게 세워주세요. 골반을 살짝 앞으로 기울이면 자연스럽게 허리가 펴집니다.',
     tip: '배꼽을 앞으로 내민다는 느낌으로 앉아보세요',
   },
   {
     title: '어깨 펴고 목 정렬',
-    // icon: faPerson,
+    icon: faPerson,
     instruction: '양쪽 어깨를 수평으로 내리고, 턱을 살짝 당겨주세요. 귀와 어깨가 일직선이 되면 좋아요.',
     tip: '머리를 천장 방향으로 당기는 느낌으로',
   },
   {
     title: '이 자세 그대로!',
-    // icon: faCircleCheck,
+    icon: faCircleCheck,
     instruction: '이 자세 그대로 유지해주세요. 잠시 후 기준 자세가 자동으로 등록됩니다.',
     tip: '3초간 움직이지 않으면 자동으로 캡처돼요',
   },
