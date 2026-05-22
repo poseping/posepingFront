@@ -6,12 +6,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faArrowLeft,
   faArrowRight,
-  faBone,
   faCamera,
   faCheck,
-  faCircleCheck,
   faLightbulb,
-  faPerson,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons'
 import { analyzePose } from '../../services/api'
@@ -167,7 +164,6 @@ export default function PostureGuideModal({ onClose, onComplete }: PostureGuideM
         </div>
 
         <div className="guide-instruction">
-          <div className="guide-step-icon"><FontAwesomeIcon icon={current.icon} /></div>
           <p className="guide-step-label">{step + 1} / {STEPS.length}</p>
           <h3 className="guide-step-title">{current.title}</h3>
           <p className="guide-step-desc">{current.instruction}</p>

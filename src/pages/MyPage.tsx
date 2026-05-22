@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons'
 import PageHeader from '../components/PageHeader'
@@ -19,6 +19,7 @@ import '../styles/pages/my-page.scss'
 export default function MyPage() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const user = useSelector((state: RootState) => state.auth.user)
   const token = useSelector((state: RootState) => state.auth.token) ?? ''
 
@@ -29,7 +30,8 @@ export default function MyPage() {
   const { data: habitData, isLoading: habitLoading } = useQuery({
     queryKey: ['lifestyle-habit'],
     queryFn: getLifestyleHabits,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
+    refetchOnMount: 'always',
   })
 
   const randomNicknameMutation = useMutation({
@@ -51,6 +53,7 @@ export default function MyPage() {
   const deleteMutation = useMutation({
     mutationFn: deleteAccount,
     onSuccess: () => {
+      queryClient.clear()
       dispatch(logout())
       clearAuth()
       navigate('/login')
@@ -75,6 +78,7 @@ export default function MyPage() {
   }
 
   const handleLogout = () => {
+    queryClient.clear()
     dispatch(logout())
     clearAuth()
     navigate('/login')
@@ -134,9 +138,6 @@ export default function MyPage() {
           onStartAnalysis={() => navigate('/assistant')}
           onRetakeHabits={() => navigate('/onboarding')}
         />
-
-        {/* ── 알림 및 설정 ── */}
-        <MyPreferencesCard />
 
         {/* ── 웹캠 자세 분석 설정 ── */}
         <MyWebcamSettingsCard />

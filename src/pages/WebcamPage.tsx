@@ -68,13 +68,19 @@ export default function WebcamPage() {
   const [selectedProfile, setSelectedProfile] = useState<PostureProfile | null>(null)
   const [isProfileListOpen, setIsProfileListOpen] = useState(false)
   const [isStretchOpen, setIsStretchOpen] = useState(false)
+  const [webcamError, setWebcamError] = useState<string | null>(null)
+  const [analyzeError, setAnalyzeError] = useState<string | null>(null)
+  const [cameraDevices, setCameraDevices] = useState<MediaDeviceInfo[]>([])
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string | undefined>(undefined)
 
   const sessionRef = useRef({
     startedAt: null as string | null,
-    goodCount: 0,
-    warningCount: 0,
-    badCount: 0,
+    // 상태 전환 횟수 (summary "X회" 표시용)
+    goodTransitions: 0,
+    warningTransitions: 0,
+    badTransitions: 0,
     causeCounts: {} as Record<string, number>,
+    // 프레임 수 (자세 점수 계산용)
     goodFrames: 0,
     warningFrames: 0,
     badFrames: 0,
@@ -85,6 +91,7 @@ export default function WebcamPage() {
   const webcamStreamRef = useRef<WebcamStreamRef>(null)
   const requestInFlightRef = useRef(false)
   const analysisTimerRef = useRef<number>()
+  const consecutiveErrorRef = useRef(0)
 
   const { data: profiles = [], isLoading: profilesLoading } = useQuery({
     queryKey: ['postureProfiles'],
@@ -129,7 +136,18 @@ export default function WebcamPage() {
   const { mutateAsync: runAnalyze } = useMutation({
     mutationFn: (imageBase64: string) =>
       analyzeWebcam(imageBase64, undefined, webcamSettings?.posture_sensitivity ?? 'medium'),
-    onError: (error) => { console.error('웹캠 분석 실패:', error) },
+    onSuccess: () => {
+      setAnalyzeError(null)
+      consecutiveErrorRef.current = 0
+    },
+    onError: (error) => {
+      console.error('웹캠 분석 실패:', error)
+      consecutiveErrorRef.current++
+      if (consecutiveErrorRef.current >= 5) {
+        setAnalyzeError('카메라가 감지되지 않습니다. 카메라 앞에 바르게 앉은 후 재개해주세요.')
+        setAnalysisState('paused')
+      }
+    },
   })
 
   const stretchReminder = useStretchReminder()
@@ -142,7 +160,7 @@ export default function WebcamPage() {
     resetAssistantComment,
   } = useWebcamAssistantComment(phase === 'analyzing', webcamSettings?.ai_comment_threshold_sec ?? 60)
 
-  const isAnalyzing = phase === 'analyzing' && analysisState === 'active'
+  const isAnalyzing = phase === 'analyzing' && analysisState === 'active' && !webcamError
   const canAddMore = profiles.filter((p) => p.is_active).length < 3
   const profileEditable = phase !== 'analyzing' || analysisState === 'paused'
 
@@ -152,11 +170,14 @@ export default function WebcamPage() {
 
   const handleStartAnalysis = () => {
     resetAssistantComment()
+    setWebcamError(null)
+    setAnalyzeError(null)
+    consecutiveErrorRef.current = 0
     sessionRef.current = {
       startedAt: new Date().toISOString(),
-      goodCount: 0,
-      warningCount: 0,
-      badCount: 0,
+      goodTransitions: 0,
+      warningTransitions: 0,
+      badTransitions: 0,
       causeCounts: {},
       goodFrames: 0,
       warningFrames: 0,
@@ -175,7 +196,11 @@ export default function WebcamPage() {
     setAnalysisState('paused')
   }
 
-  const handleResume = () => setAnalysisState('active')
+  const handleResume = () => {
+    setAnalyzeError(null)
+    consecutiveErrorRef.current = 0
+    setAnalysisState('active')
+  }
 
   const handleStop = () => {
     const historyCache = queryClient.getQueryData<{ sessions: { good_ratio: number }[] }>(['webcam-history'])
@@ -206,7 +231,7 @@ export default function WebcamPage() {
     else sessionRef.current.badFrames++
 
     if (data.status !== prevStatusRef.current) {
-      const key = `${data.status}Count` as 'goodCount' | 'warningCount' | 'badCount'
+      const key = `${data.status}Transitions` as 'goodTransitions' | 'warningTransitions' | 'badTransitions'
       sessionRef.current[key]++
       prevStatusRef.current = data.status
     }
@@ -231,6 +256,8 @@ export default function WebcamPage() {
           try {
             const data = await runAnalyze(imageBase64)
             handleResult(data)
+          } catch {
+            // onError에서 analyzeError 상태로 처리
           } finally {
             requestInFlightRef.current = false
           }
@@ -287,7 +314,7 @@ export default function WebcamPage() {
             <div className="wcam-empty-icon"><FontAwesomeIcon icon={faClipboardList} /></div>
             <h4>등록된 기준 자세가 없습니다</h4>
             <p>카메라 앞에 바르게 앉은 후 기준 자세를 등록하면 실시간 분석을 시작할 수 있습니다.</p>
-            <button className="btn--primary btn--lg btn--full" onClick={() => setIsGuideOpen(true)}>
+            <button className="btn--primary btn--lg" onClick={() => setIsGuideOpen(true)}>
               <FontAwesomeIcon icon={faCamera} />
               기준 자세 등록하기
             </button>
@@ -341,11 +368,36 @@ export default function WebcamPage() {
             <WebcamStream
               ref={webcamStreamRef}
               webcamNeeded={phase === 'analyzing'}
+              deviceId={selectedDeviceId}
               landmarks={analyzeResult?.landmarks}
               frameWidth={analyzeResult?.frame_width}
               frameHeight={analyzeResult?.frame_height}
               statusColor={analyzeResult ? STATUS_COLOR[analyzeResult.status] : undefined}
+              onCameraError={setWebcamError}
+              onDevicesFound={(devices) => {
+                // DEV: 카메라 선택 UI 테스트용 — 배포 전 제거
+                if (import.meta.env.DEV && devices.length < 2) {
+                  setCameraDevices([
+                    ...devices,
+                    { deviceId: 'mock-ir', label: 'IR Camera (테스트)', kind: 'videoinput', groupId: '' } as MediaDeviceInfo,
+                  ])
+                } else {
+                  setCameraDevices(devices)
+                }
+              }}
             />
+            {(webcamError || analyzeError) && (
+              <div className="wcam-canvas-overlay">
+                <div className="wcam-canvas-overlay__content">
+                  <p className="wcam-canvas-overlay__msg">
+                    {webcamError ?? analyzeError}
+                  </p>
+                  {analyzeError && !webcamError && (
+                    <p className="wcam-canvas-overlay__hint">아래 재개 버튼을 눌러주세요</p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -426,6 +478,25 @@ export default function WebcamPage() {
             )}
           </div>
 
+          {cameraDevices.length > 1 && (
+            <select
+              className="wcam-camera-select"
+              value={selectedDeviceId ?? ''}
+              onChange={(e) => {
+                setSelectedDeviceId(e.target.value || undefined)
+                setWebcamError(null)
+                setAnalyzeError(null)
+              }}
+              title="카메라 선택"
+            >
+              {cameraDevices.map((d, i) => (
+                <option key={d.deviceId} value={d.deviceId}>
+                  {d.label || `카메라 ${i + 1}`}
+                </option>
+              ))}
+            </select>
+          )}
+
           <div className="wcam-ctrl-spacer" />
 
           {analysisState === 'active' ? (
@@ -434,7 +505,7 @@ export default function WebcamPage() {
               일시정지
             </button>
           ) : (
-            <button className="btn--primary wcam-ctrl-action-btn" onClick={handleResume} disabled={!hasProfile}>
+            <button className="btn--primary wcam-ctrl-action-btn" onClick={handleResume} disabled={!hasProfile || !!webcamError}>
               <FontAwesomeIcon icon={faPlay} />
               재개
             </button>
@@ -493,7 +564,9 @@ export default function WebcamPage() {
           </div>
         ) : (
           <div className="card wcam-result-placeholder">
-            <p className="wcam-comment-muted">분석이 시작되면 결과가 여기 표시됩니다.</p>
+            <p className="wcam-comment-muted">
+              {webcamError || analyzeError ? '분석 대기 중...' : '카메라 연결 중...'}
+            </p>
           </div>
         )}
       </div>
@@ -503,13 +576,13 @@ export default function WebcamPage() {
   // ── Summary phase ──────────────────────────────────────────────────────────
 
   const renderSummaryPhase = () => {
-    const { goodCount, warningCount, badCount, causeCounts, goodFrames, warningFrames, totalFrames } = sessionRef.current
+    const { goodTransitions, warningTransitions, badTransitions, causeCounts, goodFrames, warningFrames, totalFrames } = sessionRef.current
     return (
       <div className="wcam-summary-phase">
         <WcamSessionSummaryChart
-          goodCount={goodCount}
-          warningCount={warningCount}
-          badCount={badCount}
+          goodCount={goodTransitions}
+          warningCount={warningTransitions}
+          badCount={badTransitions}
           causeCounts={causeCounts}
           alertMap={alertMap}
           prevGoodRatio={prevGoodRatio}
@@ -517,15 +590,8 @@ export default function WebcamPage() {
           goodFrames={goodFrames}
           warningFrames={warningFrames}
           totalFrames={totalFrames}
+          onRestart={() => { setPhase('ready'); setAnalyzeResult(null) }}
         />
-        <div className="wcam-summary-actions">
-          <button
-            className="btn--secondary btn--lg"
-            onClick={() => { setPhase('ready'); setAnalyzeResult(null) }}
-          >
-            재시작
-          </button>
-        </div>
         <WebcamHistoryStats />
       </div>
     )

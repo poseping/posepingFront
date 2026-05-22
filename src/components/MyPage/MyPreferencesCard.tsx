@@ -29,7 +29,7 @@ const wrap = (value: number, min: number, max: number) => {
 }
 
 export default function MyPreferencesCard() {
-  const [times, setTimes] = useState<string[]>(['오후 3:00', '오후 9:00'])
+  const [times, setTimes] = useState<string[]>(['오후 3:00'])
 
   const [isAdding, setIsAdding] = useState(false)
   const [period, setPeriod] = useState<Period>('오후')

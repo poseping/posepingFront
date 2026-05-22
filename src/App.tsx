@@ -3,13 +3,16 @@
  * 라우터 설정 및 상태 관리
  */
 
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import ProtectedRoute from './components/ProtectedRoute'
+import ErrorBoundary from './components/ErrorBoundary'
 import AppLayout from './components/AppLayout'
 import ScrollToTop from './components/ScrollToTop'
+import { warmBackend } from './services/api'
 import { RootState } from './store/store'
 
 const LoginPage = lazy(() => import('./pages/LoginPage'))
@@ -25,6 +28,71 @@ const SettingsPage = lazy(() => import('./pages/SettingsPage'))
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage'))
 const AdminMembersPage = lazy(() => import('./pages/AdminMembersPage'))
 const KakaoCallbackPage = lazy(() => import('./pages/KakaoCallbackPage'))
+const BRAND_LOGO_SRC = '/assets/logo/poseping_fill.png'
+
+function BackendWarmupScreen({
+}: {
+  hasError: boolean
+  onRetry: () => void
+  onContinue: () => void
+}) {
+  return (
+    <main className="app-warmup">
+      <img className="app-warmup__logo" src={BRAND_LOGO_SRC} alt="PosePing" />
+      <div className="app-warmup__spinner" aria-hidden="true">
+        {Array.from({ length: 8 }).map((_, index) => (
+          <span
+            key={index}
+            className="app-warmup__spinner-dot"
+            style={{
+              '--dot-angle': `${index * 45}deg`,
+              '--dot-delay': `${(7 - index) * -0.2375}s`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+      <h1>앉아있는 시간, 안심할 수 있게.</h1>
+      <p>
+        포즈PING에 접속 중입니다.
+      </p>
+    </main>
+  )
+}
+
+function BackendWarmupGate({ children }: { children: ReactNode }) {
+  const shouldSkipWarmup = window.location.pathname === '/auth/kakao/callback'
+  const [status, setStatus] = useState<'warming' | 'ready' | 'error'>(
+    shouldSkipWarmup ? 'ready' : 'warming'
+  )
+
+  const wakeBackend = () => {
+    if (shouldSkipWarmup) {
+      setStatus('ready')
+      return
+    }
+
+    setStatus('warming')
+    warmBackend()
+      .then(() => setStatus('ready'))
+      .catch(() => setStatus('error'))
+  }
+
+  useEffect(() => {
+    wakeBackend()
+  }, [])
+
+  if (status !== 'ready') {
+    return (
+      <BackendWarmupScreen
+        hasError={status === 'error'}
+        onRetry={wakeBackend}
+        onContinue={() => setStatus('ready')}
+      />
+    )
+  }
+
+  return <>{children}</>
+}
 
 function App() {
   const user = useSelector((state: RootState) => state.auth.user)
@@ -32,9 +100,11 @@ function App() {
 
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+    <BackendWarmupGate>
     <Router>
       <ScrollToTop />
       <div className="app-frame">
+      <ErrorBoundary>
       <Suspense fallback={null}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
@@ -72,8 +142,10 @@ function App() {
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </Suspense>
+      </ErrorBoundary>
       </div>
     </Router>
+    </BackendWarmupGate>
     </GoogleOAuthProvider>
   )
 }

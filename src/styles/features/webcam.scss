@@ -91,6 +91,7 @@ $_danger-fg:  #b91c1c;
 
 // ─── Stage (canvas area) ──────────────────────────────────────────────────
 .wcam-stage-inner {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -98,6 +99,44 @@ $_danger-fg:  #b91c1c;
   background:
     linear-gradient(135deg, rgba(17, 94, 239, 0.06), rgba(11, 122, 117, 0.08)),
     $_dark;
+}
+
+.wcam-canvas-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.65);
+  border-radius: inherit;
+  z-index: 10;
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  &__icon {
+    font-size: 2rem;
+    opacity: 0.7;
+  }
+
+  &__msg {
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.5;
+    max-width: 240px;
+  }
+
+  &__hint {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+  }
 }
 
 .webcam-canvas {
@@ -132,12 +171,16 @@ $_danger-fg:  #b91c1c;
     color: var(--muted-foreground);
     font-size: 0.88rem;
     line-height: 1.55;
-    max-width: 26ch;
   }
 }
 
 
 // ─── Result Card ──────────────────────────────────────────────────────────
+.wcam-result-card,
+.wcam-result-placeholder {
+  flex: 1;
+}
+
 .wcam-result-header {
   display: flex;
   align-items: center;
@@ -150,10 +193,11 @@ $_danger-fg:  #b91c1c;
 .wcam-status-chip {
   display: inline-flex;
   align-items: center;
-  padding: 0.4rem 0.85rem;
+  padding: 0.5rem 0.85rem;
   border-radius: 999px;
   font-size: 0.78rem;
   font-weight: 800;
+  line-height: 1;
 
   &.good    { background: $_success-bg; color: $_success-fg; }
   &.warning { background: #fef3c7; color: #92400e; }
@@ -375,7 +419,6 @@ $_danger-fg:  #b91c1c;
   grid-template-columns: 3fr 2fr;
   gap: 1.5rem;
   width: 100%;
-  align-items: start;
 
   @media (max-width: 768px) { grid-template-columns: 1fr; gap: 1rem; }
 }
@@ -392,6 +435,7 @@ $_danger-fg:  #b91c1c;
 // ─── Control bar ──────────────────────────────────────────────────────────
 .wcam-control-bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.65rem;
   padding: 0.65rem 1rem;
@@ -401,7 +445,24 @@ $_danger-fg:  #b91c1c;
   box-shadow: 0 4px 12px rgba(20, 38, 70, 0.06);
 }
 
-.wcam-ctrl-spacer { flex: 1; }
+.wcam-ctrl-spacer {
+  flex: 1; 
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.wcam-camera-select {
+  height: 36px;
+  padding: 0 1.85rem 0 0.65rem;
+  border: 1px solid rgba(19, 42, 76, 0.15);
+  border-radius: 8px;
+  background-color: #fff;
+  color: #374151;
+  font-size: 0.78rem;
+  max-width: 200px;
+  &:focus { outline: none; border-color: var(--color-primary, #115ef0); }
+}
 
 .wcam-ctrl-icon {
   position: relative;
@@ -567,11 +628,11 @@ $_danger-fg:  #b91c1c;
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.12s, background 0.12s, color 0.12s, opacity 0.12s;
+  transition: border-color 0.06s, background 0.06s, color 0.06s, opacity 0.06s;
 
   &:hover {
     border-color: $_heading;
-    color: $_heading;
+    color: #fff;
   }
 
   &--active {
@@ -615,6 +676,18 @@ $_danger-fg:  #b91c1c;
 .wcam-ctrl-action-btn {
   font-size: 0.88rem;
   padding: 0.45rem 0.9rem;
+  border: 1px solid transparent;
+}
+
+@media (max-width: 767px) {
+  .wcam-camera-select {
+    flex: 1;
+    max-width: none;
+  }
+
+  .wcam-ctrl-action-btn:not(.btn--danger-outline) {
+    flex: 1;
+  }
 }
 
 .wcam-paused-banner {
@@ -626,6 +699,12 @@ $_danger-fg:  #b91c1c;
   font-weight: 600;
   color: #92400e;
   text-align: center;
+
+  &--error {
+    background: #fee2e2;
+    border-color: #f87171;
+    color: #991b1b;
+  }
 }
 
 
@@ -699,11 +778,6 @@ $_danger-fg:  #b91c1c;
   &--bad     { background: $_danger-bg;  color: $_danger-fg; }
 }
 
-.wcam-summary-actions {
-  display: flex;
-  gap: 0.75rem;
-  justify-content: center;
-}
 
 
 // ─── Profile list modal (analyzing 중 조회) ───────────────────────────────
@@ -722,7 +796,6 @@ $_danger-fg:  #b91c1c;
   flex: 1;
   font-size: 0.75rem;
   color: #64748b;
-  text-align: center;
 }
 
 

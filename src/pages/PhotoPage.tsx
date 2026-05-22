@@ -19,6 +19,7 @@ import EditableLandmarkCanvas, { FRONT_EDIT_IDS, LEFT_SIDE_EDIT_IDS, RIGHT_SIDE_
 import PhotoAnalysisResultSummary from '../components/PhotoAnalysis/PhotoAnalysisResultSummary'
 import '../styles/features/photo-analysis.scss'
 
+type LandmarkFailureView = 'front' | 'side' | 'both'
 
 function normalizeManualLandmarks(landmarks: ManualLandmarkInput[]) {
   return landmarks.map((landmark) => ({
@@ -77,6 +78,38 @@ function buildObjectUrl(file: File | null) {
   return file ? URL.createObjectURL(file) : null
 }
 
+function getLandmarkFailureLabel(view: LandmarkFailureView) {
+  switch (view) {
+    case 'front':
+      return '정면'
+    case 'side':
+      return '측면'
+    default:
+      return '정면/측면'
+  }
+}
+
+function clearFailedPhotoInput(
+  view: LandmarkFailureView,
+  actions: {
+    clearFront: () => void
+    clearSide: () => void
+  }
+) {
+  if (view === 'front') {
+    actions.clearFront()
+    return
+  }
+
+  if (view === 'side') {
+    actions.clearSide()
+    return
+  }
+
+  actions.clearFront()
+  actions.clearSide()
+}
+
 function PhotoUploadField({
   id,
   label,
@@ -132,6 +165,51 @@ export default function PhotoPage() {
   const [selectedSideLandmarkId, setSelectedSideLandmarkId] = useState<number | null>(null)
   const [assistantComment, setAssistantComment] = useState<string | null>(null)
   const [assistantCommentError, setAssistantCommentError] = useState<string | null>(null)
+  const [landmarkFailureView, setLandmarkFailureView] = useState<LandmarkFailureView | null>(null)
+
+  const resetPhotoAnalysisFlow = () => {
+    setFrontFile(null)
+    setSideFile(null)
+    setFrontImageSize({ width: 0, height: 0 })
+    setSideImageSize({ width: 0, height: 0 })
+    setFinalResult(null)
+    setFrontLandmarks([])
+    setSideLandmarks([])
+    setSelectedFrontLandmarkId(null)
+    setSelectedSideLandmarkId(null)
+    setAssistantComment(null)
+    setAssistantCommentError(null)
+    setLandmarkFailureView(null)
+    setActiveStep(1)
+  }
+
+  const clearFrontPhotoInput = () => {
+    setFrontFile(null)
+    setFrontImageSize({ width: 0, height: 0 })
+  }
+
+  const clearSidePhotoInput = () => {
+    setSideFile(null)
+    setSideImageSize({ width: 0, height: 0 })
+  }
+
+  const handleLandmarkFailureConfirm = () => {
+    if (!landmarkFailureView) return
+
+    clearFailedPhotoInput(landmarkFailureView, {
+      clearFront: clearFrontPhotoInput,
+      clearSide: clearSidePhotoInput,
+    })
+    setFinalResult(null)
+    setFrontLandmarks([])
+    setSideLandmarks([])
+    setSelectedFrontLandmarkId(null)
+    setSelectedSideLandmarkId(null)
+    setAssistantComment(null)
+    setAssistantCommentError(null)
+    setLandmarkFailureView(null)
+    setActiveStep(2)
+  }
 
   useEffect(() => {
     const nextFrontUrl = buildObjectUrl(frontFile)
@@ -162,6 +240,20 @@ export default function PhotoPage() {
       return analyzePhotoFiles(frontFile, sideFile, sideView)
     },
     onSuccess: (data) => {
+      const hasFrontLandmarks = data.front_landmarks.length > 0
+      const hasSideLandmarks = data.side_landmarks.length > 0
+
+      if (!hasFrontLandmarks || !hasSideLandmarks) {
+        setLandmarkFailureView(
+          !hasFrontLandmarks && !hasSideLandmarks
+            ? 'both'
+            : hasFrontLandmarks
+              ? 'side'
+              : 'front'
+        )
+        return
+      }
+
       setFinalResult(null)
       setFrontLandmarks(data.front_landmarks)
       setSideLandmarks(data.side_landmarks)
@@ -218,18 +310,7 @@ export default function PhotoPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['photo-analysis-history'] })
       queryClient.invalidateQueries({ queryKey: ['photo-analysis-history-summary'] })
-      setFrontFile(null)
-      setSideFile(null)
-      setFrontImageSize({ width: 0, height: 0 })
-      setSideImageSize({ width: 0, height: 0 })
-      setFinalResult(null)
-      setFrontLandmarks([])
-      setSideLandmarks([])
-      setSelectedFrontLandmarkId(null)
-      setSelectedSideLandmarkId(null)
-      setAssistantComment(null)
-      setAssistantCommentError(null)
-      setActiveStep(1)
+      resetPhotoAnalysisFlow()
       navigate('/photo', { replace: true })
     },
     onError: (error) => {
@@ -442,6 +523,22 @@ export default function PhotoPage() {
             {activeStep === 4 && renderResultStep()}
           </div>
         </main>
+        {landmarkFailureView && (
+          <div className="modal" role="dialog" aria-modal="true" aria-labelledby="photo-landmark-failure-title">
+            <div className="modal__backdrop" />
+            <div className="modal__card modal--xs">
+              <h3 id="photo-landmark-failure-title">사진 분석 실패</h3>
+              <p style={{ marginTop: '0.75rem' }}>
+                {getLandmarkFailureLabel(landmarkFailureView)} 사진 분석에 실패했습니다. 머리부터 골반까지 명확하게 나온 사진으로 다시 시도해주세요.
+              </p>
+              <div className="photo-action-row" style={{ marginTop: '1.25rem', justifyContent: 'flex-end' }}>
+                <button className="btn--primary" onClick={handleLandmarkFailureConfirm}>
+                  확인
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </>
   )
 }

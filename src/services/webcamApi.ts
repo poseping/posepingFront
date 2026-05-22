@@ -139,21 +139,11 @@ export interface WebcamHistoryResponse {
 export type HistoryPeriod = "day" | "week" | "month";
 
 export const getWebcamHistory = async (
-  limit = 10,
+  options: { period: HistoryPeriod } | { limit?: number } = {},
 ): Promise<WebcamHistoryResponse> => {
   const response = await apiClient.get<WebcamHistoryResponse>(
     "/webcam/history",
-    { params: { limit } },
-  );
-  return response.data;
-};
-
-export const getWebcamHistoryByPeriod = async (
-  period: HistoryPeriod,
-): Promise<WebcamHistoryResponse> => {
-  const response = await apiClient.get<WebcamHistoryResponse>(
-    "/webcam/history",
-    { params: { period } },
+    { params: options },
   );
   return response.data;
 };
