@@ -27,6 +27,7 @@ export function useStretchReminder() {
   const persisted = useRef(loadPersisted()).current;
 
   const [isEnabled, setIsEnabled] = useState(() => persisted !== null);
+  const [isPaused, setIsPaused] = useState(false);
   const [intervalMinutes, setIntervalMinutes] = useState<StretchInterval>(
     persisted?.intervalMinutes ?? 60,
   );
@@ -36,6 +37,7 @@ export function useStretchReminder() {
   const lastCycleRef = useRef<number>(persisted?.lastCycle ?? 0);
   const intervalRef = useRef(intervalMinutes);
   const prevIntervalRef = useRef(intervalMinutes);
+  const pauseStartRef = useRef<number>(0);
 
   useEffect(() => {
     intervalRef.current = intervalMinutes;
@@ -46,8 +48,21 @@ export function useStretchReminder() {
       sessionStorage.removeItem(STORAGE_KEY);
       startedAtRef.current = 0;
       lastCycleRef.current = 0;
+      pauseStartRef.current = 0;
       setTimeLeft(0);
       return;
+    }
+
+    if (isPaused) {
+      // 일시정지 시작 시각 기록 — resume 시 startedAt 보정에 사용
+      pauseStartRef.current = Date.now();
+      return;
+    }
+
+    // 일시정지에서 재개 시: 멈춰있던 시간만큼 startedAt을 앞으로 당겨 elapsed에서 제외
+    if (pauseStartRef.current > 0) {
+      startedAtRef.current += Date.now() - pauseStartRef.current;
+      pauseStartRef.current = 0;
     }
 
     // 인터벌이 변경된 경우 카운트 리셋
@@ -121,11 +136,24 @@ export function useStretchReminder() {
       clearInterval(tickId);
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
-  }, [isEnabled, intervalMinutes]);
+  }, [isEnabled, isPaused, intervalMinutes]);
 
   function toggle() {
     setIsEnabled((prev) => !prev);
   }
 
-  return { isEnabled, intervalMinutes, setIntervalMinutes, timeLeft, toggle };
+  function disable() {
+    setIsEnabled(false);
+    setIsPaused(false);
+  }
+
+  function pause() {
+    setIsPaused(true);
+  }
+
+  function resume() {
+    setIsPaused(false);
+  }
+
+  return { isEnabled, isPaused, intervalMinutes, setIntervalMinutes, timeLeft, toggle, disable, pause, resume };
 }

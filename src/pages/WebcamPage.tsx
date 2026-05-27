@@ -151,6 +151,26 @@ export default function WebcamPage() {
   })
 
   const stretchReminder = useStretchReminder()
+
+  // analyzing 단계를 벗어나면 스트레칭 알림 자동 해제
+  useEffect(() => {
+    if (phase !== 'analyzing') {
+      stretchReminder.disable()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase])
+
+  // 분석 일시정지 시 스트레칭 타이머도 일시정지
+  useEffect(() => {
+    if (phase !== 'analyzing') return
+    if (analysisState === 'paused') {
+      stretchReminder.pause()
+    } else {
+      stretchReminder.resume()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [analysisState, phase])
+
   const {
     assistantComment,
     assistantError,
