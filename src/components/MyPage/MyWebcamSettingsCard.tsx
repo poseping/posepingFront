@@ -5,9 +5,20 @@ import {
   updateWebcamSettings,
   type PostureSensitivity,
   type AiCommentThresholdSec,
+  type AiCommentMode,
   type WebcamSettings,
 } from "../../services/webcamSettingsApi";
 import "../../styles/components/my-webcam-settings.scss";
+
+const AI_COMMENT_MODE_OPTIONS: { value: AiCommentMode; label: string }[] = [
+  { value: "ai", label: "AI 코멘트" },
+  { value: "notification", label: "기본 알림" },
+];
+
+const AI_COMMENT_MODE_HINTS: Record<AiCommentMode, string> = {
+  ai: "자세 이상이 지속되면 AI가 맞춤 코멘트를 작성해요",
+  notification: "AI 없이 원인 항목을 알림으로 바로 전달해요",
+};
 
 const SENSITIVITY_OPTIONS: { value: PostureSensitivity; label: string }[] = [
   { value: "low", label: "낮음" },
@@ -47,6 +58,7 @@ export default function MyWebcamSettingsCard() {
   const [draft, setDraft] = useState<WebcamSettings>({
     posture_sensitivity: "medium",
     ai_comment_threshold_sec: 60,
+    ai_comment_mode: "ai",
   });
 
   useEffect(() => {
@@ -56,7 +68,8 @@ export default function MyWebcamSettingsCard() {
   const isDirty =
     serverData !== undefined &&
     (draft.posture_sensitivity !== serverData.posture_sensitivity ||
-      draft.ai_comment_threshold_sec !== serverData.ai_comment_threshold_sec);
+      draft.ai_comment_threshold_sec !== serverData.ai_comment_threshold_sec ||
+      draft.ai_comment_mode !== serverData.ai_comment_mode);
 
   const { mutate: saveSettings, isPending } = useMutation({
     mutationFn: updateWebcamSettings,
@@ -74,6 +87,25 @@ export default function MyWebcamSettingsCard() {
         <p className="mp-webcam-settings__loading">불러오는 중…</p>
       ) : (
         <ul className="mp-pref-list">
+          <li className="mp-pref-row">
+            <div className="mp-pref-label-group">
+              <span className="mp-pref-label">알림 방식</span>
+              <span className="mp-pref-sublabel">{AI_COMMENT_MODE_HINTS[draft.ai_comment_mode]}</span>
+            </div>
+            <div className="mp-wcam-seg" role="group" aria-label="알림 방식 선택">
+              {AI_COMMENT_MODE_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  className={`mp-wcam-seg__btn${draft.ai_comment_mode === opt.value ? " is-active" : ""}`}
+                  onClick={() => setDraft((prev) => ({ ...prev, ai_comment_mode: opt.value }))}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </li>
+
           <li className="mp-pref-row">
             <div className="mp-pref-label-group">
               <span className="mp-pref-label">자세 민감도</span>
