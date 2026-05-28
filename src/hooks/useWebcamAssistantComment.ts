@@ -4,8 +4,15 @@ import {
   getAssistantErrorMessage,
   getWebcamComment,
 } from "../services/assistantApi";
+import type { AiCommentMode } from "../services/webcamSettingsApi";
 
 const supportsNotification = typeof Notification !== "undefined";
+
+function buildFallbackMessage(issues: string[], getIssueName: (id: string) => string): string {
+  if (issues.length === 0) return "자세를 바르게 해주세요."
+  const labels = issues.map(getIssueName).filter(Boolean)
+  return `${labels.join(", ")} — 자세를 바르게 해주세요.`
+}
 
 export interface WebcamAssistantAnalyzeInput {
   status: string;
@@ -16,7 +23,12 @@ export interface WebcamAssistantAnalyzeInput {
   judgement_signature?: string;
 }
 
-export function useWebcamAssistantComment(isSessionActive: boolean, thresholdSec: number = 60) {
+export function useWebcamAssistantComment(
+  isSessionActive: boolean,
+  thresholdSec: number = 60,
+  aiMode: AiCommentMode = "ai",
+  getIssueName: (id: string) => string = (id) => id,
+) {
   const thresholdMsRef = useRef(thresholdSec * 1000);
   useEffect(() => { thresholdMsRef.current = thresholdSec * 1000 }, [thresholdSec]);
   const badPostureStartRef = useRef<number | null>(null);
@@ -78,6 +90,15 @@ export function useWebcamAssistantComment(isSessionActive: boolean, thresholdSec
     if (isAssistantCommentPending) return;
 
     badPostureStartRef.current = null;
+
+    if (aiMode === "notification") {
+      const message = buildFallbackMessage(result.issues, getIssueName);
+      setAssistantComment(message);
+      if (supportsNotification && Notification.permission === "granted" && document.hidden) {
+        new Notification("포즈PING", { body: message, icon: "/favicon.ico" });
+      }
+      return;
+    }
 
     requestWebcamComment({
       status: result.status,

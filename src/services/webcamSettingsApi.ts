@@ -2,10 +2,12 @@ import apiClient from "./api";
 
 export type PostureSensitivity = "low" | "medium" | "high";
 export type AiCommentThresholdSec = 30 | 60 | 180 | 300;
+export type AiCommentMode = "ai" | "notification";
 
 export interface WebcamSettings {
   posture_sensitivity: PostureSensitivity;
   ai_comment_threshold_sec: AiCommentThresholdSec;
+  ai_comment_mode: AiCommentMode;
 }
 
 export const getWebcamSettings = async (): Promise<WebcamSettings> => {

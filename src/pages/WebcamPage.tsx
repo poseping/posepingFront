@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, useCallback } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
@@ -104,6 +104,11 @@ export default function WebcamPage() {
     staleTime: Infinity,
   })
   const alertMap = Object.fromEntries(alertTypes.map((a) => [a.alert_type_id, a]))
+  const getIssueName = useCallback(
+    (id: string) => alertMap[id]?.alert_name ?? id,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [alertTypes],
+  )
 
   const { data: webcamSettings } = useQuery({
     queryKey: ['webcam-settings'],
@@ -178,7 +183,12 @@ export default function WebcamPage() {
     notifPermission,
     handleAnalyzeResult,
     resetAssistantComment,
-  } = useWebcamAssistantComment(phase === 'analyzing', webcamSettings?.ai_comment_threshold_sec ?? 60)
+  } = useWebcamAssistantComment(
+    phase === 'analyzing',
+    webcamSettings?.ai_comment_threshold_sec ?? 60,
+    webcamSettings?.ai_comment_mode ?? 'ai',
+    getIssueName,
+  )
 
   const isAnalyzing = phase === 'analyzing' && analysisState === 'active' && !webcamError
   const canAddMore = profiles.filter((p) => p.is_active).length < 3
