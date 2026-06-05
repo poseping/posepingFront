@@ -151,7 +151,7 @@ export default function WebcamPage() {
     onError: (error) => {
       console.error('웹캠 분석 실패:', error)
       consecutiveErrorRef.current++
-      if (consecutiveErrorRef.current >= 5) {
+      if (consecutiveErrorRef.current >= 20) {
         setAnalyzeError('카메라가 감지되지 않습니다. 카메라 앞에 바르게 앉은 후 재개해주세요.')
         setAnalysisState('paused')
       }
