@@ -90,16 +90,16 @@ const WebcamStream = forwardRef<WebcamStreamRef, WebcamStreamProps>(
 
       if (pipOverlay) {
         const w = canvas.width
-        const h = canvas.height
-        const barH = 48
+        const barH = 52
 
+        const barTop = 2
         pc.fillStyle = 'rgba(0,0,0,0.6)'
-        pc.fillRect(0, h - barH, w, barH)
+        pc.fillRect(0, barTop, w, barH)
 
         // 상태 색 점
-        const dotR = 6
+        const dotR = 7
         const dotX = 18
-        const dotY = h - barH / 2
+        const dotY = barTop + barH / 2
         pc.fillStyle = statusColor ?? '#10b981'
         pc.beginPath()
         pc.arc(dotX, dotY, dotR, 0, Math.PI * 2)
@@ -107,22 +107,22 @@ const WebcamStream = forwardRef<WebcamStreamRef, WebcamStreamProps>(
 
         // 상태 라벨
         pc.textBaseline = 'middle'
-        pc.font = 'bold 14px sans-serif'
+        pc.font = 'bold 17px sans-serif'
         pc.fillStyle = '#fff'
-        pc.fillText(pipOverlay.label, dotX + dotR + 8, dotY)
+        pc.fillText(pipOverlay.label, dotX + dotR + 10, dotY)
 
         // 자세 점수 (우측)
         const scoreStr = pipOverlay.score.toFixed(1)
         const prefix = '자세 점수 '
-        pc.font = '13px sans-serif'
+        pc.font = '16px sans-serif'
         const prefixW = pc.measureText(prefix).width
-        pc.font = 'bold 13px sans-serif'
+        pc.font = 'bold 16px sans-serif'
         const scoreW = pc.measureText(scoreStr).width
-        const pad = 16
-        pc.font = '13px sans-serif'
+        const pad = 18
+        pc.font = '16px sans-serif'
         pc.fillStyle = 'rgba(255,255,255,0.7)'
         pc.fillText(prefix, w - prefixW - scoreW - pad, dotY)
-        pc.font = 'bold 13px sans-serif'
+        pc.font = 'bold 16px sans-serif'
         pc.fillStyle = '#fff'
         pc.fillText(scoreStr, w - scoreW - pad, dotY)
       }
