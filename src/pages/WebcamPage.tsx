@@ -10,6 +10,8 @@ import {
   faStop,
   faPlus,
   faXmark,
+  faExpand,
+  faCompress,
 } from '@fortawesome/free-solid-svg-icons'
 import {
   getPostureProfiles,
@@ -68,6 +70,7 @@ export default function WebcamPage() {
   const [selectedProfile, setSelectedProfile] = useState<PostureProfile | null>(null)
   const [isProfileListOpen, setIsProfileListOpen] = useState(false)
   const [isStretchOpen, setIsStretchOpen] = useState(false)
+  const [isPip, setIsPip] = useState(false)
   const [webcamError, setWebcamError] = useState<string | null>(null)
   const [analyzeError, setAnalyzeError] = useState<string | null>(null)
   const [cameraDevices, setCameraDevices] = useState<MediaDeviceInfo[]>([])
@@ -175,6 +178,42 @@ export default function WebcamPage() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [analysisState, phase])
+
+  // analyzing phase 벗어나면 PIP 자동 종료
+  useEffect(() => {
+    if (phase !== 'analyzing' && isPip) {
+      document.exitPictureInPicture?.().catch(() => {})
+    }
+  }, [phase, isPip])
+
+  // PIP 활성 시 Media Session API로 PIP 창 안에 일시정지/재개 버튼 노출
+  useEffect(() => {
+    if (!isPip) {
+      navigator.mediaSession?.setActionHandler('play', null)
+      navigator.mediaSession?.setActionHandler('pause', null)
+      return
+    }
+    navigator.mediaSession.setActionHandler('play', () => {
+      setAnalyzeError(null)
+      consecutiveErrorRef.current = 0
+      setAnalysisState('active')
+    })
+    navigator.mediaSession.setActionHandler('pause', () => {
+      resetAssistantComment()
+      setAnalysisState('paused')
+    })
+    return () => {
+      navigator.mediaSession?.setActionHandler('play', null)
+      navigator.mediaSession?.setActionHandler('pause', null)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPip])
+
+  // PIP 창 버튼 상태(▶/⏸)를 분석 상태와 동기화
+  useEffect(() => {
+    if (!isPip || !navigator.mediaSession) return
+    navigator.mediaSession.playbackState = analysisState === 'active' ? 'playing' : 'paused'
+  }, [isPip, analysisState])
 
   const {
     assistantComment,
@@ -404,6 +443,12 @@ export default function WebcamPage() {
               frameHeight={analyzeResult?.frame_height}
               statusColor={analyzeResult ? STATUS_COLOR[analyzeResult.status] : undefined}
               onCameraError={setWebcamError}
+              onPipChange={setIsPip}
+              pipPlaying={isPip && analysisState === 'active'}
+              pipOverlay={isPip && analyzeResult ? {
+                label: STATUS_LABEL[analyzeResult.status],
+                score: 100 - analyzeResult.deviation_score * 100,
+              } : undefined}
               onDevicesFound={(devices) => {
                 // DEV: 카메라 선택 UI 테스트용 — 배포 전 제거
                 if (import.meta.env.DEV && devices.length < 2) {
@@ -508,6 +553,16 @@ export default function WebcamPage() {
             )}
           </div>
 
+          {'pictureInPictureEnabled' in document && document.pictureInPictureEnabled && (
+            <button
+              className={`btn-icon btn-icon--circle wcam-ctrl-icon${isPip ? ' wcam-ctrl-icon--active' : ''}`}
+              onClick={() => webcamStreamRef.current?.togglePip()}
+              title={isPip ? 'PIP 종료' : 'PIP 모드'}
+            >
+              <FontAwesomeIcon icon={isPip ? faCompress : faExpand} />
+            </button>
+          )}
+
           {cameraDevices.length > 1 && (
             <select
               className="wcam-camera-select"
@@ -565,7 +620,11 @@ export default function WebcamPage() {
               </span>
             </div>
             <p className="wcam-result-score">
-              이탈 점수&nbsp;<strong>{(analyzeResult.deviation_score * 100).toFixed(1)}</strong>
+              자세 점수&nbsp;<strong>{(100 - analyzeResult.deviation_score * 100).toFixed(1)}</strong>
+              <span className="wcam-info-badge" style={{ verticalAlign: 'middle', margin: '0 0.35rem' }}>
+                ?
+                <span className="wcam-info-tooltip">기준 자세와의 일치도예요. 100에 가까울수록 기준 자세와 비슷한 상태입니다.</span>
+              </span>
               &nbsp;·&nbsp;기준: {analyzeResult.profile_name}
             </p>
             {analyzeResult.issues.length > 0 && (
