@@ -26,6 +26,7 @@ import {
 import { useStretchReminder, type StretchInterval } from '../hooks/useStretchReminder'
 import { useWebcamAssistantComment } from '../hooks/useWebcamAssistantComment'
 import { getWebcamSettings } from '../services/webcamSettingsApi'
+import { getUserApiSettings } from '../services/userApiSettingsApi'
 import WebcamStream, { type WebcamStreamRef } from '../components/Webcam/WebcamStream'
 import WebcamHistoryStats from '../components/Webcam/WebcamHistoryStats'
 import WcamSessionSummaryChart from '../components/Webcam/WcamSessionSummaryChart'
@@ -116,6 +117,12 @@ export default function WebcamPage() {
   const { data: webcamSettings } = useQuery({
     queryKey: ['webcam-settings'],
     queryFn: getWebcamSettings,
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const { data: userApiSettings } = useQuery({
+    queryKey: ['user-api-settings'],
+    queryFn: getUserApiSettings,
     staleTime: 5 * 60 * 1000,
   })
 
@@ -225,7 +232,7 @@ export default function WebcamPage() {
   } = useWebcamAssistantComment(
     phase === 'analyzing',
     webcamSettings?.ai_comment_threshold_sec ?? 60,
-    webcamSettings?.ai_comment_mode ?? 'ai',
+    userApiSettings?.is_ai_enabled ?? false,
     getIssueName,
   )
 

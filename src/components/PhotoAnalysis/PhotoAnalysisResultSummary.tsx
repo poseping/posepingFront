@@ -9,6 +9,7 @@ export default function PhotoAnalysisResultSummary({
   assistantComment,
   assistantCommentError,
   isAssistantCommentPending,
+  isAiEnabled = true,
   onRetryAssistantComment,
 }: {
   title: string
@@ -16,6 +17,7 @@ export default function PhotoAnalysisResultSummary({
   assistantComment: string | null
   assistantCommentError: string | null
   isAssistantCommentPending: boolean
+  isAiEnabled?: boolean
   onRetryAssistantComment: () => void
 }) {
   const craniovertebralAngle = result.side.craniovertebral_angle ?? null
@@ -86,7 +88,11 @@ export default function PhotoAnalysisResultSummary({
           </div>
           <div className="photo-message-block photo-message-block--assistant">
             <h4>AI 코멘트</h4>
-            {isAssistantCommentPending && !assistantComment ? (
+            {!isAiEnabled ? (
+              <p className="photo-message-muted">
+                AI 모드가 꺼져 있어요. 마이페이지에서 API 키를 등록하고 AI 모드를 켜면 맞춤 코멘트를 받을 수 있어요.
+              </p>
+            ) : isAssistantCommentPending && !assistantComment ? (
               <p className="photo-message-muted">코멘트를 작성하는 중입니다...</p>
             ) : assistantCommentError ? (
               <>

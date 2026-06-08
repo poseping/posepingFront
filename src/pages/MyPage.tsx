@@ -8,6 +8,7 @@ import PageHeader from '../components/PageHeader'
 import MyProfileCard from '../components/MyPage/MyProfileCard'
 import MyHabitsCard from '../components/MyPage/MyHabitsCard'
 import MyWebcamSettingsCard from '../components/MyPage/MyWebcamSettingsCard'
+import MyApiSettingsCard from '../components/MyPage/MyApiSettingsCard'
 import { loginSuccess, logout } from '../store/authSlice'
 import { clearAuth, saveUserInfo } from '../services/authService'
 import { deleteAccount, getRandomNickname, updateNickname, getLifestyleHabits } from '../services/memberApi'
@@ -129,6 +130,9 @@ export default function MyPage() {
           onLogout={handleLogout}
           onDeleteAccount={handleDeleteAccount}
         />
+
+        {/* ── AI 설정 ── */}
+        <MyApiSettingsCard />
 
         {/* ── 생활 습관 ── */}
         <MyHabitsCard
