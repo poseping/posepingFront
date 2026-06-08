@@ -241,6 +241,17 @@
   font-size: 0.9rem;
 }
 
+.onboarding-chat-ai-disabled {
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary, #888);
+
+  a {
+    color: var(--color-primary, #1FB5AC);
+    text-decoration: underline;
+  }
+}
+
 .onboarding-chat-hint {
   color: #64748b;
 }

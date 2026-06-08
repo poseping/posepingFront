@@ -334,3 +334,35 @@
     align-items: center;
   }
 }
+
+
+.home-ai-mode {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+
+  &__badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--color-surface-2, #f0f0f0);
+    color: var(--color-text-secondary, #888);
+
+    &--on {
+      background: var(--color-primary, #1FB5AC);
+      color: #fff;
+    }
+  }
+
+  &__link {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary, #888);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

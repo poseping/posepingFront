@@ -8,6 +8,7 @@ import { RootState } from '../store/store'
 import '../styles/pages/home.scss'
 import {getLatestPhotoAnalysis} from "../services/photoAnalysisApi.ts";
 import {useQuery} from "@tanstack/react-query";
+import { getUserApiSettings } from '../services/userApiSettingsApi'
 
 // 시간대별 인사말 (24시간 전체 커버)
 const getTimeGreeting = () => {
@@ -58,6 +59,11 @@ export default function HomePage() {
     queryKey: ['photo-latest-analysis'],
     queryFn: getLatestPhotoAnalysis,
   })
+  const { data: apiSettings } = useQuery({
+    queryKey: ['user-api-settings'],
+    queryFn: getUserApiSettings,
+    staleTime: 5 * 60 * 1000,
+  })
   const latestDateLabel = formatRecentAnalysisDate(data?.saved_at ?? data?.analyzed_at ?? data?.created_at)
   const latestScore = typeof data?.posture_score === 'number' && Number.isFinite(data.posture_score)
       ? Math.round(data.posture_score)
@@ -71,6 +77,12 @@ export default function HomePage() {
         <section className="home-greeting">
           <p>{getTimeGreeting()}</p>
           <h2>{nickname}님!</h2>
+          <div className="home-ai-mode">
+            <span className={`home-ai-mode__badge${apiSettings?.is_ai_enabled ? ' home-ai-mode__badge--on' : ''}`}>
+              {apiSettings?.is_ai_enabled ? 'AI 모드' : '수동 모드'}
+            </span>
+            <Link className="home-ai-mode__link" to="/mypage">설정 변경 →</Link>
+          </div>
         </section>
         <div className="home-page">
           {isLoading && <section className={'my-info'}><p>기록을 불러오는 중입니다.</p></section>}

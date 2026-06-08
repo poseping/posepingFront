@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons'
 import PageHeader from '../components/PageHeader'
@@ -10,8 +10,10 @@ import {
   sendOnboardingChat,
 } from '../services/assistantApi'
 import '../styles/pages/onboarding-chat.scss'
-import {useSelector} from "react-redux";
-import {RootState} from "../store/store.ts";
+import { useSelector } from 'react-redux'
+import { RootState } from '../store/store.ts'
+import { getUserApiSettings } from '../services/userApiSettingsApi'
+import { Link } from 'react-router-dom'
 
 const REDIRECT_DELAY_SECONDS = 3
 const ASSISTANT_AVATAR_SRC = '/assets/logo/android-icon-48x48.png'
@@ -30,7 +32,14 @@ export default function AssistantPage() {
   const messagesRef = useRef<HTMLDivElement | null>(null)
   const requestInFlightRef = useRef(false)
   const user = useSelector((state: RootState) => state.auth.user)
-  const nickname = user?.nickname?.trim() || '사용자';
+  const nickname = user?.nickname?.trim() || '사용자'
+
+  const { data: apiSettings } = useQuery({
+    queryKey: ['user-api-settings'],
+    queryFn: getUserApiSettings,
+    staleTime: 5 * 60 * 1000,
+  })
+  const isAiEnabled = apiSettings?.is_ai_enabled ?? false
   const initialMessages = [
     `안녕하세요, ${nickname} 님!`,
     '평소 생활 습관에 대해 몇 가지 물어볼게요😊',
@@ -141,10 +150,10 @@ export default function AssistantPage() {
     }
   }, [])
 
-  const canSubmit = inputValue.trim().length > 0 && !onboardingMutation.isPending && !done
+  const canSubmit = isAiEnabled && inputValue.trim().length > 0 && !onboardingMutation.isPending && !done
   const submitPrompt = (prompt: string) => {
     const trimmed = prompt.trim()
-    if (!trimmed || done || onboardingMutation.isPending || requestInFlightRef.current) return
+    if (!trimmed || done || !isAiEnabled || onboardingMutation.isPending || requestInFlightRef.current) return
 
     requestInFlightRef.current = true
     setErrorMessage(null)
@@ -254,13 +263,19 @@ export default function AssistantPage() {
               {errorMessage ? (
                   <p className="onboarding-chat-error">{errorMessage}</p>
               ) : ""}
+              {!isAiEnabled && (
+                <p className="onboarding-chat-ai-disabled">
+                  AI 모드가 꺼져 있어요.{' '}
+                  <Link to="/mypage">마이페이지</Link>에서 API 키를 등록하고 AI 모드를 켜주세요.
+                </p>
+              )}
               <form className="onboarding-chat-form" onSubmit={handleSubmit}>
                 <input
                     type="text"
                     value={inputValue}
                     onChange={(event) => setInputValue(event.target.value)}
-                    placeholder="질문에 답변해 보세요."
-                    disabled={done}
+                    placeholder={isAiEnabled ? "질문에 답변해 보세요." : "AI 모드를 활성화해야 대화할 수 있어요."}
+                    disabled={done || !isAiEnabled}
                 />
                 <button type="submit" className="onboarding-chat-submit" disabled={!canSubmit} aria-label="메시지 보내기">
                   <FontAwesomeIcon icon={faPaperPlane} />

@@ -4,8 +4,6 @@ import {
   getAssistantErrorMessage,
   getWebcamComment,
 } from "../services/assistantApi";
-import type { AiCommentMode } from "../services/webcamSettingsApi";
-
 const supportsNotification = typeof Notification !== "undefined";
 
 function buildFallbackMessage(issues: string[], getIssueName: (id: string) => string): string {
@@ -26,7 +24,7 @@ export interface WebcamAssistantAnalyzeInput {
 export function useWebcamAssistantComment(
   isSessionActive: boolean,
   thresholdSec: number = 60,
-  aiMode: AiCommentMode = "ai",
+  isAiEnabled: boolean = false,
   getIssueName: (id: string) => string = (id) => id,
 ) {
   const thresholdMsRef = useRef(thresholdSec * 1000);
@@ -91,7 +89,7 @@ export function useWebcamAssistantComment(
 
     badPostureStartRef.current = null;
 
-    if (aiMode === "notification") {
+    if (!isAiEnabled) {
       const message = buildFallbackMessage(result.issues, getIssueName);
       setAssistantComment(message);
       if (supportsNotification && Notification.permission === "granted" && document.hidden) {

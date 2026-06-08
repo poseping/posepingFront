@@ -1,6 +1,6 @@
 import { ChangeEvent, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faImage } from '@fortawesome/free-solid-svg-icons'
@@ -13,6 +13,7 @@ import {
   savePhotoAnalysis,
 } from '../services/photoAnalysisApi'
 import { buildPhotoCommentPayload, getAssistantErrorMessage, getPhotoComment } from '../services/assistantApi'
+import { getUserApiSettings } from '../services/userApiSettingsApi'
 import PageHeader from '../components/PageHeader'
 import HistorySummaryCards from '../components/History/HistorySummaryCards'
 import EditableLandmarkCanvas, { FRONT_EDIT_IDS, LEFT_SIDE_EDIT_IDS, RIGHT_SIDE_EDIT_IDS } from '../components/PhotoAnalysis/EditableLandmarkCanvas'
@@ -150,6 +151,13 @@ function PhotoUploadField({
 export default function PhotoPage() {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
+
+  const { data: apiSettings } = useQuery({
+    queryKey: ['user-api-settings'],
+    queryFn: getUserApiSettings,
+    staleTime: 5 * 60 * 1000,
+  })
+  const isAiEnabled = apiSettings?.is_ai_enabled ?? false
   const [activeStep, setActiveStep] = useState(1)
   const [frontFile, setFrontFile] = useState<File | null>(null)
   const [sideFile, setSideFile] = useState<File | null>(null)
@@ -331,17 +339,17 @@ export default function PhotoPage() {
   })
 
   const requestPhotoComment = (result: PhotoAnalysisResponse | null = finalResult) => {
-    if (!result) return
+    if (!result || !isAiEnabled) return
 
     setAssistantCommentError(null)
     photoCommentMutation.mutate(buildPhotoCommentPayload(result))
   }
 
   useEffect(() => {
-    if (!finalResult) return
+    if (!finalResult || !isAiEnabled) return
 
     requestPhotoComment(finalResult)
-  }, [finalResult])
+  }, [finalResult, isAiEnabled])
 
   const handleFileChange =
       (kind: 'front' | 'side') => (event: ChangeEvent<HTMLInputElement>) => {
@@ -481,6 +489,7 @@ export default function PhotoPage() {
               assistantComment={assistantComment}
               assistantCommentError={assistantCommentError}
               isAssistantCommentPending={photoCommentMutation.isPending}
+              isAiEnabled={isAiEnabled}
               onRetryAssistantComment={() => requestPhotoComment()}
           />
           <div className="photo-save-actions">
@@ -500,7 +509,7 @@ export default function PhotoPage() {
                   !finalResult.can_save ||
                   !finalResult.save_token ||
                   saveMutation.isPending ||
-                  photoCommentMutation.isPending
+                  (isAiEnabled && photoCommentMutation.isPending)
                 }
             >
               {saveMutation.isPending ? '기록 중...' : '기록하기'}
